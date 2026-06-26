@@ -417,7 +417,7 @@ function acPrehledCounts(){
      const sd=e.stredisko,k=e.kat; if(sd&&k){ c[sd+"|"+k]=(c[sd+"|"+k]||0)+1; if(e.objekt) oc[sd+"|"+k+"|"+e.objekt]=(oc[sd+"|"+k+"|"+e.objekt]||0)+1; } });
    evs.sort(function(a,b){return (b.ts||0)-(a.ts||0);});
    _evCounts=c; _evObjCounts=oc; _cachedOpenEvs=evs; renderPrehled();
-   try{ const tot=Object.values(c).reduce(function(a,b){return a+b;},0); const b=document.getElementById("bdgUd"); if(b){ b.textContent=tot; b.style.display=tot?"":"none"; } }catch(_){}
+   try{ const tot=evs.length; const b=document.getElementById("bdgUd"); if(b){ b.textContent=tot; b.style.display=tot?"":"none"; } }catch(_){}
   }).catch(function(){});
  }catch(_){}
 }
