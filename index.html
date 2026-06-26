@@ -549,14 +549,14 @@ function setObjektJiny(stred,name){st.objekt=name;st.objektStred=stred;resetKol(
 function krok2(){
  if(st.podminka==="Použití cisterny"){
   let h=`<h4>Použití cisterny – kde</h4><p class="hint">Vyber pracoviště a pak cisterny, místo a dobu přistavení.</p>`;
-  h+=`<div class="fld"><label>Pracoviště</label><div class="str-btns">`+STR.map(([nm])=>`<div class="pill ${st.stredisko===nm?'sel':''}" style="${st.stredisko===nm?'background:#1577c8':''}" onclick="setStr('${esc(nm)}')">${nm}</div>`).join("")+`</div></div>`;
+  h+=`<div class="fld"><label>Pracoviště <span style="color:#e23b3b">*</span></label><div class="str-btns">`+STR.map(([nm])=>`<div class="pill ${st.stredisko===nm?'sel':''}" style="${st.stredisko===nm?'background:#1577c8':''}" onclick="setStr('${esc(nm)}')">${nm}</div>`).join("")+`</div></div>`;
   h+=cisternaDetail();
   return h;
  }
  const tp=PODM_TYP[st.podminka]||null;
  if(tp){st.typ=tp;const objs=(st.stredisko&&OBJEKTY[st.stredisko]&&OBJEKTY[st.stredisko][tp])?OBJEKTY[st.stredisko][tp].map(o=>o.n):[];
   let h=`<h4>Kde – ${tp}</h4><p class="hint">Vyber pracoviště a pak konkrétní ${tp}.</p>`;
-  h+=`<div class="fld"><label>Pracoviště</label><div class="str-btns">`+STR.map(([nm])=>`<div class="pill ${st.stredisko===nm?'sel':''}" style="${st.stredisko===nm?'background:#1577c8':''}" onclick="setStr('${esc(nm)}')">${nm}</div>`).join("")+`</div></div>`;
+  h+=`<div class="fld"><label>Pracoviště <span style="color:#e23b3b">*</span></label><div class="str-btns">`+STR.map(([nm])=>`<div class="pill ${st.stredisko===nm?'sel':''}" style="${st.stredisko===nm?'background:#1577c8':''}" onclick="setStr('${esc(nm)}')">${nm}</div>`).join("")+`</div></div>`;
   if(st.stredisko){
    const jine=st.objJiny?STR.map(([nm])=>nm).filter(nm=>nm!==st.stredisko).map(nm=>{const list=(OBJEKTY[nm]&&OBJEKTY[nm][tp])?OBJEKTY[nm][tp].map(o=>o.n):[];return list.length?`<div style="margin-top:8px"><div style="font-size:11.5px;font-weight:800;color:#6b7a8d;margin-bottom:4px">${esc(nm)}</div><div class="people" style="max-height:180px;overflow:auto">`+list.map(o=>`<div class="person ${(st.objekt===o&&st.objektStred===nm)?'sel':''}" onclick="setObjektJiny('${esc(nm).replace(/'/g,"\\'")}','${esc(o).replace(/'/g,"\\'")}')">${esc(o)}</div>`).join("")+`</div></div>`:"";}).join(""):"";
    h+=`<div class="fld"><label>Vyber ${tp} (${objs.length})</label>`+(objs.length?`<div class="people" style="max-height:240px;overflow:auto">`+objs.map((o,i)=>`<div class="person ${(st.objekt===o&&!st.objektStred)?'sel':''}" onclick="setObjekt2(${i})">${esc(o)}</div>`).join("")+`</div>`:`<p class="hint">Seznam pro „${tp}" zatím není naimportovaný.</p>`)
@@ -570,7 +570,7 @@ function krok2(){
  const tk=st.typ?TYP2KEY[st.typ]:null;
  const objs=(st.stredisko&&tk&&OBJEKTY[st.stredisko]&&OBJEKTY[st.stredisko][tk])?OBJEKTY[st.stredisko][tk].map(o=>o.n):[];
  return `<h4>Kde se to děje?</h4><p class="hint">Středisko → typ objektu → konkrétní objekt.</p>
- <div class="fld"><label>Středisko</label><div class="str-btns">`+
+ <div class="fld"><label>Středisko <span style="color:#e23b3b">*</span></label><div class="str-btns">`+
  STR.map(([nm])=>`<div class="pill ${st.stredisko===nm?'sel':''}" style="${st.stredisko===nm?'background:#1577c8':''}" onclick="setStr('${esc(nm)}')">${nm}</div>`).join("")+`</div></div>
  <div class="fld"><label>Typ objektu</label><div class="typ-btns">`+
  TYPY.map(t=>`<div class="pill ${st.typ===t?'sel':''}" style="${st.typ===t?'background:#1577c8':''}" onclick="setTyp('${esc(t)}')">${t}</div>`).join("")+`</div></div>
