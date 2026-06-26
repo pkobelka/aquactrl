@@ -217,8 +217,8 @@ const LIDE=[["AB", "Aleš Bubák"], ["BK", "Bláža Kolaříková"], ["JR", "Jan
 const VEDENI=["GŘ","TŘ","PŘ"];
 const _prijmeni=jm=>{const p=String(jm).trim().split(/\s+/);return p[p.length-1];};
 const LIDE_R=[...LIDE].sort((a,b)=>{const ia=VEDENI.indexOf(a[0]),ib=VEDENI.indexOf(b[0]);if(ia>=0||ib>=0){if(ia<0)return 1;if(ib<0)return -1;return ia-ib;}return _prijmeni(a[1]).localeCompare(_prijmeni(b[1]),"cs")||a[1].localeCompare(b[1],"cs");});
-// Kdo smí uzavírat události (Zvejška, Rada, Vykydal, Kolaříková)
-const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK"];
+// Kdo smí uzavírat události (Zvejška, Rada, Vykydal, Kolaříková, Kobelka)
+const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
 // Správce, který schvaluje nová zařízení (Petr Kobelka = TŘ)
 const ADMIN_KOD="TŘ";
@@ -852,15 +852,33 @@ function acRefreshBadge(evs){
 function _udalostRadek(ev){
   var zl=(ev.zavaznost&&ZAV[ev.zavaznost])?ZAV[ev.zavaznost]:null;
   var zlB=zl?'<span style="background:'+zl[1]+';color:#fff;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:800;white-space:nowrap">'+zl[0]+'</span>':"";
-  var s=ev.stredisko||"", kl=ev.kat||"Ostatní";
-  var klik=s?'onclick="zavriSeznam();openSeznam(\''+s.replace(/'/g,"\\'")+"','"+kl.replace(/'/g,"\\'")+'\');return false;"':"";
-  return '<div '+klik+' style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #eef2f7;flex-wrap:wrap;'+(klik?'cursor:pointer':'')+'">'+
-    zlB+
-    '<span style="font-weight:700;color:#0b3a66;flex:1;min-width:0">'+esc(ev.co||"Událost")+'</span>'+
-    '<span style="font-size:12px;color:#6b7a8d">'+esc(ev.kde||"")+'</span>'+
-    '<span style="font-size:11px;color:#9aa7b8;white-space:nowrap">'+_fmtCas(ev.ts)+'</span>'+
-    (klik?'<span style="font-size:11px;color:#b0bac8">▸</span>':"")+
+  var eid=ev.id;
+  return '<div style="border-bottom:1px solid #eef2f7">'+
+    '<div onclick="acTogDet(\''+eid+'\')" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:10px 12px;flex-wrap:wrap">'+
+      zlB+
+      '<span style="font-weight:700;color:#0b3a66;flex:1;min-width:0">'+esc(ev.co||"Událost")+'</span>'+
+      '<span style="font-size:12px;color:#6b7a8d">'+esc(ev.kde||"")+'</span>'+
+      '<span style="font-size:11px;color:#9aa7b8;white-space:nowrap">'+_fmtCas(ev.ts)+'</span>'+
+      '<span id="udArr-'+eid+'" style="font-size:11px;color:#b0bac8">▸</span>'+
+    '</div>'+
+    '<div id="udDet-'+eid+'" style="display:none;padding:0 10px 10px"></div>'+
   '</div>';
+}
+function acTogDet(id){
+  var el=document.getElementById("udDet-"+id);
+  var arr=document.getElementById("udArr-"+id);
+  if(!el)return;
+  if(el.style.display!=="none"){el.style.display="none";if(arr)arr.textContent="▸";return;}
+  el.innerHTML='<p style="font-size:12px;color:#9aa7b8;padding:8px 0">Načítám…</p>';
+  el.style.display="block";if(arr)arr.textContent="▾";
+  var ev=_cachedOpenEvs.find(function(e){return e.id===id;});
+  if(!ev){el.innerHTML='<p style="font-size:12px;color:#e23b3b">Událost nenalezena.</p>';return;}
+  firebase.database().ref("aqua_ukoly").orderByChild("eventId").equalTo(id).get().then(function(s){
+    var ukoly=[];
+    s.forEach(function(c){ukoly.push(Object.assign({id:c.key},c.val()||{}));});
+    ukoly.sort(function(a,b){var ad=a.stav==="splneny"?1:0,bd=b.stav==="splneny"?1:0;if(ad!==bd)return ad-bd;return(a.termin||9e15)-(b.termin||9e15);});
+    el.innerHTML=_udalostKarta(ev,ukoly);
+  }).catch(function(){el.innerHTML='<p style="font-size:12px;color:#e23b3b;padding:8px 0">Chyba načtení.</p>';});
 }
 function openUdalosti(){
   zavriPlan();
