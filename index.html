@@ -416,7 +416,7 @@ function acPrehledCounts(){
    s.forEach(function(ch){ const e=ch.val()||{}; if(e.uzavreno)return; openTotal++;
      const sd=e.stredisko,k=e.kat; if(sd&&k){ c[sd+"|"+k]=(c[sd+"|"+k]||0)+1; if(e.objekt) oc[sd+"|"+k+"|"+e.objekt]=(oc[sd+"|"+k+"|"+e.objekt]||0)+1; } });
    _evCounts=c; _evObjCounts=oc; renderPrehled();
-   try{ const b=document.getElementById("bdgUd"); if(b){ b.textContent=openTotal; b.style.display=openTotal?"":"none"; } }catch(_){}
+   try{ const tot=Object.values(c).reduce(function(a,b){return a+b;},0); const b=document.getElementById("bdgUd"); if(b){ b.textContent=tot; b.style.display=tot?"":"none"; } }catch(_){}
   }).catch(function(){});
  }catch(_){}
 }
@@ -848,6 +848,24 @@ function acRefreshBadge(evs){
   try{ const open=evs.filter(ev=>!ev.uzavreno).length;
     const b=document.getElementById("bdgUd"); if(b){ b.textContent=open; b.style.display=open?"":"none"; } }catch(_){}
 }
+function _udalostRadek(ev,ukoly){
+  const zl=(ev.zavaznost&&ZAV[ev.zavaznost])?ZAV[ev.zavaznost]:null;
+  const zlB=zl?`<span style="background:${zl[1]};color:#fff;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:800;white-space:nowrap">${zl[0]}</span>`:"";
+  const total=ukoly.length,done=ukoly.filter(u=>u.stav==="splneny").length;
+  const late=ukoly.filter(u=>u.termin&&Date.now()>u.termin&&u.stav!=="splneny").length;
+  const ukTag=total===0?"":(done===total?`<span style="color:#2faf5a;font-size:11px;font-weight:800">✔ vše splněno</span>`:`<span style="color:${late?'#e23b3b':'#6b7a8d'};font-size:11px;font-weight:700">${done}/${total} úkolů${late?` · ${late}⏰`:""}</span>`);
+  const id="udR-"+ev.id;
+  return `<div style="border-bottom:1px solid #eef2f7">
+    <div onclick="document.getElementById('${id}').style.display=document.getElementById('${id}').style.display==='none'?'block':'none'" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:9px 10px;flex-wrap:wrap">
+      ${zlB}
+      <span style="font-weight:700;color:#0b3a66;flex:1;min-width:0">${esc(ev.co||"Událost")}</span>
+      ${ukTag}
+      <span style="font-size:11px;color:#9aa7b8;white-space:nowrap">${ev.kde?esc(ev.kde):""}</span>
+      <span style="font-size:11px;color:#b0bac8">▾</span>
+    </div>
+    <div id="${id}" style="display:none;padding:0 10px 10px">${_udalostKarta(ev,ukoly)}</div>
+  </div>`;
+}
 function openUdalosti(){
   zavriPlan();
   document.getElementById("seznamHead").textContent="Aktuální události";
@@ -859,8 +877,8 @@ function openUdalosti(){
     if(err){ body.innerHTML='<p class="hint">Chyba načtení: '+esc(err.message||err)+'</p>'; return; }
     if(!evs.length){ body.innerHTML='<p class="hint">Zatím žádné události. Vytvoř první přes „＋ Nová událost".</p>'; acRefreshBadge(evs); return; }
     const open=evs.filter(e=>!e.uzavreno), closed=evs.filter(e=>e.uzavreno);
-    let html=open.length?open.map(ev=>_udalostKarta(ev,byEvent[ev.id]||[])).join(""):'<p class="hint">Žádné otevřené události. 🎉</p>';
-    if(closed.length){ html+='<div style="margin:14px 0 8px;border-top:1px solid #e6eef6;padding-top:10px;font-size:12px;color:#9aa7b8;font-weight:800">UZAVŘENÉ ('+closed.length+')</div>'+closed.map(ev=>_udalostKarta(ev,byEvent[ev.id]||[])).join(""); }
+    let html=open.length?open.map(ev=>_udalostRadek(ev,byEvent[ev.id]||[])).join(""):'<p class="hint">Žádné otevřené události. 🎉</p>';
+    if(closed.length){ html+='<div style="margin:14px 0 4px;border-top:1px solid #e6eef6;padding-top:10px;font-size:12px;color:#9aa7b8;font-weight:800">UZAVŘENÉ ('+closed.length+')</div>'+closed.map(ev=>_udalostRadek(ev,byEvent[ev.id]||[])).join(""); }
     body.innerHTML=html;
     acRefreshBadge(evs);acCistBadge();acPrehledCounts();
   });
