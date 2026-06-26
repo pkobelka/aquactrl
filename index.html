@@ -412,8 +412,11 @@ function acPrehledCounts(){
  try{ if(!(window.firebase&&firebase.database))return;
   firebase.database().ref("aqua_udalosti").get().then(function(s){
    const c={}, oc={};
-   s.forEach(function(ch){ const e=ch.val()||{}; if(e.uzavreno)return; const sd=e.stredisko,k=e.kat; if(sd&&k){ c[sd+"|"+k]=(c[sd+"|"+k]||0)+1; if(e.objekt) oc[sd+"|"+k+"|"+e.objekt]=(oc[sd+"|"+k+"|"+e.objekt]||0)+1; } });
+   let openTotal=0;
+   s.forEach(function(ch){ const e=ch.val()||{}; if(e.uzavreno)return; openTotal++;
+     const sd=e.stredisko,k=e.kat; if(sd&&k){ c[sd+"|"+k]=(c[sd+"|"+k]||0)+1; if(e.objekt) oc[sd+"|"+k+"|"+e.objekt]=(oc[sd+"|"+k+"|"+e.objekt]||0)+1; } });
    _evCounts=c; _evObjCounts=oc; renderPrehled();
+   try{ const b=document.getElementById("bdgUd"); if(b){ b.textContent=openTotal; b.style.display=openTotal?"":"none"; } }catch(_){}
   }).catch(function(){});
  }catch(_){}
 }
@@ -481,10 +484,28 @@ function _eventKat(){
   if(st.typ&&m[st.typ])return m[st.typ];
   return "Ostatní";
 }
-function openSeznam(s,kl){const typ=KAT_TYP[kl];const objs=(OBJEKTY[s]&&OBJEKTY[s][typ])?OBJEKTY[s][typ]:[];
+function openSeznam(s,kl){
+ const typ=KAT_TYP[kl];const objs=(OBJEKTY[s]&&OBJEKTY[s][typ])?OBJEKTY[s][typ]:[];
  document.getElementById("seznamHead").textContent=kl+" – "+s+" ("+objs.length+")";
- document.getElementById("seznamBody").innerHTML=objs.length?objs.map((o,i)=>`<div><div class="sl-row"><div><b>${esc(o.n)}</b>${(_evObjCounts[s+"|"+kl+"|"+o.n]||0)>0?` <span style="background:#e23b3b;color:#fff;border-radius:9px;padding:1px 7px;font-size:11px;font-weight:800">${_evObjCounts[s+"|"+kl+"|"+o.n]}</span>`:""}${o.p?` <span style="color:#6b7a8d">· ${esc(o.p)}</span>`:""}${o.c?` <span class="sl-tech" title="Zobrazit info o čerpadle" onclick="document.getElementById('ci${i}').classList.toggle('show')">🔧</span>`:""}</div>`+(o.lat?`<a class="sl-map" target="_blank" href="https://www.openstreetmap.org/?mlat=${o.lat}&mlon=${o.lon}#map=16/${o.lat}/${o.lon}">📍 Mapa</a>`:`<span class="sl-nogps">bez GPS</span>`)+`</div>${o.c?`<div class="sl-cinfo" id="ci${i}">${esc(o.c)}</div>`:""}</div>`).join(""):`<p class="hint">Žádné objekty.</p>`;
- document.getElementById("seznamOv").classList.add("show");}
+ const evCount=_evCounts[s+"|"+kl]||0;
+ const objHtml=objs.length?objs.map((o,i)=>`<div><div class="sl-row"><div><b>${esc(o.n)}</b>${(_evObjCounts[s+"|"+kl+"|"+o.n]||0)>0?` <span style="background:#e23b3b;color:#fff;border-radius:9px;padding:1px 7px;font-size:11px;font-weight:800">${_evObjCounts[s+"|"+kl+"|"+o.n]}</span>`:""}${o.p?` <span style="color:#6b7a8d">· ${esc(o.p)}</span>`:""}${o.c?` <span class="sl-tech" title="Zobrazit info o čerpadle" onclick="document.getElementById('ci${i}').classList.toggle('show')">🔧</span>`:""}</div>`+(o.lat?`<a class="sl-map" target="_blank" href="https://www.openstreetmap.org/?mlat=${o.lat}&mlon=${o.lon}#map=16/${o.lat}/${o.lon}">📍 Mapa</a>`:`<span class="sl-nogps">bez GPS</span>`)+`</div>${o.c?`<div class="sl-cinfo" id="ci${i}">${esc(o.c)}</div>`:""}</div>`).join(""):`<p class="hint">Žádné objekty.</p>`;
+ let html="";
+ if(evCount>0) html+=`<div id="slEventy" style="margin-bottom:12px"><p class="hint" style="margin:0">Načítám události…</p></div>`;
+ if(objs.length) html+=`<div style="font-size:12px;font-weight:800;color:#6b7a8d;margin:${evCount>0?'10px':'0'} 0 4px;border-top:${evCount>0?'1px solid #e6eef6':'none'};padding-top:${evCount>0?'10px':'0'}">Objekty (${objs.length})</div>`;
+ html+=objHtml;
+ document.getElementById("seznamBody").innerHTML=html;
+ document.getElementById("seznamOv").classList.add("show");
+ if(evCount>0&&window.firebase&&firebase.database){
+   _udNactiVse(function(err,evs,byEvent){
+     const el=document.getElementById("slEventy");if(!el)return;
+     if(err){el.innerHTML='<p class="hint">Chyba načtení událostí.</p>';return;}
+     const filtered=evs.filter(function(e){return !e.uzavreno&&e.stredisko===s&&e.kat===kl;});
+     if(filtered.length){
+       el.innerHTML=`<div style="font-weight:800;color:#0b3a66;font-size:13px;margin-bottom:8px;border-bottom:2px solid #cfe6f7;padding-bottom:4px">Otevřené události (${filtered.length})</div>`+filtered.map(function(ev){return _udalostKarta(ev,byEvent[ev.id]||[]);}).join("");
+     }else{el.style.display="none";}
+   });
+ }
+}
 function zavriSeznam(){document.getElementById("seznamOv").classList.remove("show");}
 function openKontakty(){
  document.getElementById("seznamHead").textContent="Kontakty ("+LIDE_R.length+")";
