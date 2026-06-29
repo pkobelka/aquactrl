@@ -711,6 +711,7 @@ function acSaveEvent(){
 
 // ===== Moje úkoly (kde jsem řešitel) =====
 const UK_STAV={novy:["🆕 Nový","#1577c8"],potvrzeny:["✅ Potvrzený","#2faf5a"],splneny:["✔️ Splněno","#7e92a8"]};
+let _mojeUkoly=[];
 function ukolKartaHTML(u){
   const now=Date.now();
   const poTerminu=u.termin&&now>u.termin&&u.stav!=="splneny";
@@ -722,11 +723,14 @@ function ukolKartaHTML(u){
                            `<button onclick="ukolSplneno('${u.id}')" style="border:1px solid #2faf5a;border-radius:10px;padding:8px 14px;background:#fff;color:#2faf5a;font-weight:800;cursor:pointer">Splněno</button>`;
   else if(u.stav==="potvrzeny") btns=`<button onclick="ukolSplneno('${u.id}')" style="border:0;border-radius:10px;padding:8px 14px;background:#2faf5a;color:#fff;font-weight:800;cursor:pointer">Označit splněno</button>`;
   return `<div style="border:1px solid #dbe6f1;border-radius:14px;padding:12px;margin-bottom:10px;background:#fbfdff">
+    <div onclick="ukolTogDet('${u.id}')" style="cursor:pointer">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">${badge}
-      ${u.termin?`<span style="font-size:12px;color:${poTerminu?'#e23b3b':'#6b7a8d'};font-weight:700">termín ${esc(u.termin_txt||"")}</span>`:`<span style="font-size:12px;color:#9aa7b8">bez termínu</span>`}</div>
+      <span style="display:flex;align-items:center;gap:6px">${u.termin?`<span style="font-size:12px;color:${poTerminu?'#e23b3b':'#6b7a8d'};font-weight:700">termín ${esc(u.termin_txt||"")}</span>`:`<span style="font-size:12px;color:#9aa7b8">bez termínu</span>`}<span id="ukArr-${u.id}" style="font-size:11px;color:#b0bac8">▸</span></span></div>
     <div style="font-weight:800;color:#0b3a66;margin-bottom:2px">${esc(u.popis||"(bez popisu)")}</div>
     ${u.kontext?`<div style="font-size:12.5px;color:#6b7a8d;margin-bottom:2px">${esc(u.co?u.co+" · ":"")}${esc(u.kontext)}</div>`:""}
     <div style="font-size:12px;color:#9aa7b8;margin-bottom:8px">zadal: ${esc(u.zadal_jmeno||"—")}</div>
+    </div>
+    <div id="ukDet-${u.id}" style="display:none;margin-bottom:8px"></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">${btns}</div></div>`;
 }
 function openMojeUkoly(){
@@ -747,9 +751,43 @@ function openMojeUkoly(){
       if(ad!==bd) return ad-bd;
       return (a.termin||9e15)-(b.termin||9e15);
     });
+    _mojeUkoly=rows;
     body.innerHTML=rows.length?rows.map(ukolKartaHTML).join(""):'<p class="hint">Žádné úkoly pro tebe. 🎉</p>';
     acUkolyBadge();
   }).catch(function(e){ body.innerHTML='<p class="hint">Chyba načtení úkolů: '+esc(e&&e.message?e.message:e)+'</p>'; });
+}
+// Rozbalovací detail úkolu (stav, časová osa, kdo zadal, upozornění + související událost)
+function ukolTogDet(id){
+  var el=document.getElementById("ukDet-"+id), arr=document.getElementById("ukArr-"+id);
+  if(!el)return;
+  if(el.style.display!=="none"){ el.style.display="none"; if(arr)arr.textContent="▸"; return; }
+  el.style.display="block"; if(arr)arr.textContent="▾";
+  var u=_mojeUkoly.find(function(x){return x.id===id;})||{};
+  var tl=["zadáno "+_fmtCas(u.vznik_ts)];
+  if(u.potvrzeno_ts)tl.push("přijato "+_fmtCas(u.potvrzeno_ts));
+  if(u.splneno_ts)tl.push("splněno "+_fmtCas(u.splneno_ts));
+  var L=[];
+  L.push('<div style="font-size:12.5px;color:#33485e"><b>Stav:</b> '+esc((UK_STAV[u.stav]||UK_STAV.novy)[0])+'</div>');
+  L.push('<div style="font-size:11.5px;color:#9aa7b8;margin:2px 0">'+tl.map(esc).join(" → ")+'</div>');
+  if(u.termin_txt)L.push('<div style="font-size:12px;color:#6b7a8d"><b>Termín:</b> '+esc(u.termin_txt)+'</div>');
+  L.push('<div style="font-size:12px;color:#6b7a8d"><b>Zadal:</b> '+esc(u.zadal_jmeno||u.zadal||"—")+'</div>');
+  if(u.upozornit&&u.upozornit.length)L.push('<div style="font-size:12px;color:#6b7a8d"><b>Upozornit:</b> '+u.upozornit.map(function(z){return esc(lidLbl(z));}).join(", ")+'</div>');
+  el.innerHTML='<div style="border-top:1px dashed #dbe6f1;padding-top:8px">'+L.join("")+'<div id="ukEv-'+id+'" style="margin-top:6px"></div></div>';
+  if(u.eventId&&window.firebase&&firebase.database){
+    firebase.database().ref("aqua_udalosti/"+u.eventId).get().then(function(s){
+      var ev=s.val(); var box=document.getElementById("ukEv-"+id); if(!box)return;
+      if(!ev){ box.innerHTML='<div style="font-size:11.5px;color:#9aa7b8">Související událost nenalezena.</div>'; return; }
+      var zl=(ev.zavaznost&&ZAV[ev.zavaznost])?ZAV[ev.zavaznost]:null;
+      var zlB=zl?'<span style="background:'+zl[1]+';color:#fff;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:800">'+zl[0]+'</span> ':'';
+      box.innerHTML='<div style="background:#f3f7fb;border-radius:10px;padding:8px">'+
+        '<div style="font-size:11px;color:#9aa7b8;margin-bottom:2px">Související událost</div>'+
+        '<div style="font-weight:700;color:#0b3a66">'+zlB+esc(ev.co||"")+'</div>'+
+        (ev.kde?'<div style="font-size:12px;color:#6b7a8d">'+esc(ev.kde)+'</div>':'')+
+        (ev.popis?'<div style="font-size:12px;color:#33485e;margin-top:2px">'+esc(ev.popis)+'</div>':'')+
+        (ev.nahlasil?'<div style="font-size:11.5px;color:#9aa7b8;margin-top:2px">nahlásil: '+esc(ev.nahlasil)+(ev.tel?" · "+esc(ev.tel):"")+'</div>':'')+
+        '<div style="font-size:11px;color:#9aa7b8;margin-top:2px">zadal událost: '+esc(ev.zadal_jmeno||"—")+' · '+_fmtCas(ev.ts)+'</div></div>';
+    }).catch(function(){});
+  }
 }
 // Změna stavu úkolu + push zadavateli (echo „přijal/splnil"). Self-úkol (zadal==řešitel) se neupozorňuje.
 function _ukolZmenaStav(id,novyStav,tsPole,pushTitle,sloveso){
