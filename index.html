@@ -152,7 +152,7 @@ padding:24px;z-index:50;overflow:auto}
 <main id="prehled"></main>
 
 <footer style="text-align:center;color:#9aa7b8;font-size:11px;padding:14px 10px 26px;line-height:1.6">
-  <b style="color:#1577c8">Aqua</b><b style="color:#0b3a66">Control</b> <span id="acVer"></span> · © Petr Kobelka
+  <b style="color:#1577c8">Aqua</b><b style="color:#0b3a66">Control</b> <span id="acVer"></span> · © 2026 Petr Kobelka
 </footer>
 
 <button class="fab" title="Nová událost" onclick="otevri()">＋</button>
@@ -226,7 +226,7 @@ const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
 // Správce, který schvaluje nová zařízení (Petr Kobelka = TŘ)
 const ADMIN_KOD="TŘ";
-const VERZE="v23";  // drž v souladu s CACHE v sw.js
+const VERZE="v24";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -1020,7 +1020,9 @@ function acVyberLidi(opt){
     const ov=document.createElement("div");
     ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px";
     const chips=LIDE_R.map(function(p){return '<span class="person'+(sel.has(p[0])?' sel':'')+'" data-z="'+p[0]+'" style="cursor:pointer">'+esc(lidLbl(p[0]))+'</span>';}).join("");
-    const terminHtml=opt.withTermin?'<div class="two"><div class="fld"><label>Termín – datum</label><input type="date" id="acvDat" style="width:100%"></div><div class="fld"><label>Čas</label><input type="time" id="acvCas" style="width:100%"></div></div>':'';
+    let _hopt='<option value="">—</option>'; for(let _h=0;_h<24;_h++){const _hh=("0"+_h).slice(-2); _hopt+='<option value="'+_hh+'">'+_hh+'</option>';}
+    const _mopt=['00','10','20','30','40','50'].map(function(m){return '<option value="'+m+'">'+m+'</option>';}).join('');
+    const terminHtml=opt.withTermin?'<div class="two"><div class="fld"><label>Termín – datum</label><input type="date" id="acvDat" style="width:100%"></div><div class="fld"><label>Čas (hod / min)</label><div style="display:flex;gap:6px"><select id="acvHod" style="flex:1;padding:9px;border:1px solid #ccc;border-radius:8px;font-size:15px;font-family:inherit">'+_hopt+'</select><select id="acvMin" style="flex:1;padding:9px;border:1px solid #ccc;border-radius:8px;font-size:15px;font-family:inherit">'+_mopt+'</select></div></div></div>':'';
     ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:460px;width:100%;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.3);max-height:86vh;overflow:auto">'
       +'<h3 style="margin:0 0 4px;color:#0b3a66">'+esc(opt.head||"Vybrat")+'</h3>'
       +(opt.sub?'<p style="margin:0 0 10px;font-size:13px;color:#555">'+esc(opt.sub)+'</p>':'')
@@ -1033,7 +1035,7 @@ function acVyberLidi(opt){
     if(opt.people!==false){ ov.querySelectorAll('#acvPeople .person').forEach(function(el){ el.onclick=function(){ const z=el.getAttribute("data-z"); if(opt.single){ sel.clear(); ov.querySelectorAll('#acvPeople .person').forEach(function(x){x.classList.remove("sel");}); sel.add(z); el.classList.add("sel"); } else if(sel.has(z)){sel.delete(z);el.classList.remove("sel");}else{sel.add(z);el.classList.add("sel");} }; }); }
     ov.onclick=function(e){ if(e.target===ov){document.body.removeChild(ov);resolve(null);} };
     ov.querySelector("#acvCancel").onclick=function(){document.body.removeChild(ov);resolve(null);};
-    ov.querySelector("#acvOk").onclick=function(){ const note=((ov.querySelector("#acvNote")||{}).value||"").trim(); let termin=null,termin_txt=""; if(opt.withTermin){ const td=((ov.querySelector("#acvDat")||{}).value||""), tc=((ov.querySelector("#acvCas")||{}).value||""); if(td){ const ms=_msFrom(td,tc||"00:00"); if(ms){termin=ms;termin_txt=fmtDatumCz(td)+" "+(tc||"00:00");} } } document.body.removeChild(ov); resolve({persons:Array.from(sel), note:note, termin:termin, termin_txt:termin_txt}); };
+    ov.querySelector("#acvOk").onclick=function(){ const note=((ov.querySelector("#acvNote")||{}).value||"").trim(); let termin=null,termin_txt=""; if(opt.withTermin){ const td=((ov.querySelector("#acvDat")||{}).value||""), hh=((ov.querySelector("#acvHod")||{}).value||""), mm=((ov.querySelector("#acvMin")||{}).value||"00"); const tc=hh?(hh+":"+mm):""; if(td){ const ms=_msFrom(td,tc||"00:00"); if(ms){termin=ms;termin_txt=fmtDatumCz(td)+" "+(tc||"00:00");} } } document.body.removeChild(ov); resolve({persons:Array.from(sel), note:note, termin:termin, termin_txt:termin_txt}); };
   });
 }
 function uzavriUdalost(id){
