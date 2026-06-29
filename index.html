@@ -871,6 +871,9 @@ function _udalostKarta(ev,ukoly){
   let cistLine="";
   { const arr=_cistArr(ev); if(arr.length){ const c0=arr[0];
     cistLine=`<div style="font-size:12px;color:#33485e;margin-top:2px">🚚 ${arr.map(c=>esc(fmtL(c.obj)+" · "+(c.typ||""))).join(", ")}${c0.misto?` → ${esc(c0.misto)}`:""}${(c0.od||c0.do)?` · ${c0.od?_fmtCas(c0.od):"?"}–${c0.do?_fmtCas(c0.do):"?"}`:""}${!ev.uzavreno?` <a onclick="upravCisternu('${ev.id}')" style="color:#0b5cae;cursor:pointer;font-weight:700">✏️ upravit</a>`:""}</div>`; } }
+  const _poznArr=ev.poznamky?Object.keys(ev.poznamky).map(function(k){return ev.poznamky[k];}).sort(function(a,b){return (a.ts||0)-(b.ts||0);}):[];
+  const poznHtml=_poznArr.length?'<div style="margin-top:6px">'+_poznArr.map(function(p){return '<div style="border-left:3px solid #e8a51b;background:#fffaf0;border-radius:6px;padding:4px 8px;margin:4px 0"><div style="font-size:12px;color:#33485e">'+esc(p.text||"")+'</div><div style="font-size:10.5px;color:#9aa7b8">📝 '+esc(p.kdo||"")+' · '+_fmtCas(p.ts)+'</div></div>';}).join("")+'</div>':"";
+  const akce=ev.uzavreno?"":'<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button onclick="udalostUkol(\''+ev.id+'\')" style="border:0;border-radius:10px;padding:7px 12px;background:#1577c8;color:#fff;font-weight:800;cursor:pointer">➕ Úkol</button><button onclick="udalostPoznamka(\''+ev.id+'\')" style="border:1px solid #1577c8;border-radius:10px;padding:7px 12px;background:#fff;color:#1577c8;font-weight:800;cursor:pointer">➕ Poznámka</button></div>';
   let footer;
   if(ev.uzavreno){
     footer=`<div style="margin-top:8px;font-size:12px;color:#2faf5a;font-weight:700">🔒 Uzavřeno — ${esc(ev.uzavrel_jmeno||"")} · ${_fmtCas(ev.uzavreno_ts)}${ev.uzavreno_pozn?` · ${esc(ev.uzavreno_pozn)}`:""}</div>`;
@@ -888,7 +891,9 @@ function _udalostKarta(ev,ukoly){
     <div style="font-size:11.5px;color:#9aa7b8;margin-bottom:2px">zadal: ${esc(ev.zadal_jmeno||"—")} · ${_fmtCas(ev.ts)}</div>
     ${nahl}
     ${cistLine}
+    ${poznHtml}
     ${ukoly.length?`<div style="margin-top:6px">${ukoly.map(_ukolRadek).join("")}</div>`:""}
+    ${akce}
     <div id="prubA-${ev.id}" onclick="_udTog('${ev.id}')" style="cursor:pointer;margin-top:8px;font-size:12px;font-weight:800;color:#0b5cae;user-select:none">📜 Průběh ▾</div>
     <div id="prub-${ev.id}" style="display:none;margin-top:4px;border-top:1px solid #eef2f6;padding-top:6px">${_udProbeh(ev,ukoly)}</div>
     ${footer}</div>`;
@@ -938,6 +943,47 @@ function acTogDet(id){
     el.innerHTML=_udalostKarta(ev,ukoly);
   }).catch(function(){el.innerHTML='<p style="font-size:12px;color:#e23b3b;padding:8px 0">Chyba načtení.</p>';});
 }
+// Obnoví otevřený detail události (po přidání poznámky/úkolu) – dotáhne čerstvá data
+function _udRefreshDetail(id){
+  var el=document.getElementById("udDet-"+id); if(!el||!(window.firebase&&firebase.database))return;
+  Promise.all([firebase.database().ref("aqua_udalosti/"+id).get(),firebase.database().ref("aqua_ukoly").get()]).then(function(res){
+    var ev=Object.assign({id:id},res[0].val()||{});
+    var ci=_cachedOpenEvs.findIndex(function(e){return e.id===id;}); if(ci>=0)_cachedOpenEvs[ci]=ev;
+    var ukoly=[]; res[1].forEach(function(c){var u=c.val()||{};if(u.eventId===id)ukoly.push(Object.assign({id:c.key},u));});
+    ukoly.sort(function(a,b){var ad=a.stav==="splneny"?1:0,bd=b.stav==="splneny"?1:0;if(ad!==bd)return ad-bd;return(a.termin||9e15)-(b.termin||9e15);});
+    el.innerHTML=_udalostKarta(ev,ukoly); acUkolyBadge();
+  }).catch(function(){});
+}
+// Přidat poznámku k události
+function udalostPoznamka(id){
+  acVyberLidi({head:"Přidat poznámku",people:false,noteLabel:"Poznámka",notePh:"napiš poznámku k události…",ok:"Uložit poznámku"}).then(function(r){
+    if(!r||!r.note)return;
+    firebase.database().ref("aqua_udalosti/"+id+"/poznamky").push({text:r.note,kdo:uzivatelJmeno(),ts:Date.now()}).then(function(){_udRefreshDetail(id);}).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
+  });
+}
+// Přidat úkol k existující události (přiřadit někomu)
+function udalostUkol(id){
+  var ev=_cachedOpenEvs.find(function(e){return e.id===id;})||{};
+  acVyberLidi({head:"Přidat úkol",sub:(ev.co||"Událost")+(ev.kde?" · "+ev.kde:""),peopleLabel:"Řešitel (vyber jednoho)",single:true,noteLabel:"Popis úkolu",notePh:"co je potřeba udělat…",withTermin:true,ok:"Zadat úkol"}).then(function(r){
+    if(!r)return;
+    var resitel=r.persons[0]||"";
+    if(!resitel){alert("Vyber řešitele úkolu.");return;}
+    var zadalKod=localStorage.getItem("ac_person")||"";
+    var kontext=ev.kde||"";
+    firebase.database().ref("aqua_ukoly").push({
+      eventId:id, co:ev.co||"", kontext:kontext,
+      resitel:resitel, resitel_jmeno:lidLbl(resitel),
+      zadal:zadalKod, zadal_jmeno:uzivatelJmeno(),
+      popis:r.note||"", termin:r.termin||null, termin_txt:r.termin_txt||"",
+      upozornit:[], stav:"novy", vznik_ts:Date.now()
+    }).then(function(){
+      if(resitel&&resitel!==zadalKod){
+        firebase.database().ref("aqua_outbox").push({title:"🆕 Nový úkol", body:(r.note||"úkol")+(kontext?(" – "+kontext):"")+" · zadal "+uzivatelJmeno(), targets:[resitel], ts:Date.now()});
+      }
+      _udRefreshDetail(id);
+    }).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
+  });
+}
 function openUdalosti(){
   zavriPlan();
   document.getElementById("seznamHead").textContent="Aktuální události";
@@ -957,18 +1003,20 @@ function acVyberLidi(opt){
     const ov=document.createElement("div");
     ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px";
     const chips=LIDE_R.map(function(p){return '<span class="person'+(sel.has(p[0])?' sel':'')+'" data-z="'+p[0]+'" style="cursor:pointer">'+esc(lidLbl(p[0]))+'</span>';}).join("");
+    const terminHtml=opt.withTermin?'<div class="two"><div class="fld"><label>Termín – datum</label><input type="date" id="acvDat" style="width:100%"></div><div class="fld"><label>Čas</label><input type="time" id="acvCas" style="width:100%"></div></div>':'';
     ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:460px;width:100%;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.3);max-height:86vh;overflow:auto">'
       +'<h3 style="margin:0 0 4px;color:#0b3a66">'+esc(opt.head||"Vybrat")+'</h3>'
       +(opt.sub?'<p style="margin:0 0 10px;font-size:13px;color:#555">'+esc(opt.sub)+'</p>':'')
-      +'<div class="fld"><label>Poznámka (nepovinné)</label><textarea id="acvNote" placeholder="'+esc(opt.notePh||"")+'" style="width:100%"></textarea></div>'
+      +'<div class="fld"><label>'+esc(opt.noteLabel||"Poznámka (nepovinné)")+'</label><textarea id="acvNote" placeholder="'+esc(opt.notePh||"")+'" style="width:100%"></textarea></div>'
+      +terminHtml
       +(opt.people!==false?'<div class="fld"><label>'+esc(opt.peopleLabel||"Koho upozornit")+'</label><div class="people" id="acvPeople">'+chips+'</div></div>':'')
       +'<div style="display:flex;gap:8px;margin-top:14px"><button id="acvCancel" style="flex:1;padding:10px;border:1px solid #ccc;background:#f3f3f3;border-radius:8px;cursor:pointer">Zrušit</button>'
       +'<button id="acvOk" style="flex:1;padding:10px;border:0;background:#0b5cae;color:#fff;border-radius:8px;font-weight:700;cursor:pointer">'+esc(opt.ok||"Potvrdit")+'</button></div></div>';
     document.body.appendChild(ov);
-    if(opt.people!==false){ ov.querySelectorAll('#acvPeople .person').forEach(function(el){ el.onclick=function(){ const z=el.getAttribute("data-z"); if(sel.has(z)){sel.delete(z);el.classList.remove("sel");}else{sel.add(z);el.classList.add("sel");} }; }); }
+    if(opt.people!==false){ ov.querySelectorAll('#acvPeople .person').forEach(function(el){ el.onclick=function(){ const z=el.getAttribute("data-z"); if(opt.single){ sel.clear(); ov.querySelectorAll('#acvPeople .person').forEach(function(x){x.classList.remove("sel");}); sel.add(z); el.classList.add("sel"); } else if(sel.has(z)){sel.delete(z);el.classList.remove("sel");}else{sel.add(z);el.classList.add("sel");} }; }); }
     ov.onclick=function(e){ if(e.target===ov){document.body.removeChild(ov);resolve(null);} };
     ov.querySelector("#acvCancel").onclick=function(){document.body.removeChild(ov);resolve(null);};
-    ov.querySelector("#acvOk").onclick=function(){ const note=((ov.querySelector("#acvNote")||{}).value||"").trim(); document.body.removeChild(ov); resolve({persons:Array.from(sel), note:note}); };
+    ov.querySelector("#acvOk").onclick=function(){ const note=((ov.querySelector("#acvNote")||{}).value||"").trim(); let termin=null,termin_txt=""; if(opt.withTermin){ const td=((ov.querySelector("#acvDat")||{}).value||""), tc=((ov.querySelector("#acvCas")||{}).value||""); if(td){ const ms=_msFrom(td,tc||"00:00"); if(ms){termin=ms;termin_txt=fmtDatumCz(td)+" "+(tc||"00:00");} } } document.body.removeChild(ov); resolve({persons:Array.from(sel), note:note, termin:termin, termin_txt:termin_txt}); };
   });
 }
 function uzavriUdalost(id){
