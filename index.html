@@ -982,7 +982,7 @@ function upravCisternu(id){
 }
 // ===== Schvalování zařízení (jen správce) =====
 function acCheckPending(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aqua_push_tokens/"+devId()).get().then(function(s){ const v=s.val()||{}; const bar=document.getElementById("acPendBar"); if(bar) bar.style.display=(s.exists()&&v.schvaleno===false)?"":"none"; }).catch(function(){}); }catch(_){} }
-function acInitGate(){ try{ const a=document.getElementById("navZariz"); if(a&&jsemAdmin())a.style.display=""; acCheckPending(); }catch(_){} }
+function acInitGate(){ try{ const a=document.getElementById("navZariz"); if(a&&jsemAdmin())a.style.display=""; acCheckPending(); acUkolyWatch(); }catch(_){} }
 function openZarizeni(){
   if(!jsemAdmin()){ alert("Schvalování zařízení je jen pro správce."); return; }
   zavriPlan();
@@ -1023,7 +1023,11 @@ function zarizZamit(id){ if(!confirm("Opravdu odebrat toto zařízení? (přesta
 // Odznak v menu = počet cisteren právě v akci (aktivní rezervace teď)
 function acCistBadge(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aqua_udalosti").get().then(function(s){ const now=Date.now(); const used=new Set(); s.forEach(function(c){ const e=c.val()||{}; if(e.uzavreno)return; _cistArr(e).forEach(function(x){ if(x.idx!=null&&x.od!=null&&x.do!=null&&x.od<=now&&now<=x.do) used.add(x.idx); }); }); const b=document.getElementById("bdgCist"); if(b){ b.textContent=used.size; b.style.display=used.size?"":"none"; } }).catch(function(){}); }catch(_){} }
 // Odznak „Moje úkoly" = počet mých nesplněných úkolů (řešitel = já)
-function acUkolyBadge(){ try{ if(!(window.firebase&&firebase.database))return; const me=localStorage.getItem("ac_person")||""; const b=document.getElementById("bdgUk"); if(!me){ if(b){b.style.display="none";} return; } firebase.database().ref("aqua_ukoly").orderByChild("resitel").equalTo(me).get().then(function(snap){ let open=0; snap.forEach(function(c){ const u=c.val()||{}; if(u.stav!=="splneny") open++; }); if(b){ b.textContent=open; b.style.display=open?"":"none"; } }).catch(function(){}); }catch(_){} }
+function _setUkBadge(snap){ let open=0; snap.forEach(function(c){ const u=c.val()||{}; if(u.stav!=="splneny") open++; }); const b=document.getElementById("bdgUk"); if(b){ b.textContent=open; b.style.display=open?"":"none"; } }
+function acUkolyBadge(){ try{ if(!(window.firebase&&firebase.database))return; const me=localStorage.getItem("ac_person")||""; const b=document.getElementById("bdgUk"); if(!me){ if(b){b.style.display="none";} return; } firebase.database().ref("aqua_ukoly").orderByChild("resitel").equalTo(me).get().then(_setUkBadge).catch(function(){}); }catch(_){} }
+// Živý posluchač – odznak se aktualizuje hned, jak úkol přijde / změní stav
+let _ukRef=null, _ukWatched="";
+function acUkolyWatch(){ try{ if(!(window.firebase&&firebase.database))return; const me=localStorage.getItem("ac_person")||""; if(me===_ukWatched && _ukRef) return; if(_ukRef){ try{_ukRef.off();}catch(_){} _ukRef=null; } _ukWatched=me; const b=document.getElementById("bdgUk"); if(!me){ if(b){b.style.display="none";} return; } _ukRef=firebase.database().ref("aqua_ukoly").orderByChild("resitel").equalTo(me); _ukRef.on("value",_setUkBadge,function(){}); }catch(_){} }
 function openCisterny(){
   zavriPlan();
   document.getElementById("seznamHead").textContent="Cisterny";
@@ -1129,7 +1133,7 @@ window.addEventListener("load",acBadgeStartup);
 window.addEventListener("load",acInitGate);
 window.addEventListener("load",acCistBadge);
 window.addEventListener("load",acPrehledCounts);
-window.addEventListener("load",acUkolyBadge);
+window.addEventListener("load",acUkolyWatch);
 // Po návratu do appky (např. po klepnutí na notifikaci) obnov odznaky
 document.addEventListener("visibilitychange",function(){ if(!document.hidden){ acPrehledCounts(); acUkolyBadge(); acCistBadge(); } });
 </script>
@@ -1189,6 +1193,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
       msg.onMessage(function(p){var d=(p&&p.data)||{};try{new Notification(d.title||'AquaControl',{body:d.body||'',icon:'icon-192.png',requireInteraction:true});}catch(_){}});
       if(jeNovy && person!==ADMIN_KOD){ try{ firebase.database().ref('aqua_outbox').push({title:'🆕 Nové zařízení', body:(person?lidLbl(person):'Někdo')+' se hlásí ke schválení', targets:[ADMIN_KOD], ts:Date.now()}); }catch(_){} }
       acCheckPending();
+      try{ acUkolyWatch(); }catch(_){}
       var pend=(rec.schvaleno===false);
       setStav(pend?'⏳ Čeká na schválení':'✅ Notifikace zapnuté', !pend);
       alert(pend?'✅ Token uložený.\n\nToto zařízení teď čeká na schválení správcem (Petr Kobelka). Notifikace začnou chodit po schválení.':'✅ Hotovo! Notifikace jsou zapnuté a token uložený.');
