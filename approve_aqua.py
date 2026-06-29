@@ -63,6 +63,21 @@ def main():
         db.reference(f'{NODE}/{key}/schvaleno').set(True)
         schvalena.append((key, val.get('person'), (val.get('ua') or '')[:40]))
 
+    # Zrcadlo pro seznam zařízení v appce (bez tokenu) – vždy přesynchronizuj
+    cur = db.reference(NODE).get() or {}
+    synced = 0
+    for key, val in cur.items():
+        if not isinstance(val, dict):
+            continue
+        db.reference('aqua_zarizeni/' + key).set({
+            'person': val.get('person', ''),
+            'ua': val.get('ua', ''),
+            'schvaleno': (val.get('schvaleno') is not False),
+            'ts': val.get('ts', 0),
+        })
+        synced += 1
+    print(f'Zrcadlo aqua_zarizeni přesynchronizováno: {synced} zařízení.')
+
     if not schvalena:
         print(f'Nic ke schválení (cíl: "{target_id}").' if target_id
               else 'Žádná čekající zařízení – vše už je schválené.')
