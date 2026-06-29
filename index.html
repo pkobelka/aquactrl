@@ -1220,6 +1220,10 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
       alert('Tenhle prohlížeč push nepodporuje.\n\nÚdaje:\n• Notification: '+('Notification'in window)+'\n• serviceWorker: '+('serviceWorker'in navigator)+'\n• PushManager: '+('PushManager'in window)+'\n• https: '+(location.protocol==='https:'));
       return;
     }
+    // Vždy nabídni výběr osoby (i pro pozdější změnu), předvybráno aktuální
+    var person=await acPickPerson();
+    if(!person){ var _on=localStorage.getItem('ac_push_on')==='1'; setStav(_on?'✅ Notifikace zapnuté':'🔔 Povolit notifikace',_on); return; }
+    localStorage.setItem('ac_person',person);
     try{
       setStav('🔔 …',false);
       var perm=Notification.permission;
@@ -1230,8 +1234,6 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
         return;
       }
       if(perm!=='granted'){ setStav('🔔 Povolit notifikace',false); return; }
-      var person=localStorage.getItem('ac_person');
-      if(!person){ person=await acPickPerson(); if(!person){ setStav('🔔 Povolit notifikace',false); return; } localStorage.setItem('ac_person',person); }
       var reg=await navigator.serviceWorker.register('firebase-messaging-sw.js',{scope:'/aquacontrol/fcm/'});
       await navigator.serviceWorker.ready;
       var msg=firebase.messaging();
