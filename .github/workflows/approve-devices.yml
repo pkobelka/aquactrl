@@ -1,0 +1,29 @@
+name: Schválit zařízení (AquaControl)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_id:
+        description: 'Device ID ke schválení (prázdné = všechna čekající)'
+        required: false
+        default: ''
+
+jobs:
+  approve:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Nastav Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instaluj závislosti
+        run: pip install firebase-admin
+
+      - name: Ulož service account key
+        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > service-account-key.json
+
+      - name: Schval zařízení
+        run: python approve_aqua.py "${{ github.event.inputs.target_id }}"
