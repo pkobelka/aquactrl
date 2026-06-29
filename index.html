@@ -136,7 +136,7 @@ padding:24px;z-index:50;overflow:auto}
     <a onclick="openMojeUkoly()">Moje úkoly<span class="bdg" id="bdgUk" style="display:none;background:#e8881b">0</span></a>
     <a onclick="openCisterny()">Cisterny<span class="bdg" id="bdgCist" style="display:none;background:#1577c8">0</span></a>
     <a onclick="openKontakty()">Kontakty</a>
-    <a id="navZariz" onclick="openZarizeni()" style="display:none">Zařízení</a>
+    <a id="navZariz" onclick="openZarizeni()" style="display:none">Zařízení<span class="bdg" id="bdgZar" style="display:none;background:#e8881b">0</span></a>
     <a onclick="alert('Sekce Dokumenty – metodické pokyny (mimka).')">Dokumenty</a>
     <a id="btnPush" onclick="acEnablePush()">🔔 Povolit notifikace</a>
   </nav>
@@ -226,7 +226,7 @@ const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
 // Správce, který schvaluje nová zařízení (Petr Kobelka = TŘ)
 const ADMIN_KOD="TŘ";
-const VERZE="v25";  // drž v souladu s CACHE v sw.js
+const VERZE="v26";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -1105,7 +1105,10 @@ function upravCisternu(id){
 }
 // ===== Schvalování zařízení (jen správce) =====
 function acCheckPending(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aqua_push_tokens/"+devId()).get().then(function(s){ const v=s.val()||{}; const bar=document.getElementById("acPendBar"); if(bar) bar.style.display=(s.exists()&&v.schvaleno===false)?"":"none"; }).catch(function(){}); }catch(_){} }
-function acInitGate(){ try{ const a=document.getElementById("navZariz"); if(a&&jsemAdmin())a.style.display=""; acCheckPending(); acUkolyWatch(); }catch(_){} }
+function acInitGate(){ try{ const a=document.getElementById("navZariz"); if(a&&jsemAdmin()){a.style.display="";acZarWatch();} acCheckPending(); acUkolyWatch(); }catch(_){} }
+// Živý odznak u „Zařízení" = počet čekajících žádostí o schválení (jen pro správce)
+let _zarRef=null;
+function acZarWatch(){ try{ if(!(window.firebase&&firebase.database)||_zarRef)return; _zarRef=firebase.database().ref("aqua_zarizeni"); _zarRef.on("value",function(snap){ let p=0; snap.forEach(function(c){ if((c.val()||{}).schvaleno===false)p++; }); const b=document.getElementById("bdgZar"); if(b){ b.textContent=p; b.style.display=p?"":"none"; } },function(){}); }catch(_){} }
 function openZarizeni(){
   if(!jsemAdmin()){ alert("Schvalování zařízení je jen pro správce."); return; }
   zavriPlan();
