@@ -29,7 +29,8 @@ LIDE = {
     'ZS': 'Zdeněk Sojma', 'EJ': 'Eva Jančáková', 'KV': 'Kateřina Vávrová',
     'SŠ': 'Stanislav Škeřík', 'JB': 'Jiří Bombera', 'PK': 'Petra Křečková',
     'PT': 'Pavlína Tillová', 'DM': 'Dana Mikulková', 'AK': 'Alena Kobelková',
-    'PKa': 'Petra Kačerová',
+    'PKa': 'Petra Kačerová', 'KM': 'Kamil Michalčák', 'JT': 'Jiří Tinkl',
+    'ZK': 'Zdeněk Krejsa',
 }
 
 
