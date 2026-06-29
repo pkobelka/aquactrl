@@ -587,6 +587,7 @@ function togDotceny(nm){const i=st.dotcene.indexOf(nm);if(i<0)st.dotcene.push(nm
 function krok3(){
  const zb=Object.entries(ZAV).map(([k,[lb,c]])=>`<div class="pill ${st.zavaznost===k?'sel':''}" style="${st.zavaznost===k?'background:'+c:''}" onclick="setZav('${k}')">${lb}</div>`).join("");
  return `<h4>Podrobnosti</h4>
+ ${jeZmenaPlanu()?`<div class="fld"><label>Pracoviště <span style="color:#e23b3b">*</span></label><div class="str-btns">`+STR.map(([nm])=>`<div class="pill ${st.stredisko===nm?'sel':''}" style="${st.stredisko===nm?'background:#1577c8':''}" onclick="setStr('${esc(nm)}')">${nm}</div>`).join("")+`</div></div>`:""}
  ${kolizeBlok()}
  <div class="fld"><label>Závažnost (přednastaveno, lze změnit)</label><div class="zav-btns">${zb}</div></div>
  <div class="fld"><label>Popis</label><textarea placeholder="Stručně co se stalo…" oninput="st.popis=this.value">${esc(st.popis)}</textarea></div>
@@ -1138,6 +1139,7 @@ function krok(d){
  if(d>0){ // validace
   if(st.krok===1&&!st.podminka)return alert("Vyber, co se stalo.");
   if(st.krok===2){if(jeZmenaPlanu()){if(!st.odber)return alert("Vyber konkrétní odběr z plánu.");}else if(st.podminka==="Použití cisterny"){if(!st.stredisko)return alert("Vyber pracoviště.");if(!st.cisterny.length)return alert("Vyber aspoň jednu cisternu.");const od=_msFrom(st.cistOd,st.cistCas),doo=_msFrom(st.cistDoDatum,st.cistDoCas);if(!od||!doo)return alert("Vyplň datum i čas Od i Do.");if(doo<=od)return alert("„Do\" musí být po „Od\".");}else{const tp=PODM_TYP[st.podminka];if(tp){if(!st.stredisko||!st.objekt)return alert("Vyber pracoviště a konkrétní "+tp+".");}else if(!st.stredisko||!st.typ)return alert("Vyber středisko a typ objektu.");}}
+  if(st.krok===3&&jeZmenaPlanu()&&!st.stredisko)return alert("Vyber pracoviště (středisko).");
   if(st.krok===4){
    if(st.cistAno&&st.cisterny.length){const od=_msFrom(st.cistOd,st.cistCas),doo=_msFrom(st.cistDoDatum,st.cistDoCas);if(!od||!doo)return alert("U cisterny vyplň datum i čas Od i Do.");if(doo<=od)return alert("U cisterny musí být „Do\" po „Od\".");}
    acSaveEvent();st.hotovo=true;render();return;}
