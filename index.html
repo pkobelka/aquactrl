@@ -957,7 +957,20 @@ function _udRefreshDetail(id){
 function udalostPoznamka(id){
   acVyberLidi({head:"Přidat poznámku",people:false,noteLabel:"Poznámka",notePh:"napiš poznámku k události…",ok:"Uložit poznámku"}).then(function(r){
     if(!r||!r.note)return;
-    firebase.database().ref("aqua_udalosti/"+id+"/poznamky").push({text:r.note,kdo:uzivatelJmeno(),ts:Date.now()}).then(function(){_udRefreshDetail(id);}).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
+    var db=firebase.database(), ja=localStorage.getItem("ac_person")||"", jmeno=uzivatelJmeno();
+    db.ref("aqua_udalosti/"+id+"/poznamky").push({text:r.note,kdo:jmeno,ts:Date.now()}).then(function(){
+      return Promise.all([db.ref("aqua_udalosti/"+id).get(), db.ref("aqua_ukoly").get()]);
+    }).then(function(res){
+      var ev=res[0].val()||{}, set={};
+      if(ev.zadal)set[ev.zadal]=1;
+      res[1].forEach(function(c){var u=c.val()||{}; if(u.eventId!==id)return; if(u.resitel)set[u.resitel]=1; if(u.zadal)set[u.zadal]=1; (u.upozornit||[]).forEach(function(z){if(z)set[z]=1;});});
+      delete set[ja]; // sebe neupozorňovat
+      var targets=Object.keys(set);
+      if(targets.length){
+        db.ref("aqua_outbox").push({title:"📝 Poznámka k události", body:jmeno+": "+r.note+((ev.co||ev.kde)?(" — "+(ev.co||"")+(ev.kde?(" · "+ev.kde):"")):""), targets:targets, ts:Date.now()});
+      }
+      _udRefreshDetail(id);
+    }).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
   });
 }
 // Přidat úkol k existující události (přiřadit někomu)
