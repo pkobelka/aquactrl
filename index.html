@@ -214,7 +214,7 @@ const OBJ={ // ukázkové objekty (reálné jen vodovody MT)
 };
 const LIDE=[["AB", "Aleš Bubák"], ["BK", "Bláža Kolaříková"], ["JR", "Jan Rada"], ["GŘ", "Jana Drábková"], ["LV", "Lukáš Vykydal"], ["MH", "Milan Horník"], ["PŘ", "Tomáš Zvejška"], ["VH", "Vladislav Halva"], ["TŘ", "Petr Kobelka"], ["JF", "Jiří Fogl"], ["KK", "Karel Krombholz"], ["KN", "Kristýna Nerušilová"], ["ZS", "Zdeněk Sojma"], ["EJ", "Eva Jančáková"], ["KV", "Kateřina Vávrová"], ["SŠ", "Stanislav Škeřík"], ["JB", "Jiří Bombera"], ["PK", "Petra Křečková"], ["PT", "Pavlína Tillová"], ["DM", "Dana Mikulková", "dana.mikulkova@vhos.cz", "+420606095149"], ["AK", "Alena Kobelková"], ["PKa", "Petra Kačerová"]];
 // pořadí v nabídkách lidí: nejdřív vedení GŘ, PŘ, TŘ, pak ostatní podle jména
-const VEDENI=["GŘ","TŘ","PŘ"];
+const VEDENI=["GŘ","PŘ","TŘ"];
 const _prijmeni=jm=>{const p=String(jm).trim().split(/\s+/);return p[p.length-1];};
 const LIDE_R=[...LIDE].sort((a,b)=>{const ia=VEDENI.indexOf(a[0]),ib=VEDENI.indexOf(b[0]);if(ia>=0||ib>=0){if(ia<0)return 1;if(ib<0)return -1;return ia-ib;}return _prijmeni(a[1]).localeCompare(_prijmeni(b[1]),"cs")||a[1].localeCompare(b[1],"cs");});
 // Kdo smí uzavírat události (Zvejška, Rada, Vykydal, Kolaříková, Kobelka)
@@ -600,8 +600,10 @@ function krok3(){
 function setZav(k){st.zavaznost=k;render();}
 
 // vedení zůstává jako kód (GŘ/TŘ/PŘ), ostatní se zobrazují plným jménem
-function lidLbl(z){if(z==="GŘ"||z==="TŘ"||z==="PŘ")return z;const f=LIDE.find(x=>x[0]===z);return f?f[1]:z;}
+function lidLbl(z){if(z==="GŘ"||z==="TŘ"||z==="PŘ")return z;const f=LIDE.find(x=>x[0]===z);return f?prijmeniMonogram(f[1]):z;}
 function prijmeniJmeno(jm){const p=String(jm).trim().split(/\s+/);if(p.length<2)return jm;const sur=p.pop();return sur+" "+p.join(" ");}
+// Příjmení + monogram křestního, např. "Jiří Bombera" -> "Bombera J."
+function prijmeniMonogram(jm){const p=String(jm).trim().split(/\s+/);if(p.length<2)return jm;const sur=p.pop();return sur+" "+p[0].charAt(0).toUpperCase()+".";}
 function casSelectU(ti){
  const v=st.ukoly[ti].tcas||"";const p=v.split(":");const hh=p[0]||"",mm=p[1]||"";
  const ho=Array.from({length:24},(_,i)=>String(i).padStart(2,"0")).map(h=>`<option ${h===hh?'selected':''}>${h}</option>`).join("");
