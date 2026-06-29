@@ -151,8 +151,8 @@ padding:24px;z-index:50;overflow:auto}
 
 <main id="prehled"></main>
 
-<footer style="text-align:center;color:#9aa7b8;font-size:11px;padding:14px 10px 26px;line-height:1.6">
-  <b style="color:#1577c8">Aqua</b><b style="color:#0b3a66">Control</b> <span id="acVer"></span> · © 2026 Petr Kobelka
+<footer style="text-align:center;color:#111;font-size:12px;padding:14px 10px 26px;line-height:1.6">
+  <b style="color:#1577c8">Aqua</b><b style="color:#0b3a66">Control</b> <span id="acVer" style="color:#555"></span> · <b>© 2026 Petr Kobelka</b>
 </footer>
 
 <button class="fab" title="Nová událost" onclick="otevri()">＋</button>
@@ -226,7 +226,7 @@ const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
 // Správce, který schvaluje nová zařízení (Petr Kobelka = TŘ)
 const ADMIN_KOD="TŘ";
-const VERZE="v24";  // drž v souladu s CACHE v sw.js
+const VERZE="v25";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -1113,7 +1113,7 @@ function openZarizeni(){
   const body=document.getElementById("seznamBody");
   document.getElementById("seznamOv").classList.add("show");
   body.innerHTML='<p class="hint">Načítám…</p>';
-  firebase.database().ref("aqua_push_tokens").get().then(function(s){
+  firebase.database().ref("aqua_zarizeni").get().then(function(s){
     const rows=[]; s.forEach(function(c){ rows.push(Object.assign({id:c.key},c.val()||{})); });
     rows.sort(function(a,b){ const ap=a.schvaleno===false?0:1, bp=b.schvaleno===false?0:1; if(ap!==bp)return ap-bp; return (b.ts||0)-(a.ts||0); });
     if(!rows.length){ body.innerHTML='<p class="hint">Žádná registrovaná zařízení.</p>'; return; }
@@ -1131,16 +1131,16 @@ function openZarizeni(){
         +'<button onclick="zarizZamit(\''+r.id+'\')" style="border:1px solid #c0392b;border-radius:10px;padding:8px 14px;background:#fff;color:#c0392b;font-weight:800;cursor:pointer">🗑️ Odebrat</button>'
         +'</div></div>';
     }).join("");
-  }).catch(function(e){ body.innerHTML='<p class="hint">Chyba: '+esc(e&&e.message?e.message:e)+'</p>'; });
+  }).catch(function(e){ const m=(e&&e.message?e.message:String(e)); body.innerHTML='<p class="hint">Chyba: '+esc(m)+(/permission/i.test(m)?'<br><br>V pravidlech Firebase je potřeba povolit čtení uzlu <b>aqua_zarizeni</b>.':'')+'</p>'; });
 }
 function zarizSchval(id){
-  const ref=firebase.database().ref("aqua_push_tokens/"+id);
-  ref.update({schvaleno:true}).then(function(){
-    ref.get().then(function(s){ const v=s.val()||{}; if(v.person) firebase.database().ref("aqua_outbox").push({title:"✅ Zařízení schváleno", body:"Tvoje zařízení bylo schváleno — notifikace teď chodí.", targets:[v.person], ts:Date.now()}); });
+  const db=firebase.database();
+  Promise.all([db.ref("aqua_push_tokens/"+id+"/schvaleno").set(true), db.ref("aqua_zarizeni/"+id+"/schvaleno").set(true)]).then(function(){
+    db.ref("aqua_zarizeni/"+id).get().then(function(s){ const v=s.val()||{}; if(v.person) db.ref("aqua_outbox").push({title:"✅ Zařízení schváleno", body:"Tvoje zařízení bylo schváleno — notifikace teď chodí.", targets:[v.person], ts:Date.now()}); });
     openZarizeni();
   }).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
 }
-function zarizZamit(id){ if(!confirm("Opravdu odebrat toto zařízení? (přestane dostávat notifikace)"))return; firebase.database().ref("aqua_push_tokens/"+id).remove().then(openZarizeni).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));}); }
+function zarizZamit(id){ if(!confirm("Opravdu odebrat toto zařízení? (přestane dostávat notifikace)"))return; const db=firebase.database(); Promise.all([db.ref("aqua_push_tokens/"+id).remove(), db.ref("aqua_zarizeni/"+id).remove()]).then(openZarizeni).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));}); }
 
 // ===== Cisterny – obsazenost =====
 // Odznak v menu = počet cisteren právě v akci (aktivní rezervace teď)
@@ -1316,6 +1316,8 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
       if(snapEx.exists()){ var exv=snapEx.val()||{}; if(exv.schvaleno!==undefined) rec.schvaleno=exv.schvaleno; } // starší token = ponech (legacy povoleno)
       else { rec.schvaleno=false; } // nové zařízení čeká na schválení
       await tref.set(rec);
+      // ne-citlivé zrcadlo pro seznam zařízení v appce (bez tokenu)
+      try{ await firebase.database().ref('aqua_zarizeni/'+devId()).set({person:person, ua:rec.ua, schvaleno:(rec.schvaleno!==false), ts:rec.ts}); }catch(_){}
       localStorage.setItem('ac_push_on','1');
       msg.onMessage(function(p){var d=(p&&p.data)||{};try{new Notification(d.title||'AquaControl',{body:d.body||'',icon:'icon-192.png',requireInteraction:true});}catch(_){}});
       if(jeNovy && person!==ADMIN_KOD){ try{ firebase.database().ref('aqua_outbox').push({title:'🆕 Nové zařízení', body:(person?lidLbl(person):'Někdo')+' se hlásí ke schválení', targets:[ADMIN_KOD], ts:Date.now()}); }catch(_){} }
