@@ -388,14 +388,26 @@ function cisternaBlok(){
  return `<div class="fld"><label>Náhradní zásobování cisternou</label>${toggle}</div>${ano?cisternaDetail():""}`;
 }
 function jeZmenaPlanu(){return !!(st.podminka&&st.podminka.indexOf("plánu")>=0);}
-function selDatum(d){_datum=d;st.odber=null;render();}
+function selDatum(d){if(d)_datum=d;st.odber=null;render();}
+function selDatumNav(dir){const d=planDaty();const cand=dir>0?d.find(x=>x>_datum):[...d].reverse().find(x=>x<_datum);if(cand){_datum=cand;st.odber=null;render();}}
 function setOdber(i){st.odber=PLAN.filter(p=>p.datum===_datum)[i];render();}
 function krok2plan(){
- const daty=[...new Set(PLAN.map(p=>p.datum))].sort();
- let h=`<h4>Vyber konkrétní odběr z plánu</h4><p class="hint">Nejdřív den, pak plánovaný odběr, kterého se změna týká. (ukázka: leden 2026)</p>`;
- h+=`<div class="fld"><label>Den odběru</label><select onchange="selDatum(this.value)"><option value="">— vyber den —</option>`+daty.map(d=>`<option ${_datum===d?'selected':''} value="${d}">${d.split('-').reverse().join('.')}</option>`).join("")+`</select></div>`;
- if(_datum){const list=PLAN.filter(p=>p.datum===_datum);
-  h+=`<div class="fld"><label>Plánovaný odběr (${list.length})</label><div class="people">`+list.map((p,i)=>`<div class="person ${st.odber&&st.odber.misto===p.misto?'sel':''}" onclick="setOdber(${i})">${esc(p.misto)}${p.rozsah?' · '+esc(p.rozsah):''}</div>`).join("")+`</div></div>`;}
+ if(!_datum)_datum=dnesISO();
+ const d=planDaty();const hasPrev=d.some(x=>x<_datum),hasNext=d.some(x=>x>_datum);
+ const list=PLAN.filter(p=>p.datum===_datum);
+ const nav=(en,dir,lbl)=>`<button onclick="selDatumNav(${dir})" ${en?'':'disabled'} style="border:0;border-radius:10px;padding:9px 12px;font-weight:800;cursor:${en?'pointer':'default'};color:#fff;background:${en?'linear-gradient(180deg,#2f9be0,#1577c8)':'#c3d2e0'}">${lbl}</button>`;
+ let h=`<h4>Vyber konkrétní odběr z plánu</h4><p class="hint">Začni u dneška, šipkami posuň na plánovaný den (i dozadu), nebo vyber datum.</p>`;
+ h+=`<div style="display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:10px">
+   ${nav(hasPrev,-1,"◀ Předchozí")}
+   <input type="date" value="${_datum}" onchange="selDatum(this.value)" style="padding:9px 10px;border:1px solid var(--ram);border-radius:9px;font-size:14px;font-family:inherit">
+   ${nav(hasNext,1,"Další ▶")}
+ </div>`;
+ h+=`<div class="pl-mes" style="text-align:center">${denTitul(_datum)} · ${list.length} ${list.length===1?'odběr':(list.length>=2&&list.length<=4?'odběry':'odběrů')}</div>`;
+ if(list.length){
+  h+=`<div class="fld" style="margin-top:8px"><label>Plánovaný odběr (${list.length})</label><div class="people">`+list.map((p,i)=>`<div class="person ${st.odber&&st.odber.misto===p.misto?'sel':''}" onclick="setOdber(${i})">${esc(p.misto)}${p.rozsah?' · '+esc(p.rozsah):''}</div>`).join("")+`</div></div>`;
+ }else{
+  h+=`<p class="hint" style="text-align:center;margin-top:12px">Pro tento den nejsou naplánované odběry. Posuň se šipkami nebo vyber jiné datum.</p>`;
+ }
  return h;
 }
 
@@ -432,7 +444,7 @@ let st={krok:1,podminka:null,zavaznost:null,stredisko:null,typ:null,objekt:null,
 popis:"",nahlasil:"",tel:"",ukoly:[{resitel:null,popis:"",tdatum:"",tcas:"",upozorneni:[]}],info:[],cistAno:null,cisterny:[],cistMisto:"",cistOd:"",cistCas:"",cistDoDatum:"",cistDoCas:"",udDatum:"",kolOpen:false,kolVzorky:[],hotovo:false};
 
 function otevri(){st={krok:1,podminka:null,zavaznost:null,stredisko:null,typ:null,objekt:null,objektStred:"",objJiny:false,adresa:"",dotcene:[],popis:"",nahlasil:"",tel:"",ukoly:[{resitel:null,popis:"",tdatum:"",tcas:"",upozorneni:[]}],info:[],cistAno:null,cisterny:[],cistMisto:"",cistOd:"",cistCas:"",cistDoDatum:"",cistDoCas:"",udDatum:"",kolOpen:false,kolVzorky:[],hotovo:false};
-st.udDatum=dnesISO();_loadCistRez();document.getElementById("ov").classList.add("show");render();}
+st.udDatum=dnesISO();_datum=dnesISO();_loadCistRez();document.getElementById("ov").classList.add("show");render();}
 function zavri(){document.getElementById("ov").classList.remove("show");}
 
 function render(){
