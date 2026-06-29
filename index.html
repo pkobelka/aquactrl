@@ -519,10 +519,11 @@ function openKontakty(){
  }).join("");
  document.getElementById("seznamOv").classList.add("show");
 }
-const UZIVATEL="Petr Kobelka";
+// Jméno přihlášené osoby (z ac_person → LIDE); fallback když není vybráno
+function uzivatelJmeno(){const k=localStorage.getItem("ac_person")||"";const f=LIDE.find(x=>x[0]===k);return f?f[1]:(k||"—");}
 function jePodnet(){return st.podminka==="Stížnost občana"||st.podminka==="Reklamace";}
 function breadcrumb(){
- const t=[["Zadává",UZIVATEL]];
+ const t=[["Zadává",uzivatelJmeno()]];
  if(st.podminka)t.push(["Co",st.podminka]);
  if(jeZmenaPlanu()){if(st.odber)t.push(["Odběr",st.odber.datum.split("-").reverse().join(".")+" · "+st.odber.misto]);}
  else{if(st.stredisko)t.push(["Středisko",st.stredisko]);if(st.typ)t.push(["Typ",st.typ]);if(st.objekt)t.push(["Objekt",st.objekt]);}
@@ -685,7 +686,7 @@ function acSaveEvent(){
       stredisko: st.stredisko||"", objekt: st.objekt||"", objektStred: st.objektStred||"", adresa: st.adresa||"",
       zavaznost: st.zavaznost||"", popis: st.popis||"", dotcene: st.dotcene||[],
       nahlasil: st.nahlasil||"", tel: st.tel||"", cist: cistData,
-      zadal: zadalKod, zadal_jmeno: UZIVATEL, ts: now
+      zadal: zadalKod, zadal_jmeno: uzivatelJmeno(), ts: now
     });
     // úkoly (jen ty s řešitelem nebo popisem)
     (st.ukoly||[]).forEach(function(u){
@@ -696,7 +697,7 @@ function acSaveEvent(){
       db.ref("aqua_ukoly").push({
         eventId: eventId, co: st.podminka||"", kontext: kontext,
         resitel: u.resitel||"", resitel_jmeno: u.resitel?lidLbl(u.resitel):"",
-        zadal: zadalKod, zadal_jmeno: UZIVATEL,
+        zadal: zadalKod, zadal_jmeno: uzivatelJmeno(),
         popis: u.popis||"", termin: terminMs, termin_txt: terminTxt,
         upozornit: u.upozorneni||[], stav: "novy", vznik_ts: now
       });
@@ -1109,7 +1110,7 @@ function hotovoHTML(){
  <div class="sumline"><b>Popis:</b> ${esc(st.popis||"—")}</div>
  ${st.kolVzorky.length?`<div class="sumline"><b>Kolize – vzorky k přesunu (${st.kolVzorky.length}):</b> ${st.kolVzorky.slice().sort((a,b)=>PLAN[a].datum<PLAN[b].datum?-1:1).map(i=>fmtDatumCz(PLAN[i].datum)+" "+esc(PLAN[i].misto)).join("; ")}</div>`:""}
  ${st.cistAno&&st.cisterny.length?`<div class="sumline"><b>Cisterny:</b> ${st.cisterny.map(i=>esc(fmtL(CISTERNY[i].obj)+" · "+CISTERNY[i].typ+" ("+CISTERNY[i].stred+")")).join("; ")}${st.cistMisto?` → ${esc(st.cistMisto)}`:""}${(function(){const od=_msFrom(st.cistOd,st.cistCas),doo=_msFrom(st.cistDoDatum,st.cistDoCas);if(!od&&!doo)return"";return ` · ${od?_fmtCas(od):"?"} – ${doo?_fmtCas(doo):"?"}`;})()}</div>`:(st.cistAno?`<div class="sumline"><b>Cisterna:</b> ano (cisterna nevybrána)</div>`:"")}
- <div class="sumline"><b>Zadal:</b> ${UZIVATEL}${(jePodnet()&&st.nahlasil)?` · nahlásil: ${esc(st.nahlasil)}${st.tel?(" · "+esc(st.tel)):""}`:""}</div>
+ <div class="sumline"><b>Zadal:</b> ${esc(uzivatelJmeno())}${(jePodnet()&&st.nahlasil)?` · nahlásil: ${esc(st.nahlasil)}${st.tel?(" · "+esc(st.tel)):""}`:""}</div>
  ${st.ukoly.map((u,i)=>(u.resitel||u.popis||u.tdatum||u.tcas||u.upozorneni.length)?`<div class="sumline"><b>Úkol ${i+1}:</b> ${u.resitel?esc(lidLbl(u.resitel)):"—"}${u.popis?` – ${esc(u.popis)}`:""}${(u.tdatum||u.tcas)?` · termín ${esc(u.tdatum)} ${esc(u.tcas)}`:""}${u.upozorneni.length?` · upozornit: ${u.upozorneni.map(z=>esc(lidLbl(z))).join(", ")}`:""}</div>`:"").join("")}
  <div class="sumline"><b>Informováni:</b> ${st.info.map(z=>esc(lidLbl(z))).join(", ")||"—"}</div>
  </div>
