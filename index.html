@@ -147,6 +147,7 @@ padding:24px;z-index:50;overflow:auto}
 
 <div class="topbar">
   <div class="dat" id="dat">—</div>
+  <div id="acWho" onclick="acEnablePush()" title="Kdo jsi na tomto zařízení (klikni pro změnu)" style="cursor:pointer;font-size:12px;font-weight:800;border-radius:20px;padding:4px 11px;white-space:nowrap"></div>
   <div class="online"><span class="l">Online:</span><span class="mono" title="Petr Kobelka">Kobelka</span><span class="mono" title="Bláža Kolaříková">Kolaříková</span><span class="mono" title="Lukáš Vykydal">Vykydal</span></div>
   <button class="btn-nova" onclick="otevri()">＋ Nová událost</button>
 </div>
@@ -228,7 +229,7 @@ const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
 // Správce, který schvaluje nová zařízení (Petr Kobelka = TŘ)
 const ADMIN_KOD="TŘ";
-const VERZE="v38";  // drž v souladu s CACHE v sw.js
+const VERZE="v39";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -1162,7 +1163,8 @@ function upravCisternu(id){
 }
 // ===== Schvalování zařízení (jen správce) =====
 function acCheckPending(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aqua_push_tokens/"+devId()).get().then(function(s){ const v=s.val()||{}; const bar=document.getElementById("acPendBar"); if(bar) bar.style.display=(s.exists()&&v.schvaleno===false)?"":"none"; }).catch(function(){}); }catch(_){} }
-function acInitGate(){ try{ const a=document.getElementById("navZariz"); if(a&&jsemAdmin()){a.style.display="";acZarWatch();} acCheckPending(); acUkolyWatch(); }catch(_){} }
+function acRenderWho(){ try{ var el=document.getElementById("acWho"); if(!el)return; var k=localStorage.getItem("ac_person")||""; if(k){ el.innerHTML="👤 "+esc(uzivatelJmeno()); el.style.background="#eaf4fc"; el.style.color="#0b3a66"; el.style.border="1px solid #cfe6f7"; } else { el.innerHTML="👤 Vyber, kdo jsi"; el.style.background="#fff3cd"; el.style.color="#7a5b00"; el.style.border="1px solid #ffe69c"; } }catch(_){} }
+function acInitGate(){ try{ const a=document.getElementById("navZariz"); if(a&&jsemAdmin()){a.style.display="";acZarWatch();} acCheckPending(); acUkolyWatch(); acRenderWho(); }catch(_){} }
 // Živý odznak u „Zařízení" = počet čekajících žádostí o schválení (jen pro správce)
 let _zarRef=null;
 function acZarWatch(){ try{ if(!(window.firebase&&firebase.database)||_zarRef)return; _zarRef=firebase.database().ref("aqua_zarizeni"); _zarRef.on("value",function(snap){ let p=0; snap.forEach(function(c){ if((c.val()||{}).schvaleno===false)p++; }); const b=document.getElementById("bdgZar"); if(b){ b.textContent=p; b.style.display=p?"":"none"; } },function(){}); }catch(_){} }
@@ -1354,6 +1356,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
     var person=await acPickPerson();
     if(!person){ var _on=localStorage.getItem('ac_push_on')==='1'; setStav(_on?'✅ Notifikace zapnuté':'🔔 Povolit notifikace',_on); return; }
     localStorage.setItem('ac_person',person);
+    acRenderWho();
     try{
       setStav('🔔 …',false);
       var perm=Notification.permission;
