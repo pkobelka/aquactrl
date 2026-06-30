@@ -228,7 +228,7 @@ const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
 // Správce, který schvaluje nová zařízení (Petr Kobelka = TŘ)
 const ADMIN_KOD="TŘ";
-const VERZE="v36";  // drž v souladu s CACHE v sw.js
+const VERZE="v37";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -1281,7 +1281,7 @@ function acPickPerson(){
 function krok(d){
  if(d>0){ // validace
   if(st.krok===1&&!st.podminka)return alert("Vyber, co se stalo.");
-  if(st.krok===2){if(jeZmenaPlanu()){if(!st.odber)return alert("Vyber konkrétní odběr z plánu.");}else if(st.podminka==="Použití cisterny"){if(!st.stredisko)return alert("Vyber pracoviště.");if(!st.cisterny.length)return alert("Vyber aspoň jednu cisternu.");const od=_msFrom(st.cistOd,st.cistCas),doo=_msFrom(st.cistDoDatum,st.cistDoCas);if(!od||!doo)return alert("Vyplň datum i čas Od i Do.");if(doo<=od)return alert("„Do\" musí být po „Od\".");}else{const tp=PODM_TYP[st.podminka];if(tp){if(!st.stredisko||!st.objekt)return alert("Vyber pracoviště a konkrétní "+tp+".");}else if(!st.stredisko||!st.typ)return alert("Vyber středisko a typ objektu.");}}
+  if(st.krok===2){if(jeZmenaPlanu()){if(!st.odber)return alert("Vyber konkrétní odběr z plánu.");}else if(st.podminka==="Použití cisterny"){if(!st.stredisko)return alert("Vyber pracoviště.");if(!st.cisterny.length)return alert("Vyber aspoň jednu cisternu.");const od=_msFrom(st.cistOd,st.cistCas),doo=_msFrom(st.cistDoDatum,st.cistDoCas);if(!od||!doo)return alert("Vyplň datum i čas Od i Do.");if(doo<=od)return alert("„Do\" musí být po „Od\".");}else{const tp=PODM_TYP[st.podminka];if(tp){if(!st.stredisko||!st.objekt)return alert("Vyber pracoviště a konkrétní "+tp+".");}else{if(!st.stredisko)return alert("Vyber pracoviště (středisko).");if(!st.typ)return alert("Vyber typ objektu.");const _tk=TYP2KEY[st.typ];const _objs=(_tk&&OBJEKTY[st.stredisko]&&OBJEKTY[st.stredisko][_tk])?OBJEKTY[st.stredisko][_tk]:[];if(_objs.length&&!st.objekt)return alert("Vyber konkrétní objekt.");}}}
   if(st.krok===3&&jeZmenaPlanu()&&!st.stredisko)return alert("Vyber pracoviště (středisko).");
   if(st.krok===4){
    if(st.cistAno&&st.cisterny.length){const od=_msFrom(st.cistOd,st.cistCas),doo=_msFrom(st.cistDoDatum,st.cistDoCas);if(!od||!doo)return alert("U cisterny vyplň datum i čas Od i Do.");if(doo<=od)return alert("U cisterny musí být „Do\" po „Od\".");}
