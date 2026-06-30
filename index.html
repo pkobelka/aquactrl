@@ -228,7 +228,7 @@ const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
 // Správce, který schvaluje nová zařízení (Petr Kobelka = TŘ)
 const ADMIN_KOD="TŘ";
-const VERZE="v37";  // drž v souladu s CACHE v sw.js
+const VERZE="v38";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -505,6 +505,7 @@ const OBJEKTY={"Moravská Třebová":{"vodovod":[{"n":"Borušov","p":"","c":"","
 const KAT_TYP={"Vodovody":"vodovod","Vodojemy":"vodojem","Prameniště":"prameniste","Studny":"studna","Vrty":"vrt","Chlorace":"chlorace","Ostatní":"ostatni"};
 // kategorie události (KAT název) podle podmínky/typu – pro živá čísla v přehledu
 function _eventKat(){
+  if(jePodnet())return "Ostatní"; // podnět veřejnosti (reklamace / stížnost) = vždy Ostatní
   const tp=PODM_TYP[st.podminka];
   if(tp==="vodojem")return "Vodojemy";
   if(tp==="chlorace")return "Chlorace";
