@@ -121,6 +121,8 @@ padding:24px;z-index:50;overflow:auto}
 .sl-tech{cursor:pointer;user-select:none}
 .sl-cinfo{display:none;padding:4px 10px 10px;font-size:12.5px;color:#42526b;white-space:pre-wrap;line-height:1.45;border-bottom:1px solid #eef2f7;background:#f8fbfe}
 .sl-cinfo.show{display:block}
+@keyframes slflash{0%{box-shadow:0 0 0 3px rgba(11,92,174,.55)}100%{box-shadow:0 0 0 3px rgba(11,92,174,0)}}
+.slFlash{animation:slflash 1.6s ease}
 </style>
 </head>
 <body>
@@ -226,7 +228,7 @@ const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
 // Správce, který schvaluje nová zařízení (Petr Kobelka = TŘ)
 const ADMIN_KOD="TŘ";
-const VERZE="v27";  // drž v souladu s CACHE v sw.js
+const VERZE="v28";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -505,11 +507,13 @@ function _eventKat(){
   if(st.typ&&m[st.typ])return m[st.typ];
   return "Ostatní";
 }
+let _slCtx=null;
 function openSeznam(s,kl){
  const typ=KAT_TYP[kl];const objs=(OBJEKTY[s]&&OBJEKTY[s][typ])?OBJEKTY[s][typ]:[];
+ _slCtx={s:s,kl:kl,objs:objs,loaded:null};
  document.getElementById("seznamHead").textContent=kl+" – "+s+" ("+objs.length+")";
  const evCount=_evCounts[s+"|"+kl]||0;
- const objHtml=objs.length?objs.map((o,i)=>`<div><div class="sl-row"><div><b>${esc(o.n)}</b>${(_evObjCounts[s+"|"+kl+"|"+o.n]||0)>0?` <span style="background:#e23b3b;color:#fff;border-radius:9px;padding:1px 7px;font-size:11px;font-weight:800">${_evObjCounts[s+"|"+kl+"|"+o.n]}</span>`:""}${o.p?` <span style="color:#6b7a8d">· ${esc(o.p)}</span>`:""}${o.c?` <span class="sl-tech" title="Zobrazit info o čerpadle" onclick="document.getElementById('ci${i}').classList.toggle('show')">🔧</span>`:""}</div>`+(o.lat?`<a class="sl-map" target="_blank" href="https://www.openstreetmap.org/?mlat=${o.lat}&mlon=${o.lon}#map=16/${o.lat}/${o.lon}">📍 Mapa</a>`:`<span class="sl-nogps">bez GPS</span>`)+`</div>${o.c?`<div class="sl-cinfo" id="ci${i}">${esc(o.c)}</div>`:""}</div>`).join(""):`<p class="hint">Žádné objekty.</p>`;
+ const objHtml=objs.length?objs.map((o,i)=>`<div><div class="sl-row"><div><b>${esc(o.n)}</b>${(_evObjCounts[s+"|"+kl+"|"+o.n]||0)>0?` <span onclick="slJumpObj(${i})" title="Zobrazit událost" style="background:#e23b3b;color:#fff;border-radius:9px;padding:1px 7px;font-size:11px;font-weight:800;cursor:pointer">${_evObjCounts[s+"|"+kl+"|"+o.n]}</span>`:""}${o.p?` <span style="color:#6b7a8d">· ${esc(o.p)}</span>`:""}${o.c?` <span class="sl-tech" title="Zobrazit info o čerpadle" onclick="document.getElementById('ci${i}').classList.toggle('show')">🔧</span>`:""}</div>`+(o.lat?`<a class="sl-map" target="_blank" href="https://www.openstreetmap.org/?mlat=${o.lat}&mlon=${o.lon}#map=16/${o.lat}/${o.lon}">📍 Mapa</a>`:`<span class="sl-nogps">bez GPS</span>`)+`</div>${o.c?`<div class="sl-cinfo" id="ci${i}">${esc(o.c)}</div>`:""}</div>`).join(""):`<p class="hint">Žádné objekty.</p>`;
  let html="";
  if(evCount>0) html+=`<div id="slEventy" style="margin-bottom:12px"><p class="hint" style="margin:0">Načítám události…</p></div>`;
  if(objs.length) html+=`<div style="font-size:12px;font-weight:800;color:#6b7a8d;margin:${evCount>0?'10px':'0'} 0 4px;border-top:${evCount>0?'1px solid #e6eef6':'none'};padding-top:${evCount>0?'10px':'0'}">Objekty (${objs.length})</div>`;
@@ -521,13 +525,28 @@ function openSeznam(s,kl){
      const el=document.getElementById("slEventy");if(!el)return;
      if(err){el.innerHTML='<p class="hint">Chyba načtení událostí.</p>';return;}
      const filtered=evs.filter(function(e){return !e.uzavreno&&e.stredisko===s&&e.kat===kl;});
+     _slCtx.loaded=filtered;
      if(filtered.length){
-       el.innerHTML=`<div style="font-weight:800;color:#0b3a66;font-size:13px;margin-bottom:8px;border-bottom:2px solid #cfe6f7;padding-bottom:4px">Otevřené události (${filtered.length})</div>`+filtered.map(function(ev){return _udalostKarta(ev,byEvent[ev.id]||[]);}).join("");
+       el.innerHTML=`<div style="font-weight:800;color:#0b3a66;font-size:13px;margin-bottom:8px;border-bottom:2px solid #cfe6f7;padding-bottom:4px">Otevřené události (${filtered.length})</div>`+filtered.map(function(ev){return '<div id="slEv-'+ev.id+'" style="border-radius:14px">'+_udalostKarta(ev,byEvent[ev.id]||[])+'</div>';}).join("");
      }else{el.style.display="none";}
    });
  }
 }
 function zavriSeznam(){document.getElementById("seznamOv").classList.remove("show");}
+// Klik na odznak u objektu → skok na jeho otevřenou událost (v sekci nahoře) + zvýraznění
+function slJumpObj(i){
+  if(!_slCtx)return;
+  var o=_slCtx.objs[i]; if(!o)return;
+  var go=function(){
+    var evs=(_slCtx.loaded||[]).filter(function(e){return e.objekt===o.n;});
+    if(!evs.length)return false;
+    var el=document.getElementById("slEv-"+evs[0].id); if(!el)return false;
+    el.scrollIntoView({behavior:"smooth",block:"start"});
+    el.classList.remove("slFlash"); void el.offsetWidth; el.classList.add("slFlash");
+    return true;
+  };
+  if(!go()) setTimeout(go,500);
+}
 function openKontakty(){
  document.getElementById("seznamHead").textContent="Kontakty ("+LIDE_R.length+")";
  const telHref=t=>t.replace(/[^+0-9]/g,"");
@@ -982,21 +1001,23 @@ function udalostPoznamka(id){
 // Přidat úkol k existující události (přiřadit někomu)
 function udalostUkol(id){
   var ev=_cachedOpenEvs.find(function(e){return e.id===id;})||{};
-  acVyberLidi({head:"Přidat úkol",sub:(ev.co||"Událost")+(ev.kde?" · "+ev.kde:""),peopleLabel:"Řešitel (vyber jednoho)",single:true,noteLabel:"Popis úkolu",notePh:"co je potřeba udělat…",withTermin:true,ok:"Zadat úkol"}).then(function(r){
+  acVyberLidi({head:"Přidat úkol",sub:(ev.co||"Událost")+(ev.kde?" · "+ev.kde:""),peopleLabel:"Řešitel (vyber jednoho)",single:true,noteLabel:"Popis úkolu",notePh:"co je potřeba udělat…",withTermin:true,upoz:true,upozLabel:"Koho upozornit při (ne)splnění úkolu",ok:"Zadat úkol"}).then(function(r){
     if(!r)return;
     var resitel=r.persons[0]||"";
     if(!resitel){alert("Vyber řešitele úkolu.");return;}
     var zadalKod=localStorage.getItem("ac_person")||"";
     var kontext=ev.kde||"";
+    var upoz=r.upoz||[];
     firebase.database().ref("aqua_ukoly").push({
       eventId:id, co:ev.co||"", kontext:kontext,
       resitel:resitel, resitel_jmeno:lidLbl(resitel),
       zadal:zadalKod, zadal_jmeno:uzivatelJmeno(),
       popis:r.note||"", termin:r.termin||null, termin_txt:r.termin_txt||"",
-      upozornit:[], stav:"novy", vznik_ts:Date.now()
+      upozornit:upoz, stav:"novy", vznik_ts:Date.now()
     }).then(function(){
-      if(resitel&&resitel!==zadalKod){
-        firebase.database().ref("aqua_outbox").push({title:"🆕 Nový úkol", body:(r.note||"úkol")+(kontext?(" – "+kontext):"")+" · zadal "+uzivatelJmeno(), targets:[resitel], ts:Date.now()});
+      var tgts=[resitel].concat(upoz).filter(function(z,i,a){return z&&z!==zadalKod&&a.indexOf(z)===i;});
+      if(tgts.length){
+        firebase.database().ref("aqua_outbox").push({title:"🆕 Nový úkol", body:(r.note||"úkol")+(kontext?(" – "+kontext):"")+" · zadal "+uzivatelJmeno(), targets:tgts, ts:Date.now()});
       }
       _udRefreshDetail(id);
     }).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
@@ -1018,9 +1039,11 @@ function acVyberLidi(opt){
   opt=opt||{};
   return new Promise(function(resolve){
     const sel=new Set(opt.preselect||[]);
+    const selUpoz=new Set(opt.upozPreselect||[]);
     const ov=document.createElement("div");
     ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px";
     const chips=LIDE_R.map(function(p){return '<span class="person'+(sel.has(p[0])?' sel':'')+'" data-z="'+p[0]+'" style="cursor:pointer">'+esc(lidLbl(p[0]))+'</span>';}).join("");
+    const upozChips=LIDE_R.map(function(p){return '<span class="person'+(selUpoz.has(p[0])?' sel':'')+'" data-z="'+p[0]+'" style="cursor:pointer">'+esc(lidLbl(p[0]))+'</span>';}).join("");
     let _hopt='<option value="">—</option>'; for(let _h=0;_h<24;_h++){const _hh=("0"+_h).slice(-2); _hopt+='<option value="'+_hh+'">'+_hh+'</option>';}
     const _mopt=['00','10','20','30','40','50'].map(function(m){return '<option value="'+m+'">'+m+'</option>';}).join('');
     const terminHtml=opt.withTermin?'<div class="two"><div class="fld"><label>Termín – datum</label><input type="date" id="acvDat" style="width:100%"></div><div class="fld"><label>Čas (hod / min)</label><div style="display:flex;gap:6px"><select id="acvHod" style="flex:1;padding:9px;border:1px solid #ccc;border-radius:8px;font-size:15px;font-family:inherit">'+_hopt+'</select><select id="acvMin" style="flex:1;padding:9px;border:1px solid #ccc;border-radius:8px;font-size:15px;font-family:inherit">'+_mopt+'</select></div></div></div>':'';
@@ -1030,13 +1053,15 @@ function acVyberLidi(opt){
       +'<div class="fld"><label>'+esc(opt.noteLabel||"Poznámka (nepovinné)")+'</label><textarea id="acvNote" placeholder="'+esc(opt.notePh||"")+'" style="width:100%"></textarea></div>'
       +terminHtml
       +(opt.people!==false?'<div class="fld"><label>'+esc(opt.peopleLabel||"Koho upozornit")+'</label><div class="people" id="acvPeople">'+chips+'</div></div>':'')
+      +(opt.upoz?'<div class="fld"><label>'+esc(opt.upozLabel||"Koho upozornit při (ne)splnění")+'</label><div class="people" id="acvUpoz">'+upozChips+'</div></div>':'')
       +'<div style="display:flex;gap:8px;margin-top:14px"><button id="acvCancel" style="flex:1;padding:10px;border:1px solid #ccc;background:#f3f3f3;border-radius:8px;cursor:pointer">Zrušit</button>'
       +'<button id="acvOk" style="flex:1;padding:10px;border:0;background:#0b5cae;color:#fff;border-radius:8px;font-weight:700;cursor:pointer">'+esc(opt.ok||"Potvrdit")+'</button></div></div>';
     document.body.appendChild(ov);
     if(opt.people!==false){ ov.querySelectorAll('#acvPeople .person').forEach(function(el){ el.onclick=function(){ const z=el.getAttribute("data-z"); if(opt.single){ sel.clear(); ov.querySelectorAll('#acvPeople .person').forEach(function(x){x.classList.remove("sel");}); sel.add(z); el.classList.add("sel"); } else if(sel.has(z)){sel.delete(z);el.classList.remove("sel");}else{sel.add(z);el.classList.add("sel");} }; }); }
+    if(opt.upoz){ ov.querySelectorAll('#acvUpoz .person').forEach(function(el){ el.onclick=function(){ const z=el.getAttribute("data-z"); if(selUpoz.has(z)){selUpoz.delete(z);el.classList.remove("sel");}else{selUpoz.add(z);el.classList.add("sel");} }; }); }
     ov.onclick=function(e){ if(e.target===ov){document.body.removeChild(ov);resolve(null);} };
     ov.querySelector("#acvCancel").onclick=function(){document.body.removeChild(ov);resolve(null);};
-    ov.querySelector("#acvOk").onclick=function(){ const note=((ov.querySelector("#acvNote")||{}).value||"").trim(); let termin=null,termin_txt=""; if(opt.withTermin){ const td=((ov.querySelector("#acvDat")||{}).value||""), hh=((ov.querySelector("#acvHod")||{}).value||""), mm=((ov.querySelector("#acvMin")||{}).value||"00"); const tc=hh?(hh+":"+mm):""; if(td){ const ms=_msFrom(td,tc||"00:00"); if(ms){termin=ms;termin_txt=fmtDatumCz(td)+" "+(tc||"00:00");} } } document.body.removeChild(ov); resolve({persons:Array.from(sel), note:note, termin:termin, termin_txt:termin_txt}); };
+    ov.querySelector("#acvOk").onclick=function(){ const note=((ov.querySelector("#acvNote")||{}).value||"").trim(); let termin=null,termin_txt=""; if(opt.withTermin){ const td=((ov.querySelector("#acvDat")||{}).value||""), hh=((ov.querySelector("#acvHod")||{}).value||""), mm=((ov.querySelector("#acvMin")||{}).value||"00"); const tc=hh?(hh+":"+mm):""; if(td){ const ms=_msFrom(td,tc||"00:00"); if(ms){termin=ms;termin_txt=fmtDatumCz(td)+" "+(tc||"00:00");} } } document.body.removeChild(ov); resolve({persons:Array.from(sel), upoz:Array.from(selUpoz), note:note, termin:termin, termin_txt:termin_txt}); };
   });
 }
 function uzavriUdalost(id){
