@@ -228,7 +228,7 @@ const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
 // Správce, který schvaluje nová zařízení (Petr Kobelka = TŘ)
 const ADMIN_KOD="TŘ";
-const VERZE="v29";  // drž v souladu s CACHE v sw.js
+const VERZE="v30";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -513,7 +513,7 @@ function openSeznam(s,kl){
  _slCtx={s:s,kl:kl,objs:objs,loaded:null};
  document.getElementById("seznamHead").textContent=kl+" – "+s+" ("+objs.length+")";
  const evCount=_evCounts[s+"|"+kl]||0;
- const objHtml=objs.length?objs.map((o,i)=>`<div><div class="sl-row"><div><b>${esc(o.n)}</b>${(_evObjCounts[s+"|"+kl+"|"+o.n]||0)>0?` <span onclick="slJumpObj(${i})" title="Zobrazit událost" style="background:#e23b3b;color:#fff;border-radius:9px;padding:1px 7px;font-size:11px;font-weight:800;cursor:pointer">${_evObjCounts[s+"|"+kl+"|"+o.n]}</span>`:""}${o.p?` <span style="color:#6b7a8d">· ${esc(o.p)}</span>`:""}${o.c?` <span class="sl-tech" title="Zobrazit info o čerpadle" onclick="document.getElementById('ci${i}').classList.toggle('show')">🔧</span>`:""}</div>`+(o.lat?`<a class="sl-map" target="_blank" href="https://www.openstreetmap.org/?mlat=${o.lat}&mlon=${o.lon}#map=16/${o.lat}/${o.lon}">📍 Mapa</a>`:`<span class="sl-nogps">bez GPS</span>`)+`</div>${o.c?`<div class="sl-cinfo" id="ci${i}">${esc(o.c)}</div>`:""}</div>`).join(""):`<p class="hint">Žádné objekty.</p>`;
+ const objHtml=objs.length?objs.map((o,i)=>`<div><div class="sl-row"><div>${(_evObjCounts[s+"|"+kl+"|"+o.n]||0)>0?`<b onclick="slToggleObj(${i})" style="cursor:pointer">${esc(o.n)}</b>`:`<b>${esc(o.n)}</b>`}${(_evObjCounts[s+"|"+kl+"|"+o.n]||0)>0?` <span onclick="slToggleObj(${i})" title="Zobrazit událost" style="background:#e23b3b;color:#fff;border-radius:9px;padding:1px 8px;font-size:11px;font-weight:800;cursor:pointer">${_evObjCounts[s+"|"+kl+"|"+o.n]} <span id="objArr-${i}">▸</span></span>`:""}${o.p?` <span style="color:#6b7a8d">· ${esc(o.p)}</span>`:""}${o.c?` <span class="sl-tech" title="Zobrazit info o čerpadle" onclick="document.getElementById('ci${i}').classList.toggle('show')">🔧</span>`:""}</div>`+(o.lat?`<a class="sl-map" target="_blank" href="https://www.openstreetmap.org/?mlat=${o.lat}&mlon=${o.lon}#map=16/${o.lat}/${o.lon}">📍 Mapa</a>`:`<span class="sl-nogps">bez GPS</span>`)+`</div>${o.c?`<div class="sl-cinfo" id="ci${i}">${esc(o.c)}</div>`:""}${(_evObjCounts[s+"|"+kl+"|"+o.n]||0)>0?`<div id="objEv-${i}" style="display:none;padding:2px 6px 6px;background:#f6fafe;border-bottom:1px solid #eef2f7"></div>`:""}</div>`).join(""):`<p class="hint">Žádné objekty.</p>`;
  let html="";
  if(evCount>0) html+=`<div id="slEventy" style="margin-bottom:12px"><p class="hint" style="margin:0">Načítám události…</p></div>`;
  if(objs.length) html+=`<div style="font-size:12px;font-weight:800;color:#6b7a8d;margin:${evCount>0?'10px':'0'} 0 4px;border-top:${evCount>0?'1px solid #e6eef6':'none'};padding-top:${evCount>0?'10px':'0'}">Objekty (${objs.length})</div>`;
@@ -522,30 +522,44 @@ function openSeznam(s,kl){
  document.getElementById("seznamOv").classList.add("show");
  if(evCount>0&&window.firebase&&firebase.database){
    _udNactiVse(function(err,evs,byEvent){
-     const el=document.getElementById("slEventy");if(!el)return;
-     if(err){el.innerHTML='<p class="hint">Chyba načtení událostí.</p>';return;}
+     const el=document.getElementById("slEventy");
+     if(err){if(el)el.innerHTML='<p class="hint">Chyba načtení událostí.</p>';return;}
      const filtered=evs.filter(function(e){return !e.uzavreno&&e.stredisko===s&&e.kat===kl;});
-     _slCtx.loaded=filtered;
-     if(filtered.length){
-       el.innerHTML=`<div style="font-weight:800;color:#0b3a66;font-size:13px;margin-bottom:8px;border-bottom:2px solid #cfe6f7;padding-bottom:4px">Otevřené události (${filtered.length})</div>`+filtered.map(function(ev){return '<div id="slEv-'+ev.id+'" style="border-radius:14px">'+_udalostKarta(ev,byEvent[ev.id]||[])+'</div>';}).join("");
-     }else{el.style.display="none";}
+     const objNames={};objs.forEach(function(o){objNames[o.n]=1;});
+     const byObj={},orphans=[];
+     filtered.forEach(function(ev){
+       const x={ev:ev,ukoly:byEvent[ev.id]||[]};
+       if(ev.objekt&&objNames[ev.objekt]){(byObj[ev.objekt]=byObj[ev.objekt]||[]).push(x);}else{orphans.push(x);}
+     });
+     _slCtx.loaded=filtered;_slCtx.byObj=byObj;
+     // nahoře jen události bez konkrétního objektu (zbytek je rozbalovací u objektů)
+     if(el){
+       if(orphans.length){el.style.display="block";el.innerHTML=`<div style="font-weight:800;color:#0b3a66;font-size:13px;margin-bottom:8px;border-bottom:2px solid #cfe6f7;padding-bottom:4px">Otevřené události bez objektu (${orphans.length})</div>`+orphans.map(function(x){return '<div id="udDet-'+x.ev.id+'" style="margin-bottom:8px">'+_udalostKarta(x.ev,x.ukoly)+'</div>';}).join("");}
+       else{el.style.display="none";el.innerHTML="";}
+     }
+     // pokud je nějaký objekt právě rozbalený, dotáhni mu čerstvá data
+     objs.forEach(function(o,i){const b=document.getElementById("objEv-"+i);if(b&&b.style.display!=="none"&&byObj[o.n])b.innerHTML=byObj[o.n].map(function(x){return '<div id="udDet-'+x.ev.id+'" style="margin:6px 0">'+_udalostKarta(x.ev,x.ukoly)+'</div>';}).join("");});
    });
  }
 }
 function zavriSeznam(){document.getElementById("seznamOv").classList.remove("show");}
-// Klik na odznak u objektu → skok na jeho otevřenou událost (v sekci nahoře) + zvýraznění
-function slJumpObj(i){
+// Klik na odznak/název objektu → rozbalí jeho otevřenou událost přímo pod objektem
+function _setObjArrow(i,open){var a=document.getElementById("objArr-"+i);if(a)a.textContent=open?"▾":"▸";}
+function slToggleObj(i){
   if(!_slCtx)return;
   var o=_slCtx.objs[i]; if(!o)return;
-  var go=function(){
-    var evs=(_slCtx.loaded||[]).filter(function(e){return e.objekt===o.n;});
-    if(!evs.length)return false;
-    var el=document.getElementById("slEv-"+evs[0].id); if(!el)return false;
-    el.scrollIntoView({behavior:"smooth",block:"start"});
-    el.classList.remove("slFlash"); void el.offsetWidth; el.classList.add("slFlash");
+  var box=document.getElementById("objEv-"+i); if(!box)return;
+  if(box.style.display!=="none"){ box.style.display="none"; box.innerHTML=""; _setObjArrow(i,false); return; }
+  box.style.display="block"; _setObjArrow(i,true);
+  var render=function(){
+    var list=(_slCtx.byObj&&_slCtx.byObj[o.n])?_slCtx.byObj[o.n]:null;
+    if(!list){ box.innerHTML='<p class="hint" style="margin:6px 0">Načítám událost…</p>'; return false; }
+    box.innerHTML=list.map(function(x){return '<div id="udDet-'+x.ev.id+'" style="margin:6px 0">'+_udalostKarta(x.ev,x.ukoly)+'</div>';}).join("");
+    box.classList.remove("slFlash"); void box.offsetWidth; box.classList.add("slFlash");
+    box.scrollIntoView({behavior:"smooth",block:"nearest"});
     return true;
   };
-  if(!go()) setTimeout(go,500);
+  if(!render()) setTimeout(render,600);
 }
 function openKontakty(){
  document.getElementById("seznamHead").textContent="Kontakty ("+LIDE_R.length+")";
