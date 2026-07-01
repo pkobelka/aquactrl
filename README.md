@@ -15,6 +15,15 @@ PWA pro evidenci provozních (mimořádných) událostí na vodárenské infrast
 
 Doména `pkobelka.github.io` je v Firebase už autorizovaná (stejný origin jako budky), takže **VAPID/config netřeba měnit**.
 
+3. **Přihlašování e-mailem (Firebase Auth):** Firebase Console → Authentication → Sign-in method → povolit provider *Email/Password* a v něm zapnout přepínač *Email link (passwordless sign-in)*. Pak Authentication → Settings → Authorized domains → ověřit/přidat `pkobelka.github.io` (tohle je jiné nastavení než autorizace domény pro FCM výše, nepředpokládat, že platí automaticky).
+
+## Přístup (kdo se smí přihlásit)
+
+Appka vyžaduje přihlášení e-mailovým odkazem (funguje s jakoukoli schránkou, ne jen firemní). Kdo se smí přihlásit, řídí uzel `aqua_login_email` (e-mail → kód osoby z `LIDE`):
+
+- Spravuje se přes appku v menu **„Přístup (e-maily)"** (jen pro admina, kód `TŘ`), nebo jednorázově skriptem `seed_login_email.py` (viz jeho hlavička pro použití) přes workflow **„Naplnit povolené e-maily"**.
+- Firebase pravidla u `aqua_*` uzlů se **zpřísňují až s odstupem** (ne hned s tímhle nasazením) — nejdřív se musí všichni aspoň jednou přihlásit, teprve pak se v konzoli ručně nastaví, že čtení/zápis vyžaduje ověřený e-mail z `aqua_login_email`. Do té doby zůstávají `aqua_*` uzly přístupné jako dosud.
+
 ## Odeslání push notifikace
 
 GitHub → Actions → **Odeslat push (AquaControl)** → *Run workflow* (titulek + text, případně Device ID jednoho příjemce). Tokeny se čtou z uzlu `aqua_push_tokens` ve sdílené Firebase DB.
@@ -30,6 +39,8 @@ GitHub → Actions → **Odeslat push (AquaControl)** → *Run workflow* (titule
 | `icon-*.png`, `logo-ac-*.png` | ikony / logo (odznak „AC") |
 | `send_push_aqua.py` | skript pro odeslání FCM push |
 | `.github/workflows/send-push.yml` | ruční spuštění push notifikace |
+| `seed_login_email.py` | naplnění/doplnění seznamu povolených přihlašovacích e-mailů |
+| `.github/workflows/seed-login-email.yml` | ruční spuštění naplnění e-mailů |
 
 ## Vývoj
 
