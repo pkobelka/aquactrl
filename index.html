@@ -229,7 +229,7 @@ const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
 // Správce, který schvaluje nová zařízení (Petr Kobelka = TŘ)
 const ADMIN_KOD="TŘ";
-const VERZE="v40";  // drž v souladu s CACHE v sw.js
+const VERZE="v41";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -826,7 +826,15 @@ function openMojeUkoly(){
     _mojeUkoly=rows;
     body.innerHTML=rows.length?rows.map(ukolKartaHTML).join(""):'<p class="hint">Žádné úkoly pro tebe. 🎉</p>';
     acUkolyBadge();
+    _ukolyOznacPrectene(rows);
   }).catch(function(e){ body.innerHTML='<p class="hint">Chyba načtení úkolů: '+esc(e&&e.message?e.message:e)+'</p>'; });
+}
+// Označí úkoly řešitele jako přečtené (poprvé otevřel "Moje úkoly") – pro fajfky u zadavatele
+function _ukolyOznacPrectene(rows){
+  (rows||[]).forEach(function(u){
+    if(u.precteno||!u.resitel||u.resitel===u.zadal) return;
+    firebase.database().ref("aqua_ukoly/"+u.id).update({precteno:true, precteno_ts:Date.now()});
+  });
 }
 // Rozbalovací detail úkolu (stav, časová osa, kdo zadal, upozornění + související událost)
 function ukolTogDet(id){
@@ -892,11 +900,17 @@ function _ukolRadek(u){
   const tl=["zadáno "+_fmtCas(u.vznik_ts)];
   if(u.potvrzeno_ts)tl.push("přijato "+_fmtCas(u.potvrzeno_ts));
   if(u.splneno_ts)tl.push("splněno "+_fmtCas(u.splneno_ts));
+  if(u.precteno_ts)tl.push("přečteno "+_fmtCas(u.precteno_ts));
+  const fajfky=(u.resitel&&u.resitel!==u.zadal)
+    ? (u.precteno
+      ? `<span title="Přečteno ${esc(_fmtCas(u.precteno_ts))}" style="color:#2faf5a;font-weight:800;font-size:12px;margin-left:4px">✓✓</span>`
+      : `<span title="Odesláno, zatím nepřečteno" style="color:#9aa7b8;font-weight:800;font-size:12px;margin-left:4px">✓</span>`)
+    : "";
   return `<div style="border-left:3px solid ${col};padding:5px 8px;margin:6px 0;background:#fff;border-radius:6px">
     <div style="display:flex;justify-content:space-between;gap:6px;align-items:center">
       <b style="color:#0b3a66;font-size:13px">${esc(u.popis||"(úkol)")}</b>
       <span style="background:${col};color:#fff;border-radius:7px;padding:1px 7px;font-size:11px;font-weight:800;white-space:nowrap">${lab}</span></div>
-    <div style="font-size:11.5px;color:#6b7a8d">řešitel: ${esc(u.resitel_jmeno||u.resitel||"—")}${u.termin_txt?` · termín ${esc(u.termin_txt)}`:""}</div>
+    <div style="font-size:11.5px;color:#6b7a8d">řešitel: ${esc(u.resitel_jmeno||u.resitel||"—")}${fajfky}${u.termin_txt?` · termín ${esc(u.termin_txt)}`:""}</div>
     ${(u.upozornit&&u.upozornit.length)?`<div style="font-size:11.5px;color:#6b7a8d">🔔 upozornit: ${u.upozornit.map(z=>esc(lidLbl(z))).join(", ")}</div>`:""}
     <div style="font-size:11px;color:#9aa7b8">${tl.map(esc).join(" → ")}</div></div>`;
 }
@@ -909,6 +923,7 @@ function _udProbeh(ev,ukoly){
   if(ev.poznamky)Object.keys(ev.poznamky).forEach(function(k){var p=ev.poznamky[k]||{}; if(p.ts!=null)it.push([p.ts,"📝","Poznámka ("+(p.kdo||"?")+"): "+(p.text||"")]);});
   (ukoly||[]).forEach(function(u){
     if(u.vznik_ts)it.push([u.vznik_ts,"📋","Úkol zadán"+(u.zadal_jmeno?" ("+u.zadal_jmeno+")":"")+(u.resitel_jmeno?" → "+u.resitel_jmeno:"")+": "+(u.popis||"")]);
+    if(u.precteno_ts)it.push([u.precteno_ts,"✓✓",(u.resitel_jmeno||"Řešitel")+" přečetl/a úkol: "+(u.popis||"")]);
     if(u.potvrzeno_ts)it.push([u.potvrzeno_ts,"✅",(u.resitel_jmeno||"Řešitel")+" přijal/a úkol: "+(u.popis||"")]);
     if(u.splneno_ts)it.push([u.splneno_ts,"✔️",(u.resitel_jmeno||"Řešitel")+" splnil/a úkol: "+(u.popis||"")]);
   });
