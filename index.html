@@ -229,7 +229,7 @@ const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
 // Správce, který schvaluje nová zařízení (Petr Kobelka = TŘ)
 const ADMIN_KOD="TŘ";
-const VERZE="v42";  // drž v souladu s CACHE v sw.js
+const VERZE="v43";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -1399,7 +1399,9 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
       // ne-citlivé zrcadlo pro seznam zařízení v appce (bez tokenu)
       try{ await firebase.database().ref('aqua_zarizeni/'+devId()).set({person:person, ua:rec.ua, schvaleno:(rec.schvaleno!==false), ts:rec.ts}); }catch(_){}
       localStorage.setItem('ac_push_on','1');
-      msg.onMessage(function(p){var d=(p&&p.data)||{};try{new Notification(d.title||'AquaControl',{body:d.body||'',icon:'icon-192.png',requireInteraction:true});}catch(_){}});
+      // Notifikaci zobrazuje jen service worker (firebase-messaging-sw.js) – ruční
+      // zobrazení tady by při otevřené kartě vedlo ke zdvojení (SW + tahle stránka).
+      msg.onMessage(function(){});
       if(jeNovy && person!==ADMIN_KOD){ try{ firebase.database().ref('aqua_outbox').push({title:'🆕 Nové zařízení', body:(person?lidLbl(person):'Někdo')+' se hlásí ke schválení', targets:[ADMIN_KOD], ts:Date.now()}); }catch(_){} }
       acCheckPending();
       try{ acUkolyWatch(); }catch(_){}
@@ -1420,7 +1422,8 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
       // tiché obnovení FCM service workeru – natáhne novou verzi sám, bez mazání dat webu
       navigator.serviceWorker.register('firebase-messaging-sw.js',{scope:'/aquacontrol/fcm/'}).then(function(reg){
         try{reg.update();}catch(_){}
-        try{firebase.messaging().onMessage(function(p){var d=(p&&p.data)||{};try{new Notification(d.title||'AquaControl',{body:d.body||'',icon:'icon-192.png',requireInteraction:true});}catch(_){}});}catch(_){}
+        // Notifikaci zobrazuje jen service worker – viz poznámka u prvního onMessage výše.
+        try{firebase.messaging().onMessage(function(){});}catch(_){}
       }).catch(function(){});
     }
   });
