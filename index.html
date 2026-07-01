@@ -126,7 +126,7 @@ padding:24px;z-index:50;overflow:auto}
 </style>
 </head>
 <body>
-<div class="testbar">🔔 TESTOVACÍ PROVOZ — události a úkoly se ukládají; po „Uložit" se odešle push a přidělené úkoly najdeš v „Moje úkoly" (potvrzení + plnění, hlídání termínů). Nejdřív klikni „🔔 Povolit notifikace" a vyber, kdo jsi.</div>
+<div class="testbar">🔔 TESTOVACÍ PROVOZ — události a úkoly se ukládají; po „Uložit" se odešle push a přidělené úkoly najdeš v „Moje úkoly" (potvrzení + plnění, hlídání termínů). Nejdřív se přihlas e-mailem a klikni „🔔 Povolit notifikace".</div>
 <div id="acPendBar" style="display:none;background:#fff3cd;border-bottom:1px solid #ffe69c;color:#7a5b00;padding:8px 14px;font-size:13px;text-align:center">⏳ Toto zařízení čeká na schválení správcem — notifikace zatím nechodí.</div>
 
 <header class="hlav">
@@ -140,6 +140,7 @@ padding:24px;z-index:50;overflow:auto}
     <a onclick="openKontakty()">Kontakty</a>
     <a onclick="openSkladCerpadel()">Čerpadla na skladě</a>
     <a id="navZariz" onclick="openZarizeni()" style="display:none">Zařízení<span class="bdg" id="bdgZar" style="display:none;background:#e8881b">0</span></a>
+    <a id="navLoginEmaily" onclick="openLoginEmaily()" style="display:none">Přístup (e-maily)</a>
     <a onclick="alert('Sekce Dokumenty – metodické pokyny (mimka).')">Dokumenty</a>
     <a id="btnPush" onclick="acEnablePush()">🔔 Povolit notifikace</a>
   </nav>
@@ -148,7 +149,7 @@ padding:24px;z-index:50;overflow:auto}
 
 <div class="topbar">
   <div class="dat" id="dat">—</div>
-  <div id="acWho" onclick="acEnablePush()" title="Kdo jsi na tomto zařízení (klikni pro změnu)" style="cursor:pointer;font-size:12px;font-weight:800;border-radius:20px;padding:4px 11px;white-space:nowrap"></div>
+  <div id="acWho" onclick="acEnablePush()" title="Přihlášený uživatel (identita podle přihlašovacího e-mailu)" style="cursor:pointer;font-size:12px;font-weight:800;border-radius:20px;padding:4px 11px;white-space:nowrap"></div>
   <div class="online"><span class="l">Online:</span><span class="mono" title="Petr Kobelka">Kobelka</span><span class="mono" title="Bláža Kolaříková">Kolaříková</span><span class="mono" title="Lukáš Vykydal">Vykydal</span></div>
   <button class="btn-nova" onclick="otevri()">＋ Nová událost</button>
 </div>
@@ -230,7 +231,7 @@ const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
 // Správce, který schvaluje nová zařízení (Petr Kobelka = TŘ)
 const ADMIN_KOD="TŘ";
-const VERZE="v45";  // drž v souladu s CACHE v sw.js
+const VERZE="v46";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -824,7 +825,7 @@ function openMojeUkoly(){
   const body=document.getElementById("seznamBody");
   document.getElementById("seznamOv").classList.add("show");
   const me=localStorage.getItem("ac_person")||"";
-  if(!me){ body.innerHTML='<p class="hint">Nejdřív klikni „🔔 Povolit notifikace" a vyber, kdo jsi — pak se ti tu zobrazí úkoly, kde jsi řešitel.</p>'; return; }
+  if(!me){ body.innerHTML='<p class="hint">Nejdřív se přihlas e-mailem — pak se ti tu zobrazí úkoly, kde jsi řešitel.</p>'; return; }
   if(!(window.firebase&&firebase.database)){ body.innerHTML='<p class="hint">Databáze není dostupná.</p>'; return; }
   body.innerHTML='<p class="hint">Načítám…</p>';
   firebase.database().ref("aqua_ukoly").orderByChild("resitel").equalTo(me).get().then(function(snap){
@@ -1193,8 +1194,8 @@ function upravCisternu(id){
 }
 // ===== Schvalování zařízení (jen správce) =====
 function acCheckPending(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aqua_push_tokens/"+devId()).get().then(function(s){ const v=s.val()||{}; const bar=document.getElementById("acPendBar"); if(bar) bar.style.display=(s.exists()&&v.schvaleno===false)?"":"none"; }).catch(function(){}); }catch(_){} }
-function acRenderWho(){ try{ var el=document.getElementById("acWho"); if(!el)return; var k=localStorage.getItem("ac_person")||""; if(k){ el.innerHTML="👤 "+esc(uzivatelJmeno()); el.style.background="#eaf4fc"; el.style.color="#0b3a66"; el.style.border="1px solid #cfe6f7"; } else { el.innerHTML="👤 Vyber, kdo jsi"; el.style.background="#fff3cd"; el.style.color="#7a5b00"; el.style.border="1px solid #ffe69c"; } }catch(_){} }
-function acInitGate(){ try{ const a=document.getElementById("navZariz"); if(a&&jsemAdmin()){a.style.display="";acZarWatch();} acCheckPending(); acUkolyWatch(); acRenderWho(); }catch(_){} }
+function acRenderWho(){ try{ var el=document.getElementById("acWho"); if(!el)return; var k=localStorage.getItem("ac_person")||""; if(k){ el.innerHTML="👤 "+esc(uzivatelJmeno()); el.style.background="#eaf4fc"; el.style.color="#0b3a66"; el.style.border="1px solid #cfe6f7"; } else { el.innerHTML="👤 Přihlas se"; el.style.background="#fff3cd"; el.style.color="#7a5b00"; el.style.border="1px solid #ffe69c"; } }catch(_){} }
+function acInitGate(){ try{ const a=document.getElementById("navZariz"); const le=document.getElementById("navLoginEmaily"); if(jsemAdmin()){ if(a){a.style.display="";acZarWatch();} if(le)le.style.display=""; } acCheckPending(); acUkolyWatch(); acRenderWho(); }catch(_){} }
 // Živý odznak u „Zařízení" = počet čekajících žádostí o schválení (jen pro správce)
 let _zarRef=null;
 function acZarWatch(){ try{ if(!(window.firebase&&firebase.database)||_zarRef)return; _zarRef=firebase.database().ref("aqua_zarizeni"); _zarRef.on("value",function(snap){ let p=0; snap.forEach(function(c){ if((c.val()||{}).schvaleno===false)p++; }); const b=document.getElementById("bdgZar"); if(b){ b.textContent=p; b.style.display=p?"":"none"; } },function(){}); }catch(_){} }
@@ -1233,6 +1234,45 @@ function zarizSchval(id){
   }).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
 }
 function zarizZamit(id){ if(!confirm("Opravdu odebrat toto zařízení? (přestane dostávat notifikace)"))return; const db=firebase.database(); Promise.all([db.ref("aqua_push_tokens/"+id).remove(), db.ref("aqua_zarizeni/"+id).remove()]).then(openZarizeni).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));}); }
+
+// ===== Přístup (e-maily) – kdo se smí přihlásit e-mailovým odkazem =====
+// Klíč v aqua_login_email = e-mail malými písmeny, tečky nahrazené čárkou (Firebase klíč nesmí obsahovat ".")
+function _leKey(email){ return String(email||"").trim().toLowerCase().replace(/\./g,","); }
+function openLoginEmaily(){
+  if(!jsemAdmin()){ alert("Správa přístupu je jen pro správce."); return; }
+  zavriPlan();
+  document.getElementById("seznamHead").textContent="Přístup (e-maily)";
+  const body=document.getElementById("seznamBody");
+  document.getElementById("seznamOv").classList.add("show");
+  body.innerHTML='<p class="hint">Načítám…</p>';
+  firebase.database().ref("aqua_login_email").get().then(function(s){
+    const rows=[]; s.forEach(function(c){ rows.push({key:c.key, kod:c.val()}); });
+    rows.sort(function(a,b){ return lidLbl(a.kod).localeCompare(lidLbl(b.kod),"cs"); });
+    const opts='<option value="">— vyber osobu —</option>'+LIDE_R.map(p=>'<option value="'+p[0]+'">'+esc(p[1])+'</option>').join("");
+    const addForm='<div style="border:1px dashed #cfe6f7;border-radius:14px;padding:12px;margin-bottom:12px;background:#f6fbff">'
+      +'<div style="font-weight:800;color:#0b3a66;margin-bottom:8px">➕ Přidat přístup</div>'
+      +'<input id="leNewEmail" type="email" placeholder="email@example.cz" style="width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;box-sizing:border-box">'
+      +'<select id="leNewKod" style="width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px">'+opts+'</select>'
+      +'<button onclick="leAdd()" style="width:100%;border:0;border-radius:10px;padding:9px;background:#0b5cae;color:#fff;font-weight:800;cursor:pointer">Přidat</button></div>';
+    const list=rows.length?rows.map(function(r){
+      return '<div style="border:1px solid #dbe6f1;border-radius:14px;padding:10px 12px;margin-bottom:8px;background:#fbfdff;display:flex;justify-content:space-between;align-items:center;gap:8px">'
+        +'<div><b style="color:#0b3a66">'+esc(lidLbl(r.kod))+'</b><br><span style="font-size:11.5px;color:#9aa7b8">'+esc(r.key.replace(/,/g,"."))+'</span></div>'
+        +'<button onclick="leRemove(\''+r.key+'\')" style="border:1px solid #c0392b;border-radius:10px;padding:6px 12px;background:#fff;color:#c0392b;font-weight:800;cursor:pointer">🗑️</button>'
+        +'</div>';
+    }).join(""):'<p class="hint">Zatím žádné povolené e-maily.</p>';
+    body.innerHTML=addForm+list;
+  }).catch(function(e){ const m=(e&&e.message?e.message:String(e)); body.innerHTML='<p class="hint">Chyba: '+esc(m)+'</p>'; });
+}
+function leAdd(){
+  const emailEl=document.getElementById("leNewEmail"), kodEl=document.getElementById("leNewKod");
+  const email=(emailEl.value||"").trim(), kod=kodEl.value;
+  if(!email||!kod){ alert("Vyplň e-mail i osobu."); return; }
+  firebase.database().ref("aqua_login_email/"+_leKey(email)).set(kod).then(openLoginEmaily).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
+}
+function leRemove(key){
+  if(!confirm("Opravdu odebrat přístup pro tenhle e-mail?"))return;
+  firebase.database().ref("aqua_login_email/"+key).remove().then(openLoginEmaily).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
+}
 
 // ===== Cisterny – obsazenost =====
 // Odznak v menu = počet cisteren právě v akci (aktivní rezervace teď)
@@ -1296,20 +1336,6 @@ function openCistDetail(i){
   ov.onclick=function(e){ if(e.target===ov)close(); };
   ov.querySelector("#cdX").onclick=close;
 }
-// Výběr „kdo jsi" (uloží se k push tokenu, ať chodí adresné notifikace)
-function acPickPerson(){
-  return new Promise(resolve=>{
-    const cur=localStorage.getItem("ac_person")||"";
-    const opts='<option value="">— vyber sebe —</option>'+LIDE_R.map(p=>'<option value="'+p[0]+'"'+(p[0]===cur?' selected':'')+'>'+esc(p[1])+'</option>').join("");
-    const ov=document.createElement("div");
-    ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px";
-    ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:360px;width:100%;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.3)"><h3 style="margin:0 0 6px;color:#0b3a66">Kdo jsi?</h3><p style="margin:0 0 12px;font-size:13px;color:#555">Vyber své jméno, ať ti chodí notifikace adresované přímo tobě.</p><select id="acWhoSel" style="width:100%;padding:10px;font-size:15px;border:1px solid #ccc;border-radius:8px">'+opts+'</select><div style="display:flex;gap:8px;margin-top:14px"><button id="acWhoCancel" style="flex:1;padding:10px;border:1px solid #ccc;background:#f3f3f3;border-radius:8px;cursor:pointer">Zrušit</button><button id="acWhoOk" style="flex:1;padding:10px;border:0;background:#0b5cae;color:#fff;border-radius:8px;font-weight:700;cursor:pointer">Potvrdit</button></div></div>';
-    document.body.appendChild(ov);
-    ov.onclick=(e)=>{ if(e.target===ov){document.body.removeChild(ov);resolve(null);} };
-    ov.querySelector("#acWhoCancel").onclick=()=>{document.body.removeChild(ov);resolve(null);};
-    ov.querySelector("#acWhoOk").onclick=()=>{const v=ov.querySelector("#acWhoSel").value;document.body.removeChild(ov);resolve(v||null);};
-  });
-}
 
 function krok(d){
  if(d>0){ // validace
@@ -1359,6 +1385,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script>
 (function(){
   var CFG={apiKey:"AIzaSyBEAhZNxq3REoy1vExIrnNEXlyFXHzP4uI",authDomain:"moje-budky.firebaseapp.com",databaseURL:"https://moje-budky-default-rtdb.firebaseio.com",projectId:"moje-budky",storageBucket:"moje-budky.firebasestorage.app",messagingSenderId:"325649258561",appId:"1:325649258561:web:b5571c3278d98405320ec0"};
@@ -1372,6 +1399,63 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
 
   try{ firebase.initializeApp(CFG); }catch(e){}
 
+  // ===== Přihlášení e-mailovým odkazem (passwordless) – kdo se smí přihlásit, řídí uzel aqua_login_email =====
+  var LOGIN_URL='https://pkobelka.github.io/aquacontrol/';
+  function _leKeyLogin(email){ return String(email||"").trim().toLowerCase().replace(/\./g,","); }
+  function acLoginClose(){ var ov=document.getElementById('acLoginOv'); if(ov&&ov.parentNode) ov.parentNode.removeChild(ov); }
+  function acLoginOverlay(msg){
+    acLoginClose();
+    var ov=document.createElement("div");
+    ov.id='acLoginOv';
+    ov.style.cssText="position:fixed;inset:0;background:rgba(11,40,70,.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px";
+    ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:380px;width:100%;padding:22px;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
+      +'<h3 style="margin:0 0 8px;color:#0b3a66">🔒 Přihlášení do AquaControlu</h3>'
+      +'<p style="margin:0 0 14px;font-size:13px;color:#555">'+(msg||'Zadej svůj e-mail, pošleme ti přihlašovací odkaz. Funguje s jakoukoli schránkou.')+'</p>'
+      +'<input id="acLoginEmail" type="email" placeholder="tvuj@email.cz" style="width:100%;padding:10px;font-size:15px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box">'
+      +'<button id="acLoginSend" style="margin-top:12px;width:100%;padding:11px;border:0;background:#0b5cae;color:#fff;border-radius:8px;font-weight:700;cursor:pointer">Poslat přihlašovací odkaz</button>'
+      +'<div id="acLoginMsg" style="margin-top:10px;font-size:12.5px;color:#6b7a8d"></div>'
+      +'</div>';
+    document.body.appendChild(ov);
+    ov.querySelector('#acLoginSend').onclick=function(){
+      var email=(ov.querySelector('#acLoginEmail').value||'').trim();
+      var out=ov.querySelector('#acLoginMsg');
+      if(!email){ out.textContent='Vyplň e-mail.'; return; }
+      out.textContent='Odesílám…';
+      firebase.auth().sendSignInLinkToEmail(email,{url:LOGIN_URL,handleCodeInApp:true}).then(function(){
+        localStorage.setItem('ac_emailForSignIn',email);
+        out.textContent='✅ Odkaz poslán na '+email+'. Zkontroluj schránku (i spam) a otevři odkaz na tomhle zařízení.';
+      }).catch(function(err){ out.textContent='⚠️ Chyba: '+(err&&err.message?err.message:err); });
+    };
+  }
+  function acAuthGate(){
+    if(!(window.firebase&&firebase.auth)) return;
+    var auth=firebase.auth();
+    if(auth.isSignInWithEmailLink(window.location.href)){
+      var email=localStorage.getItem('ac_emailForSignIn');
+      if(!email){ email=window.prompt('Potvrď svůj e-mail pro přihlášení:'); }
+      if(email){
+        auth.signInWithEmailLink(email,window.location.href).then(function(){
+          localStorage.removeItem('ac_emailForSignIn');
+          history.replaceState(null,'',window.location.pathname);
+        }).catch(function(err){ alert('Přihlášení se nepovedlo: '+(err&&err.message?err.message:err)); });
+      }
+    }
+    auth.onAuthStateChanged(function(user){
+      if(!user){ acLoginOverlay(); return; }
+      firebase.database().ref('aqua_login_email/'+_leKeyLogin(user.email)).get().then(function(s){
+        if(s.exists()){
+          acLoginClose();
+          localStorage.setItem('ac_person', s.val());
+          try{ acRenderWho(); }catch(_){}
+        } else {
+          acLoginOverlay('Tenhle e-mail ('+esc(user.email)+') zatím není povolený. Ozvi se Petru Kobelkovi, ať tě přidá do "Přístup (e-maily)".');
+          auth.signOut();
+        }
+      }).catch(function(){ acLoginOverlay('Nepodařilo se ověřit přístup, zkus to prosím znovu.'); });
+    });
+  }
+  acAuthGate();
+
   window.acEnablePush=async function(){
     // iPhone: push jen z appky přidané na plochu
     if(isIOS()&&!isStandalone()){
@@ -1382,10 +1466,9 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
       alert('Tenhle prohlížeč push nepodporuje.\n\nÚdaje:\n• Notification: '+('Notification'in window)+'\n• serviceWorker: '+('serviceWorker'in navigator)+'\n• PushManager: '+('PushManager'in window)+'\n• https: '+(location.protocol==='https:'));
       return;
     }
-    // Vždy nabídni výběr osoby (i pro pozdější změnu), předvybráno aktuální
-    var person=await acPickPerson();
-    if(!person){ var _on=localStorage.getItem('ac_push_on')==='1'; setStav(_on?'✅ Notifikace zapnuté':'🔔 Povolit notifikace',_on); return; }
-    localStorage.setItem('ac_person',person);
+    // Kdo jsi se už pozná z přihlášení (aqua_login_email), ne z volného výběru
+    var person=localStorage.getItem('ac_person')||'';
+    if(!person){ alert('Nejdřív se přihlas e-mailem (mělo by se ti to nabídnout samo).'); return; }
     acRenderWho();
     try{
       setStav('🔔 …',false);
