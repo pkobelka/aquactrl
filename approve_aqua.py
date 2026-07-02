@@ -30,7 +30,7 @@ LIDE = {
     'SŠ': 'Stanislav Škeřík', 'JB': 'Jiří Bombera', 'PK': 'Petra Křečková',
     'PT': 'Pavlína Tillová', 'DM': 'Dana Mikulková', 'AK': 'Alena Kobelková',
     'PKa': 'Petra Kačerová', 'KM': 'Kamil Michalčák', 'JT': 'Jiří Tinkl',
-    'ZK': 'Zdeněk Krejsa', 'ZD': 'Zdeněk Drábek',
+    'ZK': 'Zdeněk Krejsa', 'ZD': 'Zdeněk Drábek', 'MP': 'Michal Prokop',
 }
 
 

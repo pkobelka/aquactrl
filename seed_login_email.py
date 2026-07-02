@@ -23,8 +23,8 @@ DATABASE_URL    = 'https://moje-budky-default-rtdb.firebaseio.com'
 NODE            = 'aqua_login_email'
 
 # kód osoby -> e-mail (drž v souladu s KONTAKTY v index.html)
-# Pozn.: JT (Jiří Tinkl) a ZK (Zdeněk Krejsa) nemají v KONTAKTY e-mail vůbec –
-# je potřeba se jich zeptat a přidat je ručně (přes appku nebo "pridej").
+# Pozn.: ZK (Zdeněk Krejsa) nemá v KONTAKTY e-mail vůbec –
+# je potřeba se zeptat a přidat ho ručně (přes appku nebo "pridej").
 EMAILY = {
     'GŘ': 'jana.drabkova@vhos.cz', 'PŘ': 'tomas.zvejska@vhos.cz', 'TŘ': 'petr.kobelka@vhos.cz',
     'AB': 'ales.bubak@vhos.cz', 'BK': 'blazena.kolarikova@vhos.cz', 'JR': 'jan.rada@vhos.cz',
@@ -34,6 +34,7 @@ EMAILY = {
     'SŠ': 'stanislav.skerik@cevak.cz', 'JB': 'jiri.bombera@cevak.cz', 'PK': 'petra.kreckova@cevak.cz',
     'PT': 'pavlina.tillova@cevak.cz', 'DM': 'dana.mikulkova@vhos.cz', 'AK': 'alena.kobelkova@vhos.cz',
     'PKa': 'petra.kacerova@vhos.cz', 'KM': 'kamil.michalcak@vhos.cz', 'ZD': 'zdenek.drabek@vhos.cz',
+    'JT': 'jirkatinkl@gmail.com', 'MP': 'michalprokop26@email.cz',
 }
 
 
