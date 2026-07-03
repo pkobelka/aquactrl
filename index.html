@@ -150,7 +150,7 @@ padding:24px;z-index:50;overflow:auto}
 <div class="topbar">
   <div class="dat" id="dat">—</div>
   <div id="acWho" onclick="acEnablePush()" title="Přihlášený uživatel (identita podle přihlašovacího e-mailu)" style="cursor:pointer;font-size:12px;font-weight:800;border-radius:20px;padding:4px 11px;white-space:nowrap"></div>
-  <div class="online"><span class="l">Online:</span><span class="mono" title="Petr Kobelka">Kobelka</span><span class="mono" title="Bláža Kolaříková">Kolaříková</span><span class="mono" title="Lukáš Vykydal">Vykydal</span></div>
+  <div class="online"><span class="l">Online:</span><span id="acOnlineList"></span></div>
   <button class="btn-nova" onclick="otevri()">＋ Nová událost</button>
 </div>
 
@@ -231,7 +231,7 @@ const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
 // Správce, který schvaluje nová zařízení (Petr Kobelka = TŘ)
 const ADMIN_KOD="TŘ";
-const VERZE="v48";  // drž v souladu s CACHE v sw.js
+const VERZE="v49";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -1449,6 +1449,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
           acLoginClose();
           localStorage.setItem('ac_person', s.val());
           try{ acRenderWho(); }catch(_){}
+          try{ acPresenceStart(s.val()); }catch(_){}
         } else {
           acLoginOverlay('Tenhle e-mail ('+esc(user.email)+') zatím není povolený. Ozvi se Petru Kobelkovi, ať tě přidá do "Přístup (e-maily)".');
           auth.signOut();
@@ -1457,6 +1458,39 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
     });
   }
   acAuthGate();
+
+  // ===== Kdo je online (aqua_presence) =====
+  var _presenceStarted=false;
+  function acPresenceStart(person){
+    if(_presenceStarted||!(window.firebase&&firebase.database)) return;
+    _presenceStarted=true;
+    var myRef=firebase.database().ref('aqua_presence/'+devId());
+    firebase.database().ref('.info/connected').on('value',function(snap){
+      if(snap.val()===true){
+        myRef.onDisconnect().remove();
+        myRef.set({person:person, jmeno:lidLbl(person), ts:Date.now()});
+      }
+    });
+  }
+  function acPresenceWatch(){
+    if(!(window.firebase&&firebase.database)) return;
+    firebase.database().ref('aqua_presence').on('value',function(snap){
+      var seen={}, out=[];
+      snap.forEach(function(c){
+        var v=c.val()||{};
+        if(!v.person||seen[v.person]) return;
+        seen[v.person]=1;
+        out.push(v);
+      });
+      out.sort(function(a,b){ return String(a.jmeno||'').localeCompare(String(b.jmeno||''),'cs'); });
+      var el=document.getElementById('acOnlineList');
+      if(!el) return;
+      el.innerHTML=out.length
+        ? out.map(function(v){ return '<span class="mono" title="'+esc(v.jmeno||'')+'">'+esc(v.jmeno||'')+'</span>'; }).join('')
+        : '<span class="mono" style="opacity:.6">nikdo</span>';
+    },function(){});
+  }
+  acPresenceWatch();
 
   window.acEnablePush=async function(){
     // iPhone: push jen z appky přidané na plochu
