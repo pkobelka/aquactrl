@@ -35,6 +35,7 @@ EMAILY = {
     'PT': 'pavlina.tillova@cevak.cz', 'DM': 'dana.mikulkova@vhos.cz', 'AK': 'alena.kobelkova@vhos.cz',
     'PKa': 'petra.kacerova@vhos.cz', 'KM': 'kamil.michalcak@vhos.cz', 'ZD': 'zdenek.drabek@vhos.cz',
     'JT': 'jirkatinkl@gmail.com', 'MP': 'michalprokop26@email.cz',
+    'JZ': 'jan.zahradnik@tns.cz',
 }
 
 

@@ -221,7 +221,7 @@ const OBJ={ // ukázkové objekty (reálné jen vodovody MT)
  "Moravská Třebová|Vodovod":["Boršov","Borušov","Dětřichov u M.Třebové","Kunčina","Moravská Třebová","Staré Město","Třebářov","…"],
  "Polička|Vodovod":["Polička","Lubná","Pomezí","Sebranice","Korouhev","…"]
 };
-const LIDE=[["AB", "Aleš Bubák"], ["BK", "Bláža Kolaříková"], ["JR", "Jan Rada"], ["GŘ", "Jana Drábková"], ["LV", "Lukáš Vykydal"], ["MH", "Milan Horník"], ["PŘ", "Tomáš Zvejška"], ["VH", "Vladislav Halva"], ["TŘ", "Petr Kobelka"], ["JF", "Jiří Fogl"], ["KK", "Karel Krombholz"], ["KN", "Kristýna Nerušilová"], ["ZS", "Zdeněk Sojma"], ["EJ", "Eva Jančáková"], ["KV", "Kateřina Vávrová"], ["SŠ", "Stanislav Škeřík"], ["JB", "Jiří Bombera"], ["PK", "Petra Křečková"], ["PT", "Pavlína Tillová"], ["DM", "Dana Mikulková", "dana.mikulkova@vhos.cz", "+420606095149"], ["AK", "Alena Kobelková"], ["PKa", "Petra Kačerová"], ["KM", "Kamil Michalčák"], ["JT", "Jiří Tinkl"], ["ZK", "Zdeněk Krejsa"], ["ZD", "Zdeněk Drábek"], ["MP", "Michal Prokop"]];
+const LIDE=[["AB", "Aleš Bubák"], ["BK", "Bláža Kolaříková"], ["JR", "Jan Rada"], ["GŘ", "Jana Drábková"], ["LV", "Lukáš Vykydal"], ["MH", "Milan Horník"], ["PŘ", "Tomáš Zvejška"], ["VH", "Vladislav Halva"], ["TŘ", "Petr Kobelka"], ["JF", "Jiří Fogl"], ["KK", "Karel Krombholz"], ["KN", "Kristýna Nerušilová"], ["ZS", "Zdeněk Sojma"], ["EJ", "Eva Jančáková"], ["KV", "Kateřina Vávrová"], ["SŠ", "Stanislav Škeřík"], ["JB", "Jiří Bombera"], ["PK", "Petra Křečková"], ["PT", "Pavlína Tillová"], ["DM", "Dana Mikulková", "dana.mikulkova@vhos.cz", "+420606095149"], ["AK", "Alena Kobelková"], ["PKa", "Petra Kačerová"], ["KM", "Kamil Michalčák"], ["JT", "Jiří Tinkl"], ["ZK", "Zdeněk Krejsa"], ["ZD", "Zdeněk Drábek"], ["MP", "Michal Prokop"], ["JZ", "Jan Zahradník"]];
 // pořadí v nabídkách lidí: nejdřív vedení GŘ, PŘ, TŘ, pak ostatní podle jména
 const VEDENI=["GŘ","PŘ","TŘ"];
 const _prijmeni=jm=>{const p=String(jm).trim().split(/\s+/);return p[p.length-1];};
@@ -231,7 +231,7 @@ const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
 // Správce, který schvaluje nová zařízení (Petr Kobelka = TŘ)
 const ADMIN_KOD="TŘ";
-const VERZE="v47";  // drž v souladu s CACHE v sw.js
+const VERZE="v48";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -261,7 +261,8 @@ const KONTAKTY={
  "JT":{mail:"jirkatinkl@gmail.com", tel:"602 356 495"},
  "ZK":{tel:"732 703 766"},
  "ZD":{mail:"zdenek.drabek@vhos.cz", tel:"702230328"},
- "MP":{mail:"michalprokop26@email.cz", tel:"724 500 160"}
+ "MP":{mail:"michalprokop26@email.cz", tel:"724 500 160"},
+ "JZ":{mail:"jan.zahradnik@tns.cz", tel:"731446834"}
 };
 // Sklad TČ (Moravská Třebová) – záložní čerpadla uskladněná mimo vrty (list "seznam čerpadel - sklad TČ")
 const SKLAD_CERPADLA=[{"poz":1,"misto":"SEBRANICE VRT V5","popis":"nový motor- původní hydraulika- bez kabelu"},{"poz":2,"misto":"SEBRANICE VRT V3","popis":"LOWARA Z6YZ/9- s kabelem"},{"poz":3,"misto":"PROVOZ SY","popis":"UVN 10"},{"poz":4,"misto":"OPATOVEC","popis":"UBG 5- s kabelem- odvoz vrt V2 Hradec nad Svitavou"},{"poz":5,"misto":"OPATOVEC","popis":"CUBU 0708- s kabelem"},{"poz":6,"misto":"PUSTÁ KAMENICE","popis":"UBA 6- s kabelem"},{"poz":7,"misto":"KOSTELNÍ LUKA","popis":"UDN 6- s kabelem"},{"poz":8,"misto":"BUDISLAV","popis":"A-UBA 6- s kabelem"},{"poz":9,"misto":"DĚTŘICHOV","popis":"CALPEDA-již použité čerpadlo bez kabelu"},{"poz":10,"misto":"OPATOV","popis":"čerpadlo již vydáno"},{"poz":11,"misto":"VRT JANOV","popis":"LOWARA- s kabelem- čerpadlo již vydáno"},{"poz":12,"misto":"DLOUHÁ LOUČKA","popis":"WILO- s kabelem"},{"poz":13,"misto":"HARTINKOV","popis":"EVGU- s kabelem"},{"poz":14,"misto":"VRT MLADĚJOV","popis":"KSB- s kabelem"},{"poz":15,"misto":"ČS OLDŘÍŠ","popis":"KSB , v tlakovém plášti- s kabelem"},{"poz":16,"misto":"MAŘÍN","popis":"CALPEDA- s kabelem"},{"poz":17,"misto":"POHLEDY","popis":"CALPEDA- s kabelem"},{"poz":18,"misto":"PACOV","popis":"čerpadlo již vydáno"},{"poz":19,"misto":"BĚLÁ NAD SVIT.","popis":"UBA 6- s kabelem"},{"poz":20,"misto":"PUSTÁ KAMENICE","popis":"UVN 4- s kabelem"},{"poz":21,"misto":"TRSTĚNICE","popis":"A- UBA 8- s kabelem"},{"poz":22,"misto":"POLIČKA VRT V6","popis":"CVBU 0709- s kabelem (pouze hydraulika)"},{"poz":23,"misto":"POLIČKA VRT V8","popis":"CALPEDA- s kabelem"},{"poz":24,"misto":"DĚTŘICHOV- SY","popis":"GRUNDFOS- s kabelem"},{"poz":25,"misto":"SUCHÁ LHOTA","popis":"LOWARA- s kabelem"},{"poz":26,"misto":"KRASÍKOV","popis":"LOWARA- s kabelem"},{"poz":27,"misto":"JEDLOVÁ VRT- HV5","popis":"UG 14A-23 s kabelem"},{"poz":28,"misto":"TRPÍN","popis":"UG 14A-23,chladící plášť+ kabel 50m"},{"poz":29,"misto":"RAIFOVA PILA","popis":"Z612 08F, chladicí plášť, 10 m kabelu"},{"poz":30,"misto":"JEDLOVÁ VRT- HV3","popis":"UG 8A-12 + Franklin 3kW s kabelem 30m"}];
