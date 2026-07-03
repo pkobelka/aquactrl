@@ -231,7 +231,7 @@ const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
 // Správce, který schvaluje nová zařízení (Petr Kobelka = TŘ)
 const ADMIN_KOD="TŘ";
-const VERZE="v49";  // drž v souladu s CACHE v sw.js
+const VERZE="v50";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -1448,7 +1448,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
         if(s.exists()){
           acLoginClose();
           localStorage.setItem('ac_person', s.val());
-          try{ acRenderWho(); }catch(_){}
+          try{ acInitGate(); }catch(_){}
           try{ acPresenceStart(s.val()); }catch(_){}
         } else {
           acLoginOverlay('Tenhle e-mail ('+esc(user.email)+') zatím není povolený. Ozvi se Petru Kobelkovi, ať tě přidá do "Přístup (e-maily)".');
