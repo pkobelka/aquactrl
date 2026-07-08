@@ -1,4 +1,4 @@
-name: Odeslat push (AquaControl)
+name: Odeslat push (AquaCtrl)
 
 on:
   workflow_dispatch:
@@ -6,11 +6,11 @@ on:
       title:
         description: 'Titulek notifikace'
         required: true
-        default: 'AquaControl'
+        default: 'AquaCtrl'
       body:
         description: 'Text zprávy'
         required: true
-        default: 'Testovací notifikace z AquaControlu'
+        default: 'Testovací notifikace z AquaCtrlu'
       target_id:
         description: 'Device ID příjemce (prázdné = všichni)'
         required: false
@@ -34,4 +34,4 @@ jobs:
         run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > service-account-key.json
 
       - name: Odešli push notifikaci
-        run: python send_push_aqua.py "${{ github.event.inputs.title }}" "${{ github.event.inputs.body }}" "${{ github.event.inputs.target_id }}"
+        run: python send_push_aquactrl.py "${{ github.event.inputs.title }}" "${{ github.event.inputs.body }}" "${{ github.event.inputs.target_id }}"

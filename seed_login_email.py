@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-AquaControl – naplnění seznamu povolených přihlašovacích e-mailů
+AquaCtrl – naplnění seznamu povolených přihlašovacích e-mailů
 =================================================================
-Zapíše do uzlu `aqua_login_email` mapování e-mail -> kód osoby (LIDE).
+Zapíše do uzlu `aquactrl_login_email` mapování e-mail -> kód osoby (LIDE).
 Appka podle něj po přihlášení e-mailovým odkazem pozná, kdo je přihlášený
 (localStorage.ac_person), a Firebase pravidla podle něj řídí přístup k datům.
 
@@ -20,7 +20,7 @@ from firebase_admin import credentials, db
 
 SERVICE_ACCOUNT = 'service-account-key.json'
 DATABASE_URL    = 'https://moje-budky-default-rtdb.firebaseio.com'
-NODE            = 'aqua_login_email'
+NODE            = 'aquactrl_login_email'
 
 # kód osoby -> e-mail (drž v souladu s KONTAKTY v index.html)
 # Pozn.: ZK (Zdeněk Krejsa) nemá v KONTAKTY e-mail vůbec –

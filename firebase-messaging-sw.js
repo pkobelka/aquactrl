@@ -1,4 +1,4 @@
-// AquaControl – FCM service worker (push notifikace)
+// AquaCtrl – FCM service worker (push notifikace)
 // Vlastní úzký scope, nekoliduje s offline sw.js.
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
@@ -14,8 +14,8 @@ firebase.initializeApp({
 });
 
 const messaging = firebase.messaging();
-const ICON = '/aquacontrol/icon-192.png';
-const APP_URL = 'https://pkobelka.github.io/aquacontrol/';
+const ICON = '/aquactrl/icon-192.png';
+const APP_URL = 'https://pkobelka.github.io/aquactrl/';
 
 // Nová verze SW se aktivuje hned (nečeká na zavření všech oken)
 self.addEventListener('install', () => self.skipWaiting());
@@ -23,7 +23,7 @@ self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 
 // Notifikace na pozadí (zavřená/neaktivní karta)
 messaging.onBackgroundMessage(payload => {
-  const title = payload.data?.title || 'AquaControl';
+  const title = payload.data?.title || 'AquaCtrl';
   const body  = payload.data?.body  || '';
   return self.registration.showNotification(title, {
     body,

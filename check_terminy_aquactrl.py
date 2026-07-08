@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-AquaControl – hlídání zmeškaných termínů úkolů
+AquaCtrl – hlídání zmeškaných termínů úkolů
 ===============================================
 Appka sama o sobě žádné pozadí nemá (statická stránka), takže zmeškaný
 termín úkolu by jinak nikdo nezaznamenal. Tenhle skript pravidelně
-(viz .github/workflows/check-terminy.yml) projde uzel `aqua_ukoly`,
+(viz .github/workflows/check-terminy.yml) projde uzel `aquactrl_ukoly`,
 najde nesplněné úkoly po termínu, kterým ještě nebylo posláno avízo,
 a jednou (ne opakovaně) o tom pošle push lidem z pole "upozornit" –
-stejnou frontou `aqua_outbox`, jakou používá appka (vyzvedne ji sdílená
+stejnou frontou `aquactrl_outbox`, jakou používá appka (vyzvedne ji sdílená
 Cloud Function a pošle FCM push).
 """
 
@@ -17,7 +17,7 @@ from firebase_admin import credentials, db
 
 SERVICE_ACCOUNT = 'service-account-key.json'
 DATABASE_URL    = 'https://moje-budky-default-rtdb.firebaseio.com'
-NODE            = 'aqua_ukoly'
+NODE            = 'aquactrl_ukoly'
 
 
 def main():
@@ -50,7 +50,7 @@ def main():
         kontext = u.get('kontext') or ''
         body = f'{resitel} nesplnil/a do termínu: {popis}' + (f' – {kontext}' if kontext else '')
 
-        db.reference('aqua_outbox').push({
+        db.reference('aquactrl_outbox').push({
             'title': '⏰ Úkol po termínu',
             'body': body,
             'targets': targets,

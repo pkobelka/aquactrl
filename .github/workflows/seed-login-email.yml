@@ -1,4 +1,4 @@
-name: Naplnit povolené e-maily (AquaControl)
+name: Naplnit povolené e-maily (AquaCtrl)
 
 on:
   workflow_dispatch:

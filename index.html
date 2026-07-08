@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AquaControl</title>
+<title>AquaCtrl</title>
 <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="icon-16.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -11,11 +11,11 @@
 <meta name="theme-color" content="#0b5cae">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="AquaControl">
+<meta name="apple-mobile-web-app-title" content="AquaCtrl">
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
-    navigator.serviceWorker.register('sw.js', { scope: '/aquacontrol/' }).catch(function () {});
+    navigator.serviceWorker.register('sw.js', { scope: '/aquactrl/' }).catch(function () {});
   });
 }
 </script>
@@ -130,8 +130,8 @@ padding:24px;z-index:50;overflow:auto}
 <div id="acPendBar" style="display:none;background:#fff3cd;border-bottom:1px solid #ffe69c;color:#7a5b00;padding:8px 14px;font-size:13px;text-align:center">⏳ Toto zařízení čeká na schválení správcem — notifikace zatím nechodí.</div>
 
 <header class="hlav">
-  <img class="kap" src="logo-ac-icon.png" alt="AquaControl – VHOS a.s." width="46" height="46">
-  <div class="nazev"><span class="a">Aqua</span><span class="c">Control</span></div>
+  <img class="kap" src="logo-ac-icon.png" alt="AquaCtrl – VHOS a.s." width="46" height="46">
+  <div class="nazev"><span class="a">Aqua</span><span class="c">Ctrl</span></div>
   <nav class="menu">
     <a onclick="openUdalosti()">Aktuální události<span class="bdg" id="bdgUd" style="display:none;background:#e23b3b">0</span></a>
     <a onclick="otevriPlan()">Plán vzorkování 2026</a>
@@ -158,7 +158,7 @@ padding:24px;z-index:50;overflow:auto}
 <main id="prehled"></main>
 
 <footer style="text-align:center;color:#111;font-size:12px;padding:14px 10px 26px;line-height:1.6">
-  <b style="color:#1577c8">Aqua</b><b style="color:#0b3a66">Control</b> <span id="acVer" style="color:#555"></span> · <b>© 2026 Petr Kobelka</b>
+  <b style="color:#1577c8">Aqua</b><b style="color:#0b3a66">Ctrl</b> <span id="acVer" style="color:#555"></span> · <b>© 2026 Petr Kobelka</b>
 </footer>
 
 <button class="fab" title="Nová událost" onclick="otevri()">＋</button>
@@ -232,7 +232,7 @@ const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
 // Správce, který schvaluje nová zařízení (Petr Kobelka = TŘ)
 const ADMIN_KOD="TŘ";
-const VERZE="v53";  // drž v souladu s CACHE v sw.js
+const VERZE="v54";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -298,7 +298,7 @@ function fmtL(n){return n.toLocaleString("cs-CZ")+" l";}
 function _msFrom(datum,cas){ if(!datum)return null; const hm=/^\d{2}:\d{2}$/.test(cas||"")?cas:"00:00"; const d=new Date(datum+"T"+hm+":00"); return isNaN(d.getTime())?null:d.getTime(); }
 let _cistRez=[]; // rezervace z otevřených událostí: {eventId,co,idx,misto,od,do,...}
 function _cistArr(ev){ const c=ev&&ev.cist; if(!c)return []; return Array.isArray(c)?c.filter(Boolean):[c]; }
-function _loadCistRez(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aqua_udalosti").get().then(function(s){ const r=[]; s.forEach(function(c){ const e=c.val()||{}; if(e.uzavreno)return; _cistArr(e).forEach(function(x){ if(x.idx!=null) r.push(Object.assign({eventId:c.key,co:e.co},x)); }); }); _cistRez=r; }).catch(function(){}); }catch(_){} }
+function _loadCistRez(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aquactrl_udalosti").get().then(function(s){ const r=[]; s.forEach(function(c){ const e=c.val()||{}; if(e.uzavreno)return; _cistArr(e).forEach(function(x){ if(x.idx!=null) r.push(Object.assign({eventId:c.key,co:e.co},x)); }); }); _cistRez=r; }).catch(function(){}); }catch(_){} }
 function _cistKonflikty(idx,od,doo,exceptId){ if(idx==null||od==null||doo==null)return []; return _cistRez.filter(function(r){ return r.idx===idx && r.eventId!==exceptId && r.od!=null && r.do!=null && r.od<doo && r.do>od; }); }
 // Cisternu nabídnout u událostí s rizikem přerušení dodávky nebo u střední/vysoké závažnosti
 function nabidnoutCisternu(){
@@ -454,7 +454,7 @@ function renderPrehled(){
 }
 function acPrehledCounts(){
  try{ if(!(window.firebase&&firebase.database))return;
-  firebase.database().ref("aqua_udalosti").get().then(function(s){
+  firebase.database().ref("aquactrl_udalosti").get().then(function(s){
    const c={}, oc={}, evs=[];
    s.forEach(function(ch){ const e=ch.val()||{}; if(e.uzavreno)return;
      evs.push(Object.assign({id:ch.key},e));
@@ -587,7 +587,7 @@ function slToggleObj(i){
   // jinak si data dotáhni napřímo (nezávisle na kat / na sdíleném načtení)
   box.innerHTML='<p class="hint" style="margin:6px 0">Načítám událost…</p>';
   if(!(window.firebase&&firebase.database)){ box.innerHTML='<p class="hint" style="margin:6px 0">Databáze není dostupná.</p>'; return; }
-  Promise.all([firebase.database().ref("aqua_udalosti").get(),firebase.database().ref("aqua_ukoly").get()]).then(function(res){
+  Promise.all([firebase.database().ref("aquactrl_udalosti").get(),firebase.database().ref("aquactrl_ukoly").get()]).then(function(res){
     if(box.style.display==="none")return; // uživatel mezitím sbalil
     var ukByEv={}; res[1].forEach(function(c){var u=Object.assign({id:c.key},c.val()||{});(ukByEv[u.eventId]=ukByEv[u.eventId]||[]).push(u);});
     var list=[]; res[0].forEach(function(c){var e=Object.assign({id:c.key},c.val()||{}); if(!e.uzavreno&&e.objekt===o.n&&e.stredisko===_slCtx.s){ var uk=ukByEv[e.id]||[]; uk.sort(function(a,b){var ad=a.stav==="splneny"?1:0,bd=b.stav==="splneny"?1:0;if(ad!==bd)return ad-bd;return(a.termin||9e15)-(b.termin||9e15);}); list.push({ev:e,ukoly:uk}); }});
@@ -741,7 +741,7 @@ function togUpoz(ti,z){const a=st.ukoly[ti].upozorneni;const i=a.indexOf(z);if(i
 function setRes(ti,z){st.ukoly[ti].resitel=(st.ukoly[ti].resitel===z?null:z);render();}
 function togInfo(z){const i=st.info.indexOf(z);if(i<0)st.info.push(z);else st.info.splice(i,1);render();}
 
-// ===== Push při vzniku události (přes Firebase aqua_outbox → Cloud Function) =====
+// ===== Push při vzniku události (přes Firebase aquactrl_outbox → Cloud Function) =====
 function acEventTargets(){
   const s=new Set();
   (st.ukoly||[]).forEach(u=>{ if(u.resitel)s.add(u.resitel); (u.upozorneni||[]).forEach(z=>s.add(z)); });
@@ -762,10 +762,10 @@ function acSendEvent(){
   try{
     if(!(window.firebase&&firebase.database)) return;
     const t=acEventText(), tg=acEventTargets();
-    firebase.database().ref("aqua_outbox").push({title:t.title, body:t.body, targets:tg, ts:Date.now()});
+    firebase.database().ref("aquactrl_outbox").push({title:t.title, body:t.body, targets:tg, ts:Date.now()});
   }catch(e){ console.warn("AC outbox:",e); }
 }
-// Uloží událost + úkoly do RTDB (naostro) a odešle push při vzniku (aqua_outbox).
+// Uloží událost + úkoly do RTDB (naostro) a odešle push při vzniku (aquactrl_outbox).
 function acSaveEvent(){
   try{
     if(!(window.firebase&&firebase.database)) return;
@@ -780,7 +780,7 @@ function acSaveEvent(){
       misto:st.cistMisto||"", od:_cOd, do:_cDo
     };}):null;
     // událost
-    const evRef=db.ref("aqua_udalosti").push();
+    const evRef=db.ref("aquactrl_udalosti").push();
     const eventId=evRef.key;
     evRef.set({
       co: st.podminka||st.typ||"Mimořádná událost", kde: kontext, kat: _eventKat(),
@@ -795,7 +795,7 @@ function acSaveEvent(){
       let terminMs=null, terminTxt="";
       if(u.tdatum){ const hm=(u.tcas||"00:00"); const dd=new Date(u.tdatum+"T"+hm+":00");
         if(!isNaN(dd.getTime())){ terminMs=dd.getTime(); terminTxt=fmtDatumCz(u.tdatum)+" "+hm; } }
-      db.ref("aqua_ukoly").push({
+      db.ref("aquactrl_ukoly").push({
         eventId: eventId, co: st.podminka||"", kontext: kontext,
         resitel: u.resitel||"", resitel_jmeno: u.resitel?lidLbl(u.resitel):"",
         zadal: zadalKod, zadal_jmeno: uzivatelJmeno(),
@@ -805,7 +805,7 @@ function acSaveEvent(){
     });
     // push při vzniku (informovaní + řešitelé + upozornit) – beze změny
     const t=acEventText(), tg=acEventTargets();
-    db.ref("aqua_outbox").push({title:t.title, body:t.body, targets:tg, ts:now});
+    db.ref("aquactrl_outbox").push({title:t.title, body:t.body, targets:tg, ts:now});
     setTimeout(acPrehledCounts,400);
   }catch(e){ console.warn("AC save:",e); }
 }
@@ -843,7 +843,7 @@ function openMojeUkoly(){
   if(!me){ body.innerHTML='<p class="hint">Nejdřív se přihlas e-mailem — pak se ti tu zobrazí úkoly, kde jsi řešitel.</p>'; return; }
   if(!(window.firebase&&firebase.database)){ body.innerHTML='<p class="hint">Databáze není dostupná.</p>'; return; }
   body.innerHTML='<p class="hint">Načítám…</p>';
-  firebase.database().ref("aqua_ukoly").orderByChild("resitel").equalTo(me).get().then(function(snap){
+  firebase.database().ref("aquactrl_ukoly").orderByChild("resitel").equalTo(me).get().then(function(snap){
     const rows=[];
     snap.forEach(function(c){ rows.push(Object.assign({id:c.key}, c.val()||{})); });
     // nesplněné první (po termínu úplně nahoře), pak podle termínu
@@ -862,7 +862,7 @@ function openMojeUkoly(){
 function _ukolyOznacPrectene(rows){
   (rows||[]).forEach(function(u){
     if(u.precteno||!u.resitel||u.resitel===u.zadal) return;
-    firebase.database().ref("aqua_ukoly/"+u.id).update({precteno:true, precteno_ts:Date.now()});
+    firebase.database().ref("aquactrl_ukoly/"+u.id).update({precteno:true, precteno_ts:Date.now()});
   });
 }
 // Rozbalovací detail úkolu (stav, časová osa, kdo zadal, upozornění + související událost)
@@ -883,7 +883,7 @@ function ukolTogDet(id){
   if(u.upozornit&&u.upozornit.length)L.push('<div style="font-size:12px;color:#6b7a8d"><b>Upozornit:</b> '+u.upozornit.map(function(z){return esc(lidLbl(z));}).join(", ")+'</div>');
   el.innerHTML='<div style="border-top:1px dashed #dbe6f1;padding-top:8px">'+L.join("")+'<div id="ukEv-'+id+'" style="margin-top:6px"></div></div>';
   if(u.eventId&&window.firebase&&firebase.database){
-    firebase.database().ref("aqua_udalosti/"+u.eventId).get().then(function(s){
+    firebase.database().ref("aquactrl_udalosti/"+u.eventId).get().then(function(s){
       var ev=s.val(); var box=document.getElementById("ukEv-"+id); if(!box)return;
       if(!ev){ box.innerHTML='<div style="font-size:11.5px;color:#9aa7b8">Související událost nenalezena.</div>'; return; }
       var zl=(ev.zavaznost&&ZAV[ev.zavaznost])?ZAV[ev.zavaznost]:null;
@@ -900,14 +900,14 @@ function ukolTogDet(id){
 }
 // Změna stavu úkolu + push zadavateli (echo „přijal/splnil"). Self-úkol (zadal==řešitel) se neupozorňuje.
 function _ukolZmenaStav(id,novyStav,tsPole,pushTitle,sloveso){
-  const ref=firebase.database().ref("aqua_ukoly/"+id);
+  const ref=firebase.database().ref("aquactrl_ukoly/"+id);
   ref.get().then(function(s){
     const u=s.val()||{};
     const upd={stav:novyStav}; upd[tsPole]=Date.now();
     return ref.update(upd).then(function(){
       if(u.zadal && u.zadal!==u.resitel){
         const kdo=u.resitel_jmeno||u.resitel||"Řešitel";
-        firebase.database().ref("aqua_outbox").push({
+        firebase.database().ref("aquactrl_outbox").push({
           title:pushTitle,
           body:kdo+" "+sloveso+" úkol: "+(u.popis||"")+(u.kontext?(" – "+u.kontext):""),
           targets:[u.zadal], ts:Date.now()
@@ -1002,7 +1002,7 @@ function _udalostKarta(ev,ukoly){
 }
 function _udNactiVse(cb){
   const db=firebase.database();
-  Promise.all([db.ref("aqua_udalosti").get(),db.ref("aqua_ukoly").get()]).then(function(res){
+  Promise.all([db.ref("aquactrl_udalosti").get(),db.ref("aquactrl_ukoly").get()]).then(function(res){
     const evs=[]; res[0].forEach(c=>evs.push(Object.assign({id:c.key},c.val()||{})));
     const byEvent={}; res[1].forEach(c=>{const u=Object.assign({id:c.key},c.val()||{});(byEvent[u.eventId]=byEvent[u.eventId]||[]).push(u);});
     Object.keys(byEvent).forEach(k=>byEvent[k].sort((a,b)=>{const ad=a.stav==="splneny"?1:0,bd=b.stav==="splneny"?1:0;if(ad!==bd)return ad-bd;return (a.termin||9e15)-(b.termin||9e15);}));
@@ -1038,7 +1038,7 @@ function acTogDet(id){
   el.style.display="block";if(arr)arr.textContent="▾";
   var ev=_cachedOpenEvs.find(function(e){return e.id===id;});
   if(!ev){el.innerHTML='<p style="font-size:12px;color:#e23b3b">Událost nenalezena.</p>';return;}
-  firebase.database().ref("aqua_ukoly").get().then(function(s){
+  firebase.database().ref("aquactrl_ukoly").get().then(function(s){
     var ukoly=[];
     s.forEach(function(c){var u=c.val()||{};if(u.eventId===id)ukoly.push(Object.assign({id:c.key},u));});
     ukoly.sort(function(a,b){var ad=a.stav==="splneny"?1:0,bd=b.stav==="splneny"?1:0;if(ad!==bd)return ad-bd;return(a.termin||9e15)-(b.termin||9e15);});
@@ -1048,7 +1048,7 @@ function acTogDet(id){
 // Obnoví otevřený detail události (po přidání poznámky/úkolu) – dotáhne čerstvá data
 function _udRefreshDetail(id){
   var el=document.getElementById("udDet-"+id); if(!el||!(window.firebase&&firebase.database))return;
-  Promise.all([firebase.database().ref("aqua_udalosti/"+id).get(),firebase.database().ref("aqua_ukoly").get()]).then(function(res){
+  Promise.all([firebase.database().ref("aquactrl_udalosti/"+id).get(),firebase.database().ref("aquactrl_ukoly").get()]).then(function(res){
     var ev=Object.assign({id:id},res[0].val()||{});
     var ci=_cachedOpenEvs.findIndex(function(e){return e.id===id;}); if(ci>=0)_cachedOpenEvs[ci]=ev;
     var ukoly=[]; res[1].forEach(function(c){var u=c.val()||{};if(u.eventId===id)ukoly.push(Object.assign({id:c.key},u));});
@@ -1061,8 +1061,8 @@ function udalostPoznamka(id){
   acVyberLidi({head:"Přidat poznámku",people:false,noteLabel:"Poznámka",notePh:"napiš poznámku k události…",ok:"Uložit poznámku"}).then(function(r){
     if(!r||!r.note)return;
     var db=firebase.database(), ja=localStorage.getItem("ac_person")||"", jmeno=uzivatelJmeno();
-    db.ref("aqua_udalosti/"+id+"/poznamky").push({text:r.note,kdo:jmeno,ts:Date.now()}).then(function(){
-      return Promise.all([db.ref("aqua_udalosti/"+id).get(), db.ref("aqua_ukoly").get()]);
+    db.ref("aquactrl_udalosti/"+id+"/poznamky").push({text:r.note,kdo:jmeno,ts:Date.now()}).then(function(){
+      return Promise.all([db.ref("aquactrl_udalosti/"+id).get(), db.ref("aquactrl_ukoly").get()]);
     }).then(function(res){
       var ev=res[0].val()||{}, set={};
       if(ev.zadal)set[ev.zadal]=1;
@@ -1070,7 +1070,7 @@ function udalostPoznamka(id){
       delete set[ja]; // sebe neupozorňovat
       var targets=Object.keys(set);
       if(targets.length){
-        db.ref("aqua_outbox").push({title:"📝 Poznámka k události", body:jmeno+": "+r.note+((ev.co||ev.kde)?(" — "+(ev.co||"")+(ev.kde?(" · "+ev.kde):"")):""), targets:targets, ts:Date.now()});
+        db.ref("aquactrl_outbox").push({title:"📝 Poznámka k události", body:jmeno+": "+r.note+((ev.co||ev.kde)?(" — "+(ev.co||"")+(ev.kde?(" · "+ev.kde):"")):""), targets:targets, ts:Date.now()});
       }
       _udRefreshDetail(id);
     }).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
@@ -1086,7 +1086,7 @@ function udalostUkol(id){
     var zadalKod=localStorage.getItem("ac_person")||"";
     var kontext=ev.kde||"";
     var upoz=r.upoz||[];
-    firebase.database().ref("aqua_ukoly").push({
+    firebase.database().ref("aquactrl_ukoly").push({
       eventId:id, co:ev.co||"", kontext:kontext,
       resitel:resitel, resitel_jmeno:lidLbl(resitel),
       zadal:zadalKod, zadal_jmeno:uzivatelJmeno(),
@@ -1095,7 +1095,7 @@ function udalostUkol(id){
     }).then(function(){
       var tgts=[resitel].concat(upoz).filter(function(z,i,a){return z&&z!==zadalKod&&a.indexOf(z)===i;});
       if(tgts.length){
-        firebase.database().ref("aqua_outbox").push({title:"🆕 Nový úkol", body:(r.note||"úkol")+(kontext?(" – "+kontext):"")+" · zadal "+uzivatelJmeno(), targets:tgts, ts:Date.now()});
+        firebase.database().ref("aquactrl_outbox").push({title:"🆕 Nový úkol", body:(r.note||"úkol")+(kontext?(" – "+kontext):"")+" · zadal "+uzivatelJmeno(), targets:tgts, ts:Date.now()});
       }
       _udRefreshDetail(id);
     }).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
@@ -1144,31 +1144,31 @@ function acVyberLidi(opt){
 }
 function uzavriUdalost(id){
   if(!jsemUzaviratel()){ alert("Uzavírat může jen: "+MOHOU_UZAVIRAT.map(lidLbl).join(", ")); return; }
-  firebase.database().ref("aqua_udalosti/"+id).get().then(function(s){
+  firebase.database().ref("aquactrl_udalosti/"+id).get().then(function(s){
     const ev=s.val()||{};
     if(ev.uzavreno){ alert("Událost je už uzavřená."); return; }
     const popis=(ev.co||"Událost")+(ev.kde?" · "+ev.kde:"");
     acVyberLidi({head:"Uzavřít událost", sub:popis, peopleLabel:"Koho upozornit na uzavření", ok:"🔒 Uzavřít", notePh:"např. důvod / výsledek"}).then(function(r){
       if(!r) return;
       const ja=localStorage.getItem("ac_person")||"";
-      firebase.database().ref("aqua_udalosti/"+id).update({uzavreno:true, uzavrel:ja, uzavrel_jmeno:lidLbl(ja), uzavreno_ts:Date.now(), uzavreno_pozn:r.note});
+      firebase.database().ref("aquactrl_udalosti/"+id).update({uzavreno:true, uzavrel:ja, uzavrel_jmeno:lidLbl(ja), uzavreno_ts:Date.now(), uzavreno_pozn:r.note});
       if(r.persons.length){
-        firebase.database().ref("aqua_outbox").push({title:"🔒 Událost uzavřena", body:popis+" — uzavřel/a "+lidLbl(ja)+(r.note?" · "+r.note:""), targets:r.persons, ts:Date.now()});
+        firebase.database().ref("aquactrl_outbox").push({title:"🔒 Událost uzavřena", body:popis+" — uzavřel/a "+lidLbl(ja)+(r.note?" · "+r.note:""), targets:r.persons, ts:Date.now()});
       }
       openUdalosti();
     });
   });
 }
 function vyzviUzavreni(id){
-  firebase.database().ref("aqua_udalosti/"+id).get().then(function(s){
+  firebase.database().ref("aquactrl_udalosti/"+id).get().then(function(s){
     const ev=s.val()||{};
     if(ev.uzavreno){ alert("Událost je už uzavřená."); return; }
     const popis=(ev.co||"Událost")+(ev.kde?" · "+ev.kde:"");
     acVyberLidi({head:"Vyzvat k uzavření", sub:popis, people:false, ok:"📣 Odeslat výzvu", notePh:"např. akce skončena, lze uzavřít"}).then(function(r){
       if(!r) return;
       const ja=lidLbl(localStorage.getItem("ac_person")||"")||"Někdo";
-      firebase.database().ref("aqua_udalosti/"+id+"/navrhy").push({kdo:ja, note:r.note||"", ts:Date.now()});
-      firebase.database().ref("aqua_outbox").push({title:"📣 Návrh na uzavření", body:ja+" navrhuje uzavřít: "+popis+(r.note?" — "+r.note:""), targets:MOHOU_UZAVIRAT.slice(), ts:Date.now()});
+      firebase.database().ref("aquactrl_udalosti/"+id+"/navrhy").push({kdo:ja, note:r.note||"", ts:Date.now()});
+      firebase.database().ref("aquactrl_outbox").push({title:"📣 Návrh na uzavření", body:ja+" navrhuje uzavřít: "+popis+(r.note?" — "+r.note:""), targets:MOHOU_UZAVIRAT.slice(), ts:Date.now()});
       _udRefreshDetail(id);
       alert("Výzva odeslána oprávněným osobám. 📣");
     });
@@ -1177,7 +1177,7 @@ function vyzviUzavreni(id){
 
 // Úprava rezervace cisterny u existující (otevřené) události
 function upravCisternu(id){
-  firebase.database().ref("aqua_udalosti/"+id).get().then(function(s){
+  firebase.database().ref("aquactrl_udalosti/"+id).get().then(function(s){
     const ev=s.val()||{}, arr=_cistArr(ev), c=arr[0]||{};
     if(ev.uzavreno){ alert("Událost je uzavřená — rezervaci nelze měnit."); return; }
     const od=c.od?new Date(c.od):null, doo=c.do?new Date(c.do):null;
@@ -1203,26 +1203,26 @@ function upravCisternu(id){
       if(doMs<=odMs)return alert("„Do\" musí být po „Od\".");
       const misto=ov.querySelector("#ucMisto").value;
       const novy=arr.map(function(x){return Object.assign({},x,{misto:misto,od:odMs,do:doMs});});
-      firebase.database().ref("aqua_udalosti/"+id+"/cist").set(novy).then(function(){ close(); openUdalosti(); });
+      firebase.database().ref("aquactrl_udalosti/"+id+"/cist").set(novy).then(function(){ close(); openUdalosti(); });
     };
   });
 }
 // ===== Schvalování zařízení (jen správce) =====
-function acCheckPending(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aqua_push_tokens/"+devId()).get().then(function(s){ const v=s.val()||{}; const bar=document.getElementById("acPendBar"); if(bar) bar.style.display=(s.exists()&&v.schvaleno===false)?"":"none"; }).catch(function(){}); }catch(_){} }
+function acCheckPending(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aquactrl_push_tokens/"+devId()).get().then(function(s){ const v=s.val()||{}; const bar=document.getElementById("acPendBar"); if(bar) bar.style.display=(s.exists()&&v.schvaleno===false)?"":"none"; }).catch(function(){}); }catch(_){} }
 function acRenderWho(){ try{ var el=document.getElementById("acWho"); if(!el)return; var k=localStorage.getItem("ac_person")||""; if(k){ el.innerHTML="👤 "+esc(uzivatelJmeno()); el.style.background="#eaf4fc"; el.style.color="#0b3a66"; el.style.border="1px solid #cfe6f7"; } else { el.innerHTML="👤 Přihlas se"; el.style.background="#fff3cd"; el.style.color="#7a5b00"; el.style.border="1px solid #ffe69c"; } }catch(_){} }
 function acInitGate(){ try{ const a=document.getElementById("navZariz"); const le=document.getElementById("navLoginEmaily"); const sd=document.getElementById("navSdilet"); if(jsemAdmin()){ if(a){a.style.display="";acZarWatch();} if(le)le.style.display=""; if(sd)sd.style.display=""; } acCheckPending(); acUkolyWatch(); acRenderWho(); }catch(_){} }
 // Snadné sdílení odkazu na appku (jen pro admina) – na mobilu nativní nabídka sdílení, na PC zkopíruje do schránky
 function acSdilej(){
-  const url="https://pkobelka.github.io/aquacontrol/";
-  const text="AquaControl – přihlas se prosím tímhle odkazem e-mailem, ať tě appka pozná: "+url;
-  if(navigator.share){ navigator.share({title:"AquaControl", text:text, url:url}).catch(function(){}); }
+  const url="https://pkobelka.github.io/aquactrl/";
+  const text="AquaCtrl – přihlas se prosím tímhle odkazem e-mailem, ať tě appka pozná: "+url;
+  if(navigator.share){ navigator.share({title:"AquaCtrl", text:text, url:url}).catch(function(){}); }
   else if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text).then(function(){ alert("Odkaz zkopírován do schránky:\n\n"+text); }).catch(function(){ window.prompt("Zkopíruj si odkaz:", text); });
   } else { window.prompt("Zkopíruj si odkaz:", text); }
 }
 // Živý odznak u „Zařízení" = počet čekajících žádostí o schválení (jen pro správce)
 let _zarRef=null;
-function acZarWatch(){ try{ if(!(window.firebase&&firebase.database)||_zarRef)return; _zarRef=firebase.database().ref("aqua_zarizeni"); _zarRef.on("value",function(snap){ let p=0; snap.forEach(function(c){ if((c.val()||{}).schvaleno===false)p++; }); const b=document.getElementById("bdgZar"); if(b){ b.textContent=p; b.style.display=p?"":"none"; } },function(){}); }catch(_){} }
+function acZarWatch(){ try{ if(!(window.firebase&&firebase.database)||_zarRef)return; _zarRef=firebase.database().ref("aquactrl_zarizeni"); _zarRef.on("value",function(snap){ let p=0; snap.forEach(function(c){ if((c.val()||{}).schvaleno===false)p++; }); const b=document.getElementById("bdgZar"); if(b){ b.textContent=p; b.style.display=p?"":"none"; } },function(){}); }catch(_){} }
 function openZarizeni(){
   if(!jsemAdmin()){ alert("Schvalování zařízení je jen pro správce."); return; }
   zavriPlan();
@@ -1230,7 +1230,7 @@ function openZarizeni(){
   const body=document.getElementById("seznamBody");
   document.getElementById("seznamOv").classList.add("show");
   body.innerHTML='<p class="hint">Načítám…</p>';
-  firebase.database().ref("aqua_zarizeni").get().then(function(s){
+  firebase.database().ref("aquactrl_zarizeni").get().then(function(s){
     const rows=[]; s.forEach(function(c){ rows.push(Object.assign({id:c.key},c.val()||{})); });
     rows.sort(function(a,b){ const ap=a.schvaleno===false?0:1, bp=b.schvaleno===false?0:1; if(ap!==bp)return ap-bp; return (b.ts||0)-(a.ts||0); });
     if(!rows.length){ body.innerHTML='<p class="hint">Žádná registrovaná zařízení.</p>'; return; }
@@ -1248,19 +1248,19 @@ function openZarizeni(){
         +'<button onclick="zarizZamit(\''+r.id+'\')" style="border:1px solid #c0392b;border-radius:10px;padding:8px 14px;background:#fff;color:#c0392b;font-weight:800;cursor:pointer">🗑️ Odebrat</button>'
         +'</div></div>';
     }).join("");
-  }).catch(function(e){ const m=(e&&e.message?e.message:String(e)); body.innerHTML='<p class="hint">Chyba: '+esc(m)+(/permission/i.test(m)?'<br><br>V pravidlech Firebase je potřeba povolit čtení uzlu <b>aqua_zarizeni</b>.':'')+'</p>'; });
+  }).catch(function(e){ const m=(e&&e.message?e.message:String(e)); body.innerHTML='<p class="hint">Chyba: '+esc(m)+(/permission/i.test(m)?'<br><br>V pravidlech Firebase je potřeba povolit čtení uzlu <b>aquactrl_zarizeni</b>.':'')+'</p>'; });
 }
 function zarizSchval(id){
   const db=firebase.database();
-  Promise.all([db.ref("aqua_push_tokens/"+id+"/schvaleno").set(true), db.ref("aqua_zarizeni/"+id+"/schvaleno").set(true)]).then(function(){
-    db.ref("aqua_zarizeni/"+id).get().then(function(s){ const v=s.val()||{}; if(v.person) db.ref("aqua_outbox").push({title:"✅ Zařízení schváleno", body:"Tvoje zařízení bylo schváleno — notifikace teď chodí.", targets:[v.person], ts:Date.now()}); });
+  Promise.all([db.ref("aquactrl_push_tokens/"+id+"/schvaleno").set(true), db.ref("aquactrl_zarizeni/"+id+"/schvaleno").set(true)]).then(function(){
+    db.ref("aquactrl_zarizeni/"+id).get().then(function(s){ const v=s.val()||{}; if(v.person) db.ref("aquactrl_outbox").push({title:"✅ Zařízení schváleno", body:"Tvoje zařízení bylo schváleno — notifikace teď chodí.", targets:[v.person], ts:Date.now()}); });
     openZarizeni();
   }).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
 }
-function zarizZamit(id){ if(!confirm("Opravdu odebrat toto zařízení? (přestane dostávat notifikace)"))return; const db=firebase.database(); Promise.all([db.ref("aqua_push_tokens/"+id).remove(), db.ref("aqua_zarizeni/"+id).remove()]).then(openZarizeni).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));}); }
+function zarizZamit(id){ if(!confirm("Opravdu odebrat toto zařízení? (přestane dostávat notifikace)"))return; const db=firebase.database(); Promise.all([db.ref("aquactrl_push_tokens/"+id).remove(), db.ref("aquactrl_zarizeni/"+id).remove()]).then(openZarizeni).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));}); }
 
 // ===== Přístup (e-maily) – kdo se smí přihlásit e-mailovým odkazem =====
-// Klíč v aqua_login_email = e-mail malými písmeny, tečky nahrazené čárkou (Firebase klíč nesmí obsahovat ".")
+// Klíč v aquactrl_login_email = e-mail malými písmeny, tečky nahrazené čárkou (Firebase klíč nesmí obsahovat ".")
 function _leKey(email){ return String(email||"").trim().toLowerCase().replace(/\./g,","); }
 function openLoginEmaily(){
   if(!jsemAdmin()){ alert("Správa přístupu je jen pro správce."); return; }
@@ -1269,7 +1269,7 @@ function openLoginEmaily(){
   const body=document.getElementById("seznamBody");
   document.getElementById("seznamOv").classList.add("show");
   body.innerHTML='<p class="hint">Načítám…</p>';
-  firebase.database().ref("aqua_login_email").get().then(function(s){
+  firebase.database().ref("aquactrl_login_email").get().then(function(s){
     const rows=[]; s.forEach(function(c){ rows.push({key:c.key, kod:c.val()}); });
     rows.sort(function(a,b){ return lidLbl(a.kod).localeCompare(lidLbl(b.kod),"cs"); });
     const opts='<option value="">— vyber osobu —</option>'+LIDE_R.map(p=>'<option value="'+p[0]+'">'+esc(p[1])+'</option>').join("");
@@ -1291,22 +1291,22 @@ function leAdd(){
   const emailEl=document.getElementById("leNewEmail"), kodEl=document.getElementById("leNewKod");
   const email=(emailEl.value||"").trim(), kod=kodEl.value;
   if(!email||!kod){ alert("Vyplň e-mail i osobu."); return; }
-  firebase.database().ref("aqua_login_email/"+_leKey(email)).set(kod).then(openLoginEmaily).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
+  firebase.database().ref("aquactrl_login_email/"+_leKey(email)).set(kod).then(openLoginEmaily).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
 }
 function leRemove(key){
   if(!confirm("Opravdu odebrat přístup pro tenhle e-mail?"))return;
-  firebase.database().ref("aqua_login_email/"+key).remove().then(openLoginEmaily).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
+  firebase.database().ref("aquactrl_login_email/"+key).remove().then(openLoginEmaily).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
 }
 
 // ===== Cisterny – obsazenost =====
 // Odznak v menu = počet cisteren právě v akci (aktivní rezervace teď)
-function acCistBadge(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aqua_udalosti").get().then(function(s){ const now=Date.now(); const active=new Set(), upcoming=new Set(); s.forEach(function(c){ const e=c.val()||{}; if(e.uzavreno)return; _cistArr(e).forEach(function(x){ if(x.idx==null||x.do==null||now>x.do)return; if(x.od!=null&&x.od<=now) active.add(x.idx); else upcoming.add(x.idx); }); }); upcoming.forEach(function(i){ if(active.has(i)) upcoming.delete(i); }); const b=document.getElementById("bdgCist"); if(b){ b.textContent=active.size; b.title=active.size+" v akci"; b.style.display=active.size?"":"none"; } const r=document.getElementById("bdgCistRez"); if(r){ r.textContent=upcoming.size; r.title=upcoming.size+" rezervace"; r.style.display=upcoming.size?"":"none"; } }).catch(function(){}); }catch(_){} }
+function acCistBadge(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aquactrl_udalosti").get().then(function(s){ const now=Date.now(); const active=new Set(), upcoming=new Set(); s.forEach(function(c){ const e=c.val()||{}; if(e.uzavreno)return; _cistArr(e).forEach(function(x){ if(x.idx==null||x.do==null||now>x.do)return; if(x.od!=null&&x.od<=now) active.add(x.idx); else upcoming.add(x.idx); }); }); upcoming.forEach(function(i){ if(active.has(i)) upcoming.delete(i); }); const b=document.getElementById("bdgCist"); if(b){ b.textContent=active.size; b.title=active.size+" v akci"; b.style.display=active.size?"":"none"; } const r=document.getElementById("bdgCistRez"); if(r){ r.textContent=upcoming.size; r.title=upcoming.size+" rezervace"; r.style.display=upcoming.size?"":"none"; } }).catch(function(){}); }catch(_){} }
 // Odznak „Moje úkoly" = počet mých nesplněných úkolů (řešitel = já)
 function _setUkBadge(snap){ let open=0; snap.forEach(function(c){ const u=c.val()||{}; if(u.stav!=="splneny") open++; }); const b=document.getElementById("bdgUk"); if(b){ b.textContent=open; b.style.display=open?"":"none"; } }
-function acUkolyBadge(){ try{ if(!(window.firebase&&firebase.database))return; const me=localStorage.getItem("ac_person")||""; const b=document.getElementById("bdgUk"); if(!me){ if(b){b.style.display="none";} return; } firebase.database().ref("aqua_ukoly").orderByChild("resitel").equalTo(me).get().then(_setUkBadge).catch(function(){}); }catch(_){} }
+function acUkolyBadge(){ try{ if(!(window.firebase&&firebase.database))return; const me=localStorage.getItem("ac_person")||""; const b=document.getElementById("bdgUk"); if(!me){ if(b){b.style.display="none";} return; } firebase.database().ref("aquactrl_ukoly").orderByChild("resitel").equalTo(me).get().then(_setUkBadge).catch(function(){}); }catch(_){} }
 // Živý posluchač – odznak se aktualizuje hned, jak úkol přijde / změní stav
 let _ukRef=null, _ukWatched="";
-function acUkolyWatch(){ try{ if(!(window.firebase&&firebase.database))return; const me=localStorage.getItem("ac_person")||""; if(me===_ukWatched && _ukRef) return; if(_ukRef){ try{_ukRef.off();}catch(_){} _ukRef=null; } _ukWatched=me; const b=document.getElementById("bdgUk"); if(!me){ if(b){b.style.display="none";} return; } _ukRef=firebase.database().ref("aqua_ukoly").orderByChild("resitel").equalTo(me); _ukRef.on("value",_setUkBadge,function(){}); }catch(_){} }
+function acUkolyWatch(){ try{ if(!(window.firebase&&firebase.database))return; const me=localStorage.getItem("ac_person")||""; if(me===_ukWatched && _ukRef) return; if(_ukRef){ try{_ukRef.off();}catch(_){} _ukRef=null; } _ukWatched=me; const b=document.getElementById("bdgUk"); if(!me){ if(b){b.style.display="none";} return; } _ukRef=firebase.database().ref("aquactrl_ukoly").orderByChild("resitel").equalTo(me); _ukRef.on("value",_setUkBadge,function(){}); }catch(_){} }
 function openCisterny(){
   zavriPlan();
   document.getElementById("seznamHead").textContent="Cisterny";
@@ -1314,7 +1314,7 @@ function openCisterny(){
   document.getElementById("seznamOv").classList.add("show");
   if(!(window.firebase&&firebase.database)){ body.innerHTML='<p class="hint">Databáze není dostupná.</p>'; return; }
   body.innerHTML='<p class="hint">Načítám…</p>';
-  firebase.database().ref("aqua_udalosti").get().then(function(s){
+  firebase.database().ref("aquactrl_udalosti").get().then(function(s){
     const rez=[]; s.forEach(function(c){ const e=c.val()||{}; if(e.uzavreno)return; _cistArr(e).forEach(function(x){ if(x.idx!=null) rez.push(Object.assign({eventId:c.key,co:e.co},x)); }); });
     _cistRez=rez; const now=Date.now();
     const karty=CISTERNY.map(function(c,i){
@@ -1423,8 +1423,8 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
 
   try{ firebase.initializeApp(CFG); }catch(e){}
 
-  // ===== Přihlášení e-mailovým odkazem (passwordless) – kdo se smí přihlásit, řídí uzel aqua_login_email =====
-  var LOGIN_URL='https://pkobelka.github.io/aquacontrol/';
+  // ===== Přihlášení e-mailovým odkazem (passwordless) – kdo se smí přihlásit, řídí uzel aquactrl_login_email =====
+  var LOGIN_URL='https://pkobelka.github.io/aquactrl/';
   function _leKeyLogin(email){ return String(email||"").trim().toLowerCase().replace(/\./g,","); }
   function acLoginClose(){ var ov=document.getElementById('acLoginOv'); if(ov&&ov.parentNode) ov.parentNode.removeChild(ov); }
   function acLoginOverlay(msg){
@@ -1433,7 +1433,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
     ov.id='acLoginOv';
     ov.style.cssText="position:fixed;inset:0;background:rgba(11,40,70,.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px";
     ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:380px;width:100%;padding:22px;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
-      +'<h3 style="margin:0 0 8px;color:#0b3a66">🔒 Přihlášení do AquaControlu</h3>'
+      +'<h3 style="margin:0 0 8px;color:#0b3a66">🔒 Přihlášení do AquaCtrlu</h3>'
       +'<p style="margin:0 0 14px;font-size:13px;color:#555">'+(msg||'Zadej svůj e-mail, pošleme ti přihlašovací odkaz. Funguje s jakoukoli schránkou.')+'</p>'
       +'<input id="acLoginEmail" type="email" placeholder="tvuj@email.cz" style="width:100%;padding:10px;font-size:15px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box">'
       +'<button id="acLoginSend" style="margin-top:12px;width:100%;padding:11px;border:0;background:#0b5cae;color:#fff;border-radius:8px;font-weight:700;cursor:pointer">Poslat přihlašovací odkaz</button>'
@@ -1466,7 +1466,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
     }
     auth.onAuthStateChanged(function(user){
       if(!user){ acLoginOverlay(); return; }
-      firebase.database().ref('aqua_login_email/'+_leKeyLogin(user.email)).get().then(function(s){
+      firebase.database().ref('aquactrl_login_email/'+_leKeyLogin(user.email)).get().then(function(s){
         if(s.exists()){
           acLoginClose();
           localStorage.setItem('ac_person', s.val());
@@ -1481,12 +1481,12 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
   }
   acAuthGate();
 
-  // ===== Kdo je online (aqua_presence) =====
+  // ===== Kdo je online (aquactrl_presence) =====
   var _presenceStarted=false;
   function acPresenceStart(person){
     if(_presenceStarted||!(window.firebase&&firebase.database)) return;
     _presenceStarted=true;
-    var myRef=firebase.database().ref('aqua_presence/'+devId());
+    var myRef=firebase.database().ref('aquactrl_presence/'+devId());
     firebase.database().ref('.info/connected').on('value',function(snap){
       if(snap.val()===true){
         myRef.onDisconnect().remove();
@@ -1496,7 +1496,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
   }
   function acPresenceWatch(){
     if(!(window.firebase&&firebase.database)) return;
-    firebase.database().ref('aqua_presence').on('value',function(snap){
+    firebase.database().ref('aquactrl_presence').on('value',function(snap){
       var seen={}, out=[];
       snap.forEach(function(c){
         var v=c.val()||{};
@@ -1524,7 +1524,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
       alert('Tenhle prohlížeč push nepodporuje.\n\nÚdaje:\n• Notification: '+('Notification'in window)+'\n• serviceWorker: '+('serviceWorker'in navigator)+'\n• PushManager: '+('PushManager'in window)+'\n• https: '+(location.protocol==='https:'));
       return;
     }
-    // Kdo jsi se už pozná z přihlášení (aqua_login_email), ne z volného výběru
+    // Kdo jsi se už pozná z přihlášení (aquactrl_login_email), ne z volného výběru
     var person=localStorage.getItem('ac_person')||'';
     if(!person){ alert('Nejdřív se přihlas e-mailem (mělo by se ti to nabídnout samo).'); return; }
     acRenderWho();
@@ -1538,12 +1538,12 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
         return;
       }
       if(perm!=='granted'){ setStav('🔔 Povolit notifikace',false); return; }
-      var reg=await navigator.serviceWorker.register('firebase-messaging-sw.js',{scope:'/aquacontrol/fcm/'});
+      var reg=await navigator.serviceWorker.register('firebase-messaging-sw.js',{scope:'/aquactrl/fcm/'});
       await navigator.serviceWorker.ready;
       var msg=firebase.messaging();
       var token=await msg.getToken({vapidKey:VAPID,serviceWorkerRegistration:reg});
       if(!token){ setStav('⚠️ Token se nezískal',false); alert('Nepodařilo se získat push token. Zkus to prosím znovu.'); return; }
-      var tref=firebase.database().ref('aqua_push_tokens/'+devId());
+      var tref=firebase.database().ref('aquactrl_push_tokens/'+devId());
       var snapEx=await tref.get();
       var jeNovy=!snapEx.exists();
       var rec={token:token,person:person,ts:Date.now(),ua:navigator.userAgent.slice(0,90)};
@@ -1551,12 +1551,12 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
       else { rec.schvaleno=false; } // nové zařízení čeká na schválení
       await tref.set(rec);
       // ne-citlivé zrcadlo pro seznam zařízení v appce (bez tokenu)
-      try{ await firebase.database().ref('aqua_zarizeni/'+devId()).set({person:person, ua:rec.ua, schvaleno:(rec.schvaleno!==false), ts:rec.ts}); }catch(_){}
+      try{ await firebase.database().ref('aquactrl_zarizeni/'+devId()).set({person:person, ua:rec.ua, schvaleno:(rec.schvaleno!==false), ts:rec.ts}); }catch(_){}
       localStorage.setItem('ac_push_on','1');
       // Notifikaci zobrazuje jen service worker (firebase-messaging-sw.js) – ruční
       // zobrazení tady by při otevřené kartě vedlo ke zdvojení (SW + tahle stránka).
       msg.onMessage(function(){});
-      if(jeNovy && person!==ADMIN_KOD){ try{ firebase.database().ref('aqua_outbox').push({title:'🆕 Nové zařízení', body:(person?lidLbl(person):'Někdo')+' se hlásí ke schválení', targets:[ADMIN_KOD], ts:Date.now()}); }catch(_){} }
+      if(jeNovy && person!==ADMIN_KOD){ try{ firebase.database().ref('aquactrl_outbox').push({title:'🆕 Nové zařízení', body:(person?lidLbl(person):'Někdo')+' se hlásí ke schválení', targets:[ADMIN_KOD], ts:Date.now()}); }catch(_){} }
       acCheckPending();
       try{ acUkolyWatch(); }catch(_){}
       var pend=(rec.schvaleno===false);
@@ -1574,7 +1574,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
     if(supported()&&Notification.permission==='granted'&&localStorage.getItem('ac_push_on')==='1'){
       setStav('✅ Notifikace zapnuté',true);
       // tiché obnovení FCM service workeru – natáhne novou verzi sám, bez mazání dat webu
-      navigator.serviceWorker.register('firebase-messaging-sw.js',{scope:'/aquacontrol/fcm/'}).then(function(reg){
+      navigator.serviceWorker.register('firebase-messaging-sw.js',{scope:'/aquactrl/fcm/'}).then(function(reg){
         try{reg.update();}catch(_){}
         // Notifikaci zobrazuje jen service worker – viz poznámka u prvního onMessage výše.
         try{firebase.messaging().onMessage(function(){});}catch(_){}

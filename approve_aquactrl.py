@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-AquaControl – schválení zařízení (push notifikace)
+AquaCtrl – schválení zařízení (push notifikace)
 ==================================================
-Nastaví `schvaleno: true` u zařízení v uzlu `aqua_push_tokens`.
+Nastaví `schvaleno: true` u zařízení v uzlu `aquactrl_push_tokens`.
 
 Použití:
     python approve_aqua.py            # schválí všechna čekající (schvaleno:false)
@@ -18,7 +18,7 @@ from firebase_admin import credentials, db
 
 SERVICE_ACCOUNT = 'service-account-key.json'
 DATABASE_URL    = 'https://moje-budky-default-rtdb.firebaseio.com'
-NODE            = 'aqua_push_tokens'
+NODE            = 'aquactrl_push_tokens'
 
 # kód osoby -> celé jméno (drž v souladu s LIDE v index.html)
 LIDE = {
@@ -70,14 +70,14 @@ def main():
     for key, val in cur.items():
         if not isinstance(val, dict):
             continue
-        db.reference('aqua_zarizeni/' + key).set({
+        db.reference('aquactrl_zarizeni/' + key).set({
             'person': val.get('person', ''),
             'ua': val.get('ua', ''),
             'schvaleno': (val.get('schvaleno') is not False),
             'ts': val.get('ts', 0),
         })
         synced += 1
-    print(f'Zrcadlo aqua_zarizeni přesynchronizováno: {synced} zařízení.')
+    print(f'Zrcadlo aquactrl_zarizeni přesynchronizováno: {synced} zařízení.')
 
     if not schvalena:
         print(f'Nic ke schválení (cíl: "{target_id}").' if target_id

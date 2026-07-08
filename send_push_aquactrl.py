@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-AquaControl – odesílání push notifikací (FCM)
+AquaCtrl – odesílání push notifikací (FCM)
 =============================================
 Použití:
     python send_push_aqua.py "Titulek" "Text zprávy"
     python send_push_aqua.py "Titulek" "Text zprávy" "ac-xxxx"   # jen jednomu zařízení
 
-Čte tokeny z uzlu `aqua_push_tokens` (registruje je AquaControl appka po
+Čte tokeny z uzlu `aquactrl_push_tokens` (registruje je AquaCtrl appka po
 kliknutí na "Povolit notifikace"). Sdílí Firebase projekt moje-budky.
 """
 
@@ -17,9 +17,9 @@ from firebase_admin import credentials, messaging, db
 
 SERVICE_ACCOUNT = 'service-account-key.json'
 DATABASE_URL    = 'https://moje-budky-default-rtdb.firebaseio.com'
-ICON_URL        = 'https://pkobelka.github.io/aquacontrol/icon-192.png'
-APP_URL         = 'https://pkobelka.github.io/aquacontrol/'
-NODE            = 'aqua_push_tokens'
+ICON_URL        = 'https://pkobelka.github.io/aquactrl/icon-192.png'
+APP_URL         = 'https://pkobelka.github.io/aquactrl/'
+NODE            = 'aquactrl_push_tokens'
 
 
 def main():
@@ -37,7 +37,7 @@ def main():
 
     snap = db.reference(NODE).get()
     if not snap:
-        print('Žádné uložené tokeny – nikdo ještě nepovolil notifikace v AquaControlu.')
+        print('Žádné uložené tokeny – nikdo ještě nepovolil notifikace v AquaCtrlu.')
         return
 
     tokens = []

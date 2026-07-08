@@ -1,4 +1,4 @@
-name: Hlídání termínů úkolů (AquaControl)
+name: Hlídání termínů úkolů (AquaCtrl)
 
 on:
   schedule:
@@ -23,4 +23,4 @@ jobs:
         run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > service-account-key.json
 
       - name: Zkontroluj termíny
-        run: python check_terminy_aqua.py
+        run: python check_terminy_aquactrl.py
