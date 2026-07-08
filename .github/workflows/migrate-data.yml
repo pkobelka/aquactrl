@@ -1,0 +1,37 @@
+name: Migrace dat (aqua_* -> aquactrl_*)
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Jen náhled (nic nezapíše do databáze)'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/question-9upxkf
+
+      - name: Nastav Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instaluj závislosti
+        run: pip install firebase-admin
+
+      - name: Ulož service account key
+        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > service-account-key.json
+
+      - name: Spusť migraci
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python migrate_aqua_to_aquactrl.py --dry-run
+          else
+            python migrate_aqua_to_aquactrl.py
+          fi
