@@ -236,7 +236,7 @@ const ADMIN_KOD="TŘ";
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v59";  // drž v souladu s CACHE v sw.js
+const VERZE="v60";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -1123,8 +1123,17 @@ function openUdalosti(){
   document.getElementById("seznamHead").textContent="Aktuální události";
   const body=document.getElementById("seznamBody");
   document.getElementById("seznamOv").classList.add("show");
-  if(!_cachedOpenEvs.length){ body.innerHTML='<p class="hint">Načítám…</p>'; acPrehledCounts(); return; }
-  body.innerHTML=_cachedOpenEvs.map(_udalostRadek).join("")||'<p class="hint">Žádné otevřené události. 🎉</p>';
+  // zobraz hned z cache (je-li), a zároveň vždy dotáhni čerstvá data a překresli
+  body.innerHTML=_cachedOpenEvs.length?_cachedOpenEvs.map(_udalostRadek).join(""):'<p class="hint">Načítám…</p>';
+  if(window.firebase&&firebase.database){
+    _udNactiVse(function(err,evs){
+      if(err){ if(!_cachedOpenEvs.length) body.innerHTML='<p class="hint">Chyba načtení. Zkus to prosím znovu.</p>'; return; }
+      _cachedOpenEvs=evs.filter(function(e){return !e.uzavreno;});
+      if(document.getElementById("seznamOv").classList.contains("show") && document.getElementById("seznamHead").textContent==="Aktuální události"){
+        body.innerHTML=_cachedOpenEvs.length?_cachedOpenEvs.map(_udalostRadek).join(""):'<p class="hint">Žádné otevřené události. 🎉</p>';
+      }
+    });
+  } else if(!_cachedOpenEvs.length){ body.innerHTML='<p class="hint">Databáze není dostupná.</p>'; }
 }
 function acBadgeStartup(){ try{ if(!(window.firebase&&firebase.database))return; _udNactiVse(function(err,evs,byEvent){ if(!err)acRefreshBadge(evs,byEvent); }); }catch(_){} }
 
