@@ -47,7 +47,12 @@ GitHub → Actions → **Odeslat push (AquaCtrl)** → *Run workflow* (titulek +
 Appka se dřív jmenovala AquaControl. Kód už je celý přepsaný na AquaCtrl (branding, `manifest.json`, cesty `/aquactrl/`, Firebase uzly `aquactrl_*`), ale dvě věci se musí doladit mimo tenhle repo, než se to nasadí:
 
 1. **Přejmenovat GitHub repozitář** (Settings → Repository name → `aquactrl`), jinak GitHub Pages dál poběží na `/aquacontrol/` a nebude sedět s cestami v kódu.
-2. **Přesunout data ve Firebase** ze starých uzlů (`aqua_udalosti`, `aqua_ukoly`, `aqua_outbox`, `aqua_zarizeni`, `aqua_push_tokens`, `aqua_login_email`, `aqua_presence`) do nových (`aquactrl_*`) – export/import v Firebase konzoli. Bez téhle migrace appka po nasazení uvidí prázdno (stará data zůstanou v DB, jen se na ně appka přestane dívat).
+2. **Přesunout data ve Firebase** ze starých uzlů (`aqua_udalosti`, `aqua_ukoly`, `aqua_outbox`, `aqua_zarizeni`, `aqua_push_tokens`, `aqua_login_email`, `aqua_presence`) do nových (`aquactrl_*`). Nejjednodušší přes připravený skript `migrate_aqua_to_aquactrl.py`:
+   ```
+   python migrate_aqua_to_aquactrl.py --dry-run   # nejdřív zkontroluj, co se zkopíruje
+   python migrate_aqua_to_aquactrl.py             # a pak ostrý běh
+   ```
+   Skript stará data nemaže (zůstanou jako záloha) a cílový uzel přeskočí, pokud už něco obsahuje. Bez téhle migrace appka po nasazení uvidí prázdno (stará data zůstanou v DB, jen se na ně appka přestane dívat).
 
 Po obou krocích si všichni uživatelé budou muset PWA na telefonu **znovu nainstalovat** (starý `scope`/`id` appky se změnil).
 
