@@ -1,8 +1,10 @@
 name: Hlídání termínů úkolů (AquaCtrl)
 
+# Automatické hlídání (po termínu / připomenutí před termínem / nepotvrzeno)
+# teď dělá Cloud Function aquaUkolyCheck (repo mojebudky, functions/index.js) –
+# ta umí navíc i připomenutí před termínem. Tenhle workflow zůstává jen pro
+# ruční spuštění, ať se upozornění neposílají dvakrát.
 on:
-  schedule:
-    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 jobs:
