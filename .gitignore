@@ -1,0 +1,6 @@
+# Python
+__pycache__/
+*.pyc
+
+# Firebase service account (nikdy necommitovat)
+service-account-key.json
