@@ -41,20 +41,22 @@ GitHub → Actions → **Odeslat push (AquaCtrl)** → *Run workflow* (titulek +
 | `.github/workflows/send-push.yml` | ruční spuštění push notifikace |
 | `seed_login_email.py` | naplnění/doplnění seznamu povolených přihlašovacích e-mailů |
 | `.github/workflows/seed-login-email.yml` | ruční spuštění naplnění e-mailů |
+| `check_terminy_aquactrl.py` | ruční/záložní kontrola zmeškaných termínů (viz níže – automaticky to dělá Cloud Function) |
 
-## Přejmenování z AquaControl na AquaCtrl
+## Push notifikace a hlídání termínů (Cloud Functions)
 
-Appka se dřív jmenovala AquaControl. Kód už je celý přepsaný na AquaCtrl (branding, `manifest.json`, cesty `/aquactrl/`, Firebase uzly `aquactrl_*`), ale dvě věci se musí doladit mimo tenhle repo, než se to nasadí:
+Skutečné odesílání push notifikací a **automatické** hlídání termínů úkolů řeší dvě Cloud Functions v repu [`mojebudky`](https://github.com/pkobelka/mojebudky) (`functions/index.js`), sdílený Firebase projekt `moje-budky`:
 
-1. **Přejmenovat GitHub repozitář** (Settings → Repository name → `aquactrl`), jinak GitHub Pages dál poběží na `/aquacontrol/` a nebude sedět s cestami v kódu.
-2. **Přesunout data ve Firebase** ze starých uzlů (`aqua_udalosti`, `aqua_ukoly`, `aqua_outbox`, `aqua_zarizeni`, `aqua_push_tokens`, `aqua_login_email`, `aqua_presence`) do nových (`aquactrl_*`). Nejjednodušší přes připravený skript `migrate_aqua_to_aquactrl.py`:
-   ```
-   python migrate_aqua_to_aquactrl.py --dry-run   # nejdřív zkontroluj, co se zkopíruje
-   python migrate_aqua_to_aquactrl.py             # a pak ostrý běh
-   ```
-   Skript stará data nemaže (zůstanou jako záloha) a cílový uzel přeskočí, pokud už něco obsahuje. Bez téhle migrace appka po nasazení uvidí prázdno (stará data zůstanou v DB, jen se na ně appka přestane dívat).
+- **`aquaNotify`** – trigger na vznik záznamu v `aquactrl_outbox`, pošle FCM push.
+- **`aquaUkolyCheck`** – plánovač (každých 15 min): upozorní po termínu, připomene 1 h před termínem, upozorní zadavatele na nepotvrzený úkol.
 
-Po obou krocích si všichni uživatelé budou muset PWA na telefonu **znovu nainstalovat** (starý `scope`/`id` appky se změnil).
+Tenhle repozitář má vlastní `check_terminy_aquactrl.py` / `.github/workflows/check-terminy.yml`, ale ten je záměrně **jen pro ruční/nouzové spuštění** (automatický cron je vypnutý) — aby lidem nechodilo dvojí upozornění na stejnou věc.
+
+## Přejmenování z AquaControl na AquaCtrl (hotovo)
+
+Appka se dřív jmenovala AquaControl. Přejmenování je dokončené: GitHub repo přejmenováno na `aquactrl`, kód přepsán na branding/cesty/Firebase uzly `aquactrl_*`, data přesunuta skriptem `migrate_aqua_to_aquactrl.py` (starý dry-run/ostrý běh popsaný v jeho hlavičce), Cloud Functions v `mojebudky` přepnuty na nové uzly.
+
+Uživatelé si po přejmenování museli PWA na telefonu znovu nainstalovat (starý `scope`/`id` appky se změnil).
 
 ## Vývoj
 
