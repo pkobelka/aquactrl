@@ -236,7 +236,7 @@ const ADMIN_KOD="TŘ";
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v68";  // drž v souladu s CACHE v sw.js
+const VERZE="v69";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -633,7 +633,8 @@ function acLoadAbsence(){ try{ if(!(window.firebase&&firebase.database))return; 
 function _absKolize(kod,atMs){ if(atMs==null)return []; return (_absence[kod]||[]).filter(function(a){ return a.od!=null&&a.do!=null&&a.od<=atMs&&atMs<=a.do; }); }
 function _absAktNasl(kod){ var now=Date.now(); var arr=(_absence[kod]||[]).filter(function(a){return a.do!=null&&a.do>=now;}); arr.sort(function(a,b){return (a.od||0)-(b.od||0);}); return arr; }
 function _absObdobi(a){ return (a.od?fmtDatumCz(_isoFromMs(a.od)):"?")+"–"+(a.do?fmtDatumCz(_isoFromMs(a.do)):"?"); }
-function _absLabel(a){ return (a.typ==="nemoc"?"🤒 Nemoc ":"🏖️ Dovolená ")+_absObdobi(a); }
+function _absLabel(a){ var t=a.typ==="nemoc"?"🤒 Nemoc ":(a.typ==="jiné"?"📌 Jiné ":"🏖️ Dovolená "); return t+_absObdobi(a); }
+function _absColor(typ){ if(typ==="nemoc")return ["#fdecea","#c0392b","#f3c2c2"]; if(typ==="jiné")return ["#eef1f4","#5b6b7a","#d5dde4"]; return ["#eaf4fc","#0b5cae","#cfe6f7"]; }
 const MOHOU_ABSENCE=["TŘ"]; // kdo smí editovat nepřítomnost i za druhé (kromě sebe). Admin je vždy.
 function jsemAbsenceSpravce(){ var me=localStorage.getItem("ac_person")||""; return me===ADMIN_KOD || MOHOU_ABSENCE.includes(me); }
 function _jmenoZKod(kod){ var f=LIDE.find(function(x){return x[0]===kod;}); return f?f[1]:kod; }
@@ -647,13 +648,15 @@ function absPridej(kod){
   ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:400px;width:100%;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
     +'<h3 style="margin:0 0 8px;color:#0b3a66">Přidat nepřítomnost</h3>'
     +'<p style="margin:0 0 10px;font-size:13px;color:#555">'+esc(_jmenoZKod(cil))+(cil!==me?' <span style="color:#e8881b">(zadáváš za jiného)</span>':'')+'</p>'
-    +'<div class="fld"><label>Typ</label><div class="zav-btns"><div class="pill sel" id="abDov" style="background:#0b5cae;color:#fff">🏖️ Dovolená</div><div class="pill" id="abNem">🤒 Nemoc</div></div></div>'
+    +'<div class="fld"><label>Typ</label><div class="zav-btns"><div class="pill sel" id="abDov" style="background:#0b5cae;color:#fff">🏖️ Dovolená</div><div class="pill" id="abNem">🤒 Nemoc</div><div class="pill" id="abJin">📌 Jiné</div></div></div>'
     +'<div class="two"><div class="fld"><label>Od</label><input type="date" id="abOd" value="'+dnes+'" style="width:100%"></div><div class="fld"><label>Do</label><input type="date" id="abDo" value="'+dnes+'" style="width:100%"></div></div>'
     +'<div class="fld"><label>Poznámka (nepovinné)</label><input id="abPozn" placeholder="např. zástup: Novák" style="width:100%"></div>'
     +'<div style="display:flex;gap:8px;margin-top:12px"><button id="abCancel" style="flex:1;padding:10px;border:1px solid #ccc;background:#f3f3f3;border-radius:8px;cursor:pointer">Zrušit</button><button id="abOk" style="flex:1;padding:10px;border:0;background:#0b5cae;color:#fff;border-radius:8px;font-weight:700;cursor:pointer">Uložit</button></div></div>';
   document.body.appendChild(ov);
-  ov.querySelector("#abDov").onclick=function(){typ="dovolená";this.style.background="#0b5cae";this.style.color="#fff";var n=ov.querySelector("#abNem");n.style.background="";n.style.color="";};
-  ov.querySelector("#abNem").onclick=function(){typ="nemoc";this.style.background="#e8881b";this.style.color="#fff";var d=ov.querySelector("#abDov");d.style.background="";d.style.color="";};
+  function _abSel(t){ typ=t; var map={"dovolená":["abDov","#0b5cae"],"nemoc":["abNem","#e8881b"],"jiné":["abJin","#7e92a8"]}; ["abDov","abNem","abJin"].forEach(function(id){var el=ov.querySelector("#"+id);if(el){el.style.background="";el.style.color="";}}); var m=map[t],el=ov.querySelector("#"+m[0]); if(el){el.style.background=m[1];el.style.color="#fff";} }
+  ov.querySelector("#abDov").onclick=function(){_abSel("dovolená");};
+  ov.querySelector("#abNem").onclick=function(){_abSel("nemoc");};
+  ov.querySelector("#abJin").onclick=function(){_abSel("jiné");};
   var close=function(){ if(ov.parentNode)document.body.removeChild(ov); };
   ov.onclick=function(e){ if(e.target===ov)close(); };
   ov.querySelector("#abCancel").onclick=close;
@@ -676,7 +679,7 @@ function openKontakty(){
   const links=`${mail?`<a class="sl-map" title="Napsat e-mail" href="mailto:${esc(mail)}">✉</a>`:""}${tel?`<a class="sl-map" title="Zavolat" href="tel:${esc(telHref(tel))}">📞</a>`:""}`;
   const canManage=(z===me)||jsemAbsenceSpravce();
   const abs=_absAktNasl(z);
-  const absHtml=abs.length?`<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">`+abs.map(a=>`<span style="font-size:11px;background:${a.typ==='nemoc'?'#fdecea':'#eaf4fc'};color:${a.typ==='nemoc'?'#c0392b':'#0b5cae'};border:1px solid ${a.typ==='nemoc'?'#f3c2c2':'#cfe6f7'};border-radius:8px;padding:1px 7px">${esc(_absLabel(a))}${a.pozn?` · ${esc(a.pozn)}`:""}${canManage?` <span onclick="absSmaz('${z}','${a.id}')" title="Smazat" style="cursor:pointer;font-weight:800">✕</span>`:""}</span>`).join("")+`</div>`:"";
+  const absHtml=abs.length?`<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">`+abs.map(a=>{const bc=_absColor(a.typ);return `<span style="font-size:11px;background:${bc[0]};color:${bc[1]};border:1px solid ${bc[2]};border-radius:8px;padding:1px 7px">${esc(_absLabel(a))}${a.pozn?` · ${esc(a.pozn)}`:""}${canManage?` <span onclick="absSmaz('${z}','${a.id}')" title="Smazat" style="cursor:pointer;font-weight:800">✕</span>`:""}</span>`;}).join("")+`</div>`:"";
   const selfBtn=canManage?`<div style="margin-top:5px"><span onclick="absPridej('${z}')" style="font-size:11.5px;color:#0b5cae;font-weight:700;cursor:pointer">＋ Přidat dovolenou / nemoc${z===me?'':' (za '+esc(prijmeniMonogram(jm))+')'}</span></div>`:"";
   return `<div class="sl-row"><div style="min-width:0"><b>${esc(prijmeniJmeno(jm))}</b>${fce?` <span style="color:#6b7a8d">· ${esc(fce)}</span>`:""}${z===me?` <span style="font-size:10px;background:#0b5cae;color:#fff;border-radius:6px;padding:0 5px">to jsi ty</span>`:""}<br><span style="font-size:12px;color:#6b7a8d">${det}</span>${absHtml}${selfBtn}</div><div style="display:flex;gap:6px">${links}</div></div>`;
  }).join("");
@@ -1164,7 +1167,7 @@ function udalostUkol(id){
     var resitel=r.persons[0]||"";
     if(!resitel){alert("Vyber řešitele úkolu.");return;}
     var _kol=_absKolize(resitel, r.termin||Date.now());
-    if(_kol.length){ var _a=_kol[0]; if(!confirm("⚠️ "+lidLbl(resitel)+" má "+(r.termin?"v tom termínu ":"právě teď ")+(_a.typ==="nemoc"?"nemoc":"dovolenou")+" ("+_absObdobi(_a)+").\n\nPřiřadit úkol i tak?")) return; }
+    if(_kol.length){ var _a=_kol[0]; var _tw=_a.typ==="nemoc"?"nemoc":(_a.typ==="jiné"?"nepřítomnost (jiné)":"dovolenou"); if(!confirm("⚠️ "+lidLbl(resitel)+" má "+(r.termin?"v tom termínu ":"právě teď ")+_tw+" ("+_absObdobi(_a)+").\n\nPřiřadit úkol i tak?")) return; }
     var zadalKod=localStorage.getItem("ac_person")||"";
     var kontext=ev.kde||"";
     var upoz=r.upoz||[];
