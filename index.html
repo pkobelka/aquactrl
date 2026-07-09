@@ -236,7 +236,7 @@ const ADMIN_KOD="TŘ";
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v66";  // drž v souladu s CACHE v sw.js
+const VERZE="v67";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -626,14 +626,53 @@ function openDokumenty(){
   document.getElementById("seznamBody").innerHTML='<p class="hint" style="margin:0 0 10px">Metodické pokyny VHOS a.s. Klikni na dokument pro otevření / stažení (PDF).</p>'+DOKUMENTY.map(function(d){return '<div style="border:1px solid #dbe6f1;border-radius:12px;padding:12px;margin-bottom:10px;background:#fbfdff;display:flex;justify-content:space-between;gap:10px;align-items:center"><div style="min-width:0"><div style="font-weight:800;color:#0b3a66">📄 '+esc(d.t)+'</div><div style="font-size:12px;color:#6b7a8d">'+esc(d.d)+'</div></div><a class="sl-map" href="'+esc(d.f)+'" target="_blank" rel="noopener" style="flex:none">Otevřít ▸</a></div>';}).join("");
   document.getElementById("seznamOv").classList.add("show");
 }
+// ===== Nepřítomnost (dovolená / nemoc) =====
+let _absence={}; // kód osoby -> [{id,od,do,typ,pozn}]
+function _isoFromMs(ms){var d=new Date(ms);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function acLoadAbsence(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aquactrl_absence").get().then(function(s){ var m={}; s.forEach(function(pc){ var arr=[]; pc.forEach(function(c){ var a=c.val()||{}; arr.push({id:c.key,od:a.od,do:a.do,typ:a.typ||"dovolená",pozn:a.pozn||""}); }); m[pc.key]=arr; }); _absence=m; }).catch(function(){}); }catch(_){} }
+function _absKolize(kod,atMs){ if(atMs==null)return []; return (_absence[kod]||[]).filter(function(a){ return a.od!=null&&a.do!=null&&a.od<=atMs&&atMs<=a.do; }); }
+function _absAktNasl(kod){ var now=Date.now(); var arr=(_absence[kod]||[]).filter(function(a){return a.do!=null&&a.do>=now;}); arr.sort(function(a,b){return (a.od||0)-(b.od||0);}); return arr; }
+function _absObdobi(a){ return (a.od?fmtDatumCz(_isoFromMs(a.od)):"?")+"–"+(a.do?fmtDatumCz(_isoFromMs(a.do)):"?"); }
+function _absLabel(a){ return (a.typ==="nemoc"?"🤒 Nemoc ":"🏖️ Dovolená ")+_absObdobi(a); }
+function absPridej(){
+  var me=localStorage.getItem("ac_person")||"";
+  if(!me){ alert("Nejdřív se přihlas – nahoře chip 👤 nebo 🔔 Povolit notifikace – a vyber, kdo jsi."); return; }
+  var ov=document.createElement("div"); ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px";
+  var dnes=dnesISO(); var typ="dovolená";
+  ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:400px;width:100%;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
+    +'<h3 style="margin:0 0 8px;color:#0b3a66">Přidat nepřítomnost</h3>'
+    +'<p style="margin:0 0 10px;font-size:13px;color:#555">'+esc(uzivatelJmeno())+'</p>'
+    +'<div class="fld"><label>Typ</label><div class="zav-btns"><div class="pill sel" id="abDov" style="background:#0b5cae;color:#fff">🏖️ Dovolená</div><div class="pill" id="abNem">🤒 Nemoc</div></div></div>'
+    +'<div class="two"><div class="fld"><label>Od</label><input type="date" id="abOd" value="'+dnes+'" style="width:100%"></div><div class="fld"><label>Do</label><input type="date" id="abDo" value="'+dnes+'" style="width:100%"></div></div>'
+    +'<div class="fld"><label>Poznámka (nepovinné)</label><input id="abPozn" placeholder="např. zástup: Novák" style="width:100%"></div>'
+    +'<div style="display:flex;gap:8px;margin-top:12px"><button id="abCancel" style="flex:1;padding:10px;border:1px solid #ccc;background:#f3f3f3;border-radius:8px;cursor:pointer">Zrušit</button><button id="abOk" style="flex:1;padding:10px;border:0;background:#0b5cae;color:#fff;border-radius:8px;font-weight:700;cursor:pointer">Uložit</button></div></div>';
+  document.body.appendChild(ov);
+  ov.querySelector("#abDov").onclick=function(){typ="dovolená";this.style.background="#0b5cae";this.style.color="#fff";var n=ov.querySelector("#abNem");n.style.background="";n.style.color="";};
+  ov.querySelector("#abNem").onclick=function(){typ="nemoc";this.style.background="#e8881b";this.style.color="#fff";var d=ov.querySelector("#abDov");d.style.background="";d.style.color="";};
+  var close=function(){ if(ov.parentNode)document.body.removeChild(ov); };
+  ov.onclick=function(e){ if(e.target===ov)close(); };
+  ov.querySelector("#abCancel").onclick=close;
+  ov.querySelector("#abOk").onclick=function(){
+    var od=_msFrom(ov.querySelector("#abOd").value,"00:00"), doo=_msFrom(ov.querySelector("#abDo").value,"23:59");
+    if(!od||!doo){ alert("Vyplň datum Od i Do."); return; }
+    if(doo<od){ alert("Datum Do musí být po datu Od."); return; }
+    var pozn=(ov.querySelector("#abPozn").value||"").trim();
+    firebase.database().ref("aquactrl_absence/"+me).push({od:od,do:doo,typ:typ,pozn:pozn,ts:Date.now()}).then(function(){ close(); acLoadAbsence(); setTimeout(openKontakty,300); }).catch(function(e){ alert("Chyba: "+(e&&e.message?e.message:e)); });
+  };
+}
+function absSmaz(id){ var me=localStorage.getItem("ac_person")||""; if(!me)return; if(!confirm("Smazat tuto nepřítomnost?"))return; firebase.database().ref("aquactrl_absence/"+me+"/"+id).remove().then(function(){ acLoadAbsence(); setTimeout(openKontakty,200); }).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));}); }
 function openKontakty(){
  document.getElementById("seznamHead").textContent="Kontakty ("+LIDE_R.length+")";
  const telHref=t=>t.replace(/[^+0-9]/g,"");
+ const me=localStorage.getItem("ac_person")||"";
  document.getElementById("seznamBody").innerHTML=LIDE_R.map(([z,jm])=>{
   const k=KONTAKTY[z]||{};const fce=k.funkce||"";const mail=k.mail||"";const tel=k.tel||"";
   const det=(mail||tel)?`${mail?esc(mail):""}${mail&&tel?" · ":""}${tel?esc(tel):""}`:`<i style="color:#9aa7b8">kontakt zatím nevyplněn</i>`;
   const links=`${mail?`<a class="sl-map" title="Napsat e-mail" href="mailto:${esc(mail)}">✉</a>`:""}${tel?`<a class="sl-map" title="Zavolat" href="tel:${esc(telHref(tel))}">📞</a>`:""}`;
-  return `<div class="sl-row"><div><b>${esc(prijmeniJmeno(jm))}</b>${fce?` <span style="color:#6b7a8d">· ${esc(fce)}</span>`:""}<br><span style="font-size:12px;color:#6b7a8d">${det}</span></div><div style="display:flex;gap:6px">${links}</div></div>`;
+  const abs=_absAktNasl(z);
+  const absHtml=abs.length?`<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">`+abs.map(a=>`<span style="font-size:11px;background:${a.typ==='nemoc'?'#fdecea':'#eaf4fc'};color:${a.typ==='nemoc'?'#c0392b':'#0b5cae'};border:1px solid ${a.typ==='nemoc'?'#f3c2c2':'#cfe6f7'};border-radius:8px;padding:1px 7px">${esc(_absLabel(a))}${a.pozn?` · ${esc(a.pozn)}`:""}${z===me?` <span onclick="absSmaz('${a.id}')" title="Smazat" style="cursor:pointer;font-weight:800">✕</span>`:""}</span>`).join("")+`</div>`:"";
+  const selfBtn=(z===me)?`<div style="margin-top:5px"><span onclick="absPridej()" style="font-size:11.5px;color:#0b5cae;font-weight:700;cursor:pointer">＋ Přidat dovolenou / nemoc</span></div>`:"";
+  return `<div class="sl-row"><div style="min-width:0"><b>${esc(prijmeniJmeno(jm))}</b>${fce?` <span style="color:#6b7a8d">· ${esc(fce)}</span>`:""}${z===me?` <span style="font-size:10px;background:#0b5cae;color:#fff;border-radius:6px;padding:0 5px">to jsi ty</span>`:""}<br><span style="font-size:12px;color:#6b7a8d">${det}</span>${absHtml}${selfBtn}</div><div style="display:flex;gap:6px">${links}</div></div>`;
  }).join("");
  document.getElementById("seznamOv").classList.add("show");
 }
@@ -1118,6 +1157,8 @@ function udalostUkol(id){
     if(!r)return;
     var resitel=r.persons[0]||"";
     if(!resitel){alert("Vyber řešitele úkolu.");return;}
+    var _kol=_absKolize(resitel, r.termin||Date.now());
+    if(_kol.length){ var _a=_kol[0]; if(!confirm("⚠️ "+lidLbl(resitel)+" má "+(r.termin?"v tom termínu ":"právě teď ")+(_a.typ==="nemoc"?"nemoc":"dovolenou")+" ("+_absObdobi(_a)+").\n\nPřiřadit úkol i tak?")) return; }
     var zadalKod=localStorage.getItem("ac_person")||"";
     var kontext=ev.kde||"";
     var upoz=r.upoz||[];
@@ -1450,10 +1491,11 @@ window.addEventListener("load",acBadgeStartup);
 window.addEventListener("load",acInitGate);
 window.addEventListener("load",acCistBadge);
 window.addEventListener("load",acPrehledCounts);
+window.addEventListener("load",acLoadAbsence);
 window.addEventListener("load",acUkolyWatch);
 window.addEventListener("load",function(){var v=document.getElementById("acVer");if(v)v.textContent=VERZE;});
 // Po návratu do appky (např. po klepnutí na notifikaci) obnov odznaky
-document.addEventListener("visibilitychange",function(){ if(!document.hidden){ acPrehledCounts(); acUkolyBadge(); acCistBadge(); } });
+document.addEventListener("visibilitychange",function(){ if(!document.hidden){ acPrehledCounts(); acUkolyBadge(); acCistBadge(); acLoadAbsence(); } });
 </script>
 
 <!-- Push notifikace (FCM) -->

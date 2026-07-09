@@ -1,6 +1,6 @@
 // AquaCtrl – samostatný service worker pro /aquactrl/
 // Účel: oddělit appku od "budek" (vlastní scope) a umožnit instalaci na plochu.
-const CACHE = 'aquactrl-v66';
+const CACHE = 'aquactrl-v67';
 const ASSETS = [
   './',
   './index.html',
