@@ -236,7 +236,7 @@ const ADMIN_KOD="TŘ";
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v69";  // drž v souladu s CACHE v sw.js
+const VERZE="v70";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -680,7 +680,7 @@ function openKontakty(){
   const canManage=(z===me)||jsemAbsenceSpravce();
   const abs=_absAktNasl(z);
   const absHtml=abs.length?`<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">`+abs.map(a=>{const bc=_absColor(a.typ);return `<span style="font-size:11px;background:${bc[0]};color:${bc[1]};border:1px solid ${bc[2]};border-radius:8px;padding:1px 7px">${esc(_absLabel(a))}${a.pozn?` · ${esc(a.pozn)}`:""}${canManage?` <span onclick="absSmaz('${z}','${a.id}')" title="Smazat" style="cursor:pointer;font-weight:800">✕</span>`:""}</span>`;}).join("")+`</div>`:"";
-  const selfBtn=canManage?`<div style="margin-top:5px"><span onclick="absPridej('${z}')" style="font-size:11.5px;color:#0b5cae;font-weight:700;cursor:pointer">＋ Přidat dovolenou / nemoc${z===me?'':' (za '+esc(prijmeniMonogram(jm))+')'}</span></div>`:"";
+  const selfBtn=canManage?`<div style="margin-top:5px"><span onclick="absPridej('${z}')" style="font-size:11.5px;color:#0b5cae;font-weight:700;cursor:pointer">＋ Přidat nepřítomnost${z===me?'':' (za '+esc(prijmeniMonogram(jm))+')'}</span></div>`:"";
   return `<div class="sl-row"><div style="min-width:0"><b>${esc(prijmeniJmeno(jm))}</b>${fce?` <span style="color:#6b7a8d">· ${esc(fce)}</span>`:""}${z===me?` <span style="font-size:10px;background:#0b5cae;color:#fff;border-radius:6px;padding:0 5px">to jsi ty</span>`:""}<br><span style="font-size:12px;color:#6b7a8d">${det}</span>${absHtml}${selfBtn}</div><div style="display:flex;gap:6px">${links}</div></div>`;
  }).join("");
  document.getElementById("seznamOv").classList.add("show");
