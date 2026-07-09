@@ -236,7 +236,7 @@ const ADMIN_KOD="TŘ";
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v63";  // drž v souladu s CACHE v sw.js
+const VERZE="v64";  // drž v souladu s CACHE v sw.js
 function jsemAdmin(){return (localStorage.getItem("ac_person")||"")===ADMIN_KOD;}
 // Kontaktní údaje (doplňuje se postupně): kód -> { funkce, mail, tel }
 const KONTAKTY={
@@ -569,6 +569,8 @@ function openSeznam(s,kl){
      }
      // odznaky objektů: pouze DOPLŇ z čerstvých dat (nikdy nemaž – prázdné/pomalé čtení by nemělo „zhasínat" odznaky) + dotáhni rozbalené
      objs.forEach(function(o,i){const cnt=(byObj[o.n]||[]).length;if(cnt>0){const bd=document.getElementById("objBdg-"+i),cn=document.getElementById("objCnt-"+i);if(cn)cn.textContent=cnt;if(bd)bd.style.display="";}const b=document.getElementById("objEv-"+i);if(b&&b.style.display!=="none"&&byObj[o.n])b.innerHTML=byObj[o.n].map(function(x){return '<div id="udDet-'+x.ev.id+'" style="margin:6px 0">'+_udalostKarta(x.ev,x.ukoly)+'</div>';}).join("");});
+     // DOČASNÁ DIAGNOSTIKA – ukáže počty, ať vidíme, kde to vázne
+     try{ var _keys={}; evs.forEach(function(e){ if(!e.uzavreno){ var _kk=(e.stredisko||"?")+"|"+(e.kat||"?"); _keys[_kk]=(_keys[_kk]||0)+1; } }); var _dbg=document.createElement("div"); _dbg.style.cssText="margin-top:10px;padding:8px;border:1px dashed #e23b3b;border-radius:8px;font-size:11px;color:#c0392b;word-break:break-all;font-family:monospace"; _dbg.textContent="🐞 hledám: "+s+" | "+kl+"  •  načteno="+evs.length+"  filtr="+filtered.length+"  orphans="+orphans.length+"  cache="+_cachedOpenEvs.length+"  •  otevřené klíče: "+JSON.stringify(_keys); document.getElementById("seznamBody").appendChild(_dbg); console.log("AC-DIAG",{s:s,kl:kl,evs:evs.length,filtered:filtered.length,orphans:orphans.length,cache:_cachedOpenEvs.length,keys:_keys}); }catch(_){}
    });
  }
 }
