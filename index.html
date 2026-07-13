@@ -236,7 +236,7 @@ const ADMIN_KOD="TŘ";
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v76";  // drž v souladu s CACHE v sw.js
+const VERZE="v77";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -326,7 +326,7 @@ function cisternySorted(){
   return CISTERNY[a].obj-CISTERNY[b].obj;
  });
 }
-function setCist(v){st.cistAno=v;if(!v){st.cisterny=[];st.cistMisto="";st.cistOd="";st.cistCas="";st.cistDoDatum="";st.cistDoCas="";}render();}
+function setCist(v){st.cistAno=v;if(!v){st.cisterny=[];st.cistMista={};st.cistOd="";st.cistCas="";st.cistDoDatum="";st.cistDoCas="";}render();}
 function togCist(i){i=+i;const j=st.cisterny.indexOf(i);if(j<0)st.cisterny.push(i);else st.cisterny.splice(j,1);render();}
 // Náhrada nativního výběru času dvěma selecty (nativní time-picker zůstával otevřený)
 function casSelect(field){
@@ -409,14 +409,13 @@ function cisternaDetail(){
   const chips=cisternySorted().map(i=>{const c=CISTERNY[i];const on=st.cisterny.includes(i);const k=_cistKonflikty(i,od,doo);
     if(k.length&&!on){const kx=k[0];return `<div class="person" title="Obsazená v tomto termínu jinou událostí" style="opacity:.55;cursor:not-allowed;background:#f3f5f7;color:#9aa7b8;border-style:dashed">${fmtL(c.obj)} · ${esc(c.typ)} · ${esc(c.stred)} · 🔴 obsazená ${_fmtCas(kx.od)}–${_fmtCas(kx.do)}</div>`;}
     return `<div class="person ${on?'sel':''}" onclick="togCist(${i})">${fmtL(c.obj)} · ${esc(c.typ)} · ${esc(c.stred)}${c.dispo?'':' ⛔'}${(k.length&&on)?' · ⚠️ kolize':''}</div>`;}).join("");
-  const selDet=st.cisterny.map(i=>{const c=CISTERNY[i];const k=_cistKonflikty(i,od,doo);return `<div class="bc" style="margin:6px 0 0"><span class="t"><b>Vybráno</b>${fmtL(c.obj)} · ${esc(c.typ)} (${esc(c.stred)})</span>${c.pozn?`<span class="t"><b>Pozn.</b>${esc(c.pozn)}</span>`:''}${c.dispo?'':'<span class="t" style="background:#fde9e9;border-color:#f3c2c2"><b>Stav</b>mimo provoz</span>'}${k.length?`<span class="t" style="background:#fde9e9;border-color:#f3c2c2;color:#a32626"><b>⚠️ Kolize</b>${esc(k.map(x=>(x.co||'událost')+' '+_fmtCas(x.od)+'–'+_fmtCas(x.do)).join('; '))}</span>`:''}</div>`;}).join("");
+  const selDet=st.cisterny.map(i=>{const c=CISTERNY[i];const k=_cistKonflikty(i,od,doo);return `<div class="bc" style="margin:6px 0 0"><span class="t"><b>Vybráno</b>${fmtL(c.obj)} · ${esc(c.typ)} (${esc(c.stred)})</span>${c.pozn?`<span class="t"><b>Pozn.</b>${esc(c.pozn)}</span>`:''}${c.dispo?'':'<span class="t" style="background:#fde9e9;border-color:#f3c2c2"><b>Stav</b>mimo provoz</span>'}${k.length?`<span class="t" style="background:#fde9e9;border-color:#f3c2c2;color:#a32626"><b>⚠️ Kolize</b>${esc(k.map(x=>(x.co||'událost')+' '+_fmtCas(x.od)+'–'+_fmtCas(x.do)).join('; '))}</span>`:''}<div class="fld" style="margin:6px 0 0"><label style="font-size:11px;color:#6b7a8d">Místo přistavení</label><input value="${esc((st.cistMista&&st.cistMista[i])||'')}" oninput="if(!st.cistMista)st.cistMista={};st.cistMista[${i}]=this.value" placeholder="Kam přistavit (obec, ulice, objekt)…"></div></div>`;}).join("");
   const termHint=(od&&doo)?'<p class="hint" style="margin:2px 0 6px">Obsazené cisterny v tomto termínu nejdou vybrat (🔴 obsazená).</p>':'<p class="hint" style="margin:2px 0 6px">Zadej nejdřív termín Od/Do – obsazené cisterny se pak z nabídky vyřadí.</p>';
   return `<div class="two" style="margin-top:10px"><div class="fld"><label>Od – datum</label><input type="date" value="${esc(st.cistOd||'')}" onchange="st.cistOd=this.value;render()"></div>
     <div class="fld"><label>Od – čas</label>${casSelect('cistCas')}</div></div>
     <div class="two"><div class="fld"><label>Do – datum</label><input type="date" value="${esc(st.cistDoDatum||'')}" onchange="st.cistDoDatum=this.value;render()"></div>
     <div class="fld"><label>Do – čas</label>${casSelect('cistDoCas')}</div></div>
-    <div class="fld"><label>Cisterny (lze vybrat víc)${st.cisterny.length?` · ${st.cisterny.length}`:''}</label>${termHint}<div class="people" style="max-height:200px;overflow:auto">${chips}</div>${selDet}</div>
-    <div class="fld"><label>Místo přistavení</label><input value="${esc(st.cistMisto||'')}" oninput="st.cistMisto=this.value" placeholder="Kam cisternu přistavit (obec, ulice, objekt)…"></div>`;
+    <div class="fld"><label>Cisterny (lze vybrat víc)${st.cisterny.length?` · ${st.cisterny.length}`:''}</label>${termHint}<div class="people" style="max-height:200px;overflow:auto">${chips}</div><p class="hint" style="margin:2px 0 0">Místo přistavení zadej u každé vybrané cisterny zvlášť ↓</p>${selDet}</div>`;
 }
 function cisternaBlok(){
  const ano=st.cistAno===true;
@@ -480,9 +479,9 @@ renderPrehled();
 // ---- WIZARD ----
 const KROKY=["1. Co se stalo?","2. Kde?","3. Podrobnosti","4. Lidé"];
 let st={krok:1,podminka:null,zavaznost:null,stredisko:null,typ:null,objekt:null,objektStred:"",objJiny:false,adresa:"",
-popis:"",nahlasil:"",tel:"",ukoly:[{resitel:null,popis:"",tdatum:"",tcas:"",upozorneni:[]}],info:[],cistAno:null,cisterny:[],cistMisto:"",cistOd:"",cistCas:"",cistDoDatum:"",cistDoCas:"",udDatum:"",kolOpen:false,kolVzorky:[],hotovo:false};
+popis:"",nahlasil:"",tel:"",ukoly:[{resitel:null,popis:"",tdatum:"",tcas:"",upozorneni:[]}],info:[],cistAno:null,cisterny:[],cistMista:{},cistOd:"",cistCas:"",cistDoDatum:"",cistDoCas:"",udDatum:"",kolOpen:false,kolVzorky:[],hotovo:false};
 
-function otevri(){st={krok:1,podminka:null,zavaznost:null,stredisko:null,typ:null,objekt:null,objektStred:"",objJiny:false,adresa:"",dotcene:[],popis:"",nahlasil:"",tel:"",ukoly:[{resitel:null,popis:"",tdatum:"",tcas:"",upozorneni:[]}],info:[],cistAno:null,cisterny:[],cistMisto:"",cistOd:"",cistCas:"",cistDoDatum:"",cistDoCas:"",udDatum:"",kolOpen:false,kolVzorky:[],hotovo:false};
+function otevri(){st={krok:1,podminka:null,zavaznost:null,stredisko:null,typ:null,objekt:null,objektStred:"",objJiny:false,adresa:"",dotcene:[],popis:"",nahlasil:"",tel:"",ukoly:[{resitel:null,popis:"",tdatum:"",tcas:"",upozorneni:[]}],info:[],cistAno:null,cisterny:[],cistMista:{},cistOd:"",cistCas:"",cistDoDatum:"",cistDoCas:"",udDatum:"",kolOpen:false,kolVzorky:[],hotovo:false};
 st.udDatum=dnesISO();_datum=dnesISO();_loadCistRez();document.getElementById("ov").classList.add("show");render();}
 function zavri(){document.getElementById("ov").classList.remove("show");}
 
@@ -848,7 +847,7 @@ function acSaveEvent(){
     const _cOd=_msFrom(st.cistOd,st.cistCas), _cDo=_msFrom(st.cistDoDatum,st.cistDoCas);
     const cistData=(st.cistAno&&st.cisterny.length)?st.cisterny.map(function(i){return {
       idx:i, obj:CISTERNY[i].obj, typ:CISTERNY[i].typ, stred:CISTERNY[i].stred,
-      misto:st.cistMisto||"", od:_cOd, do:_cDo
+      misto:(st.cistMista&&st.cistMista[i])||"", od:_cOd, do:_cDo
     };}):null;
     // událost
     const evRef=db.ref("aquactrl_udalosti").push();
@@ -877,7 +876,7 @@ function acSaveEvent(){
     // push při vzniku (informovaní + řešitelé + upozornit) – beze změny
     const t=acEventText(), tg=acEventTargets();
     db.ref("aquactrl_outbox").push({title:t.title, body:t.body, targets:tg, ts:now});
-    setTimeout(acPrehledCounts,400);
+    setTimeout(function(){ acPrehledCounts(); try{acCistBadge();}catch(_){} try{_loadCistRez();}catch(_){} },400);
   }catch(e){ console.warn("AC save:",e); }
 }
 
@@ -1252,6 +1251,7 @@ function uzavriUdalost(id){
         firebase.database().ref("aquactrl_outbox").push({title:"🔒 Událost uzavřena", body:popis+" — uzavřel/a "+lidLbl(ja)+(r.note?" · "+r.note:""), targets:r.persons, ts:Date.now()});
       }
       openUdalosti();
+      setTimeout(function(){ try{acCistBadge();}catch(_){} try{_loadCistRez();}catch(_){} try{acPrehledCounts();}catch(_){} },400);
     });
   });
 }
@@ -1478,7 +1478,7 @@ function hotovoHTML(){
  ${st.dotcene.length?`<div class="sumline"><b>Dotčené vodovody:</b> ${st.dotcene.map(esc).join(", ")}</div>`:""}
  <div class="sumline"><b>Popis:</b> ${esc(st.popis||"—")}</div>
  ${st.kolVzorky.length?`<div class="sumline"><b>Kolize – vzorky k přesunu (${st.kolVzorky.length}):</b> ${st.kolVzorky.slice().sort((a,b)=>PLAN[a].datum<PLAN[b].datum?-1:1).map(i=>fmtDatumCz(PLAN[i].datum)+" "+esc(PLAN[i].misto)).join("; ")}</div>`:""}
- ${st.cistAno&&st.cisterny.length?`<div class="sumline"><b>Cisterny:</b> ${st.cisterny.map(i=>esc(fmtL(CISTERNY[i].obj)+" · "+CISTERNY[i].typ+" ("+CISTERNY[i].stred+")")).join("; ")}${st.cistMisto?` → ${esc(st.cistMisto)}`:""}${(function(){const od=_msFrom(st.cistOd,st.cistCas),doo=_msFrom(st.cistDoDatum,st.cistDoCas);if(!od&&!doo)return"";return ` · ${od?_fmtCas(od):"?"} – ${doo?_fmtCas(doo):"?"}`;})()}</div>`:(st.cistAno?`<div class="sumline"><b>Cisterna:</b> ano (cisterna nevybrána)</div>`:"")}
+ ${st.cistAno&&st.cisterny.length?`<div class="sumline"><b>Cisterny:</b> ${st.cisterny.map(i=>esc(fmtL(CISTERNY[i].obj)+" · "+CISTERNY[i].typ+" ("+CISTERNY[i].stred+")"+((st.cistMista&&st.cistMista[i])?" → "+st.cistMista[i]:""))).join("; ")}${(function(){const od=_msFrom(st.cistOd,st.cistCas),doo=_msFrom(st.cistDoDatum,st.cistDoCas);if(!od&&!doo)return"";return ` · ${od?_fmtCas(od):"?"} – ${doo?_fmtCas(doo):"?"}`;})()}</div>`:(st.cistAno?`<div class="sumline"><b>Cisterna:</b> ano (cisterna nevybrána)</div>`:"")}
  <div class="sumline"><b>Zadal:</b> ${esc(uzivatelJmeno())}${(jePodnet()&&st.nahlasil)?` · nahlásil: ${esc(st.nahlasil)}${st.tel?(" · "+esc(st.tel)):""}`:""}</div>
  ${st.ukoly.map((u,i)=>(u.resitel||u.popis||u.tdatum||u.tcas||u.upozorneni.length)?`<div class="sumline"><b>Úkol ${i+1}:</b> ${u.resitel?esc(lidLbl(u.resitel)):"—"}${u.popis?` – ${esc(u.popis)}`:""}${(u.tdatum||u.tcas)?` · termín ${esc(u.tdatum)} ${esc(u.tcas)}`:""}${u.upozorneni.length?` · upozornit: ${u.upozorneni.map(z=>esc(lidLbl(z))).join(", ")}`:""}</div>`:"").join("")}
  <div class="sumline"><b>Informováni:</b> ${st.info.map(z=>esc(lidLbl(z))).join(", ")||"—"}</div>
