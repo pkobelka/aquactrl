@@ -236,7 +236,7 @@ const ADMIN_KOD="TŘ";
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v73";  // drž v souladu s CACHE v sw.js
+const VERZE="v74";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -1646,7 +1646,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
     try{
       var d=(payload&&payload.data)||{};
       var title=d.title||'AquaCtrl';
-      var opts={ body:d.body||'', icon:'/aquactrl/icon-192.png', badge:'/aquactrl/icon-192.png', tag:d.push_id||undefined, data:{url:d.url||'https://pkobelka.github.io/aquactrl/'} };
+      var opts={ body:d.body||'', icon:'/aquactrl/icon-192.png', badge:'/aquactrl/icon-192.png', tag:d.push_id||undefined, requireInteraction:true, vibrate:[200,100,200], data:{url:d.url||'https://pkobelka.github.io/aquactrl/'} };
       navigator.serviceWorker.getRegistration('/aquactrl/fcm/').then(function(reg){
         if(reg&&reg.showNotification){ reg.showNotification(title,opts); }
         else if('Notification'in window && Notification.permission==='granted'){ new Notification(title,opts); }
