@@ -26,37 +26,37 @@ if ('serviceWorker' in navigator) {
 *{box-sizing:border-box}
 body{margin:0;font-family:"Segoe UI",Roboto,Arial,sans-serif;color:var(--text);
 background:linear-gradient(180deg,#eef6fc,#e6edf5);min-height:100vh;overflow-x:hidden;-webkit-text-size-adjust:100%}
-.testbar{background:#fff6e6;color:#8a5a12;border-bottom:1px solid #f0d8a8;font-size:13px;
+.testbar{background:#fff6e6;color:#8a5a12;border-bottom:1px solid #f0d8a8;font-size:15px;
 font-weight:600;text-align:center;padding:7px}
 .hlav{display:flex;align-items:center;gap:14px;padding:10px 22px;background:linear-gradient(180deg,#fff,#f4fbff);
 border-bottom:3px solid #cfe6f7;flex-wrap:wrap}
 .hlav .kap{width:46px;height:46px}
 .nazev{font-size:24px;font-weight:800}.nazev .a{color:var(--modra);font-weight:400}.nazev .c{color:var(--tmava)}
 .menu{display:flex;gap:6px;margin-left:18px;flex-wrap:wrap}
-.menu a{font-size:13px;font-weight:600;color:var(--seda);padding:6px 12px;border-radius:8px;text-decoration:none;cursor:pointer}
+.menu a{font-size:15px;font-weight:600;color:var(--seda);padding:6px 12px;border-radius:8px;text-decoration:none;cursor:pointer}
 .menu a.act{background:#e7f1fb;color:var(--tmava);font-weight:800}
-.menu .bdg{background:var(--cerv);color:#fff;border-radius:10px;font-size:11px;font-weight:800;padding:1px 6px;margin-left:5px}
+.menu .bdg{background:var(--cerv);color:#fff;border-radius:10px;font-size:12.5px;font-weight:800;padding:1px 6px;margin-left:5px}
 .vhos{margin-left:auto;display:flex;align-items:baseline;gap:6px}
 .vhos b{color:var(--tmava);font-size:22px;letter-spacing:1px}.vhos i{color:var(--cerv);font-weight:800;font-style:italic}
 .topbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;max-width:1080px;margin:14px auto 0;
 padding:9px 16px;background:#fff;border-radius:12px;box-shadow:var(--stin)}
 .topbar .dat{font-weight:700;color:var(--tmava)}
-.online{flex:1;display:flex;align-items:center;gap:6px}.online .l{color:var(--seda);font-size:13px;font-weight:600}
+.online{flex:1;display:flex;align-items:center;gap:6px}.online .l{color:var(--seda);font-size:15px;font-weight:600}
 .online .l::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#2faf5a;margin-right:6px}
-.mono{background:#e9f6ee;color:var(--zel);border:1px solid #bfe3cc;border-radius:7px;padding:3px 8px;font-size:12px;font-weight:800}
-.btn-nova{border:0;cursor:pointer;color:#fff;font-weight:800;font-size:14px;
+.mono{background:#e9f6ee;color:var(--zel);border:1px solid #bfe3cc;border-radius:7px;padding:3px 8px;font-size:14px;font-weight:800}
+.btn-nova{border:0;cursor:pointer;color:#fff;font-weight:800;font-size:16px;
 background:linear-gradient(180deg,#34a85a,#239048);padding:9px 18px;border-radius:14px;box-shadow:var(--stin)}
 main{max-width:1080px;margin:0 auto;padding:16px 16px 80px}
 .card-s{background:#f6fafe;border:1px solid #dbe6f1;border-radius:16px;box-shadow:var(--stin);
 padding:12px 14px;margin-bottom:14px}
-.card-s h3{margin:2px 0 8px;color:var(--tmava);font-size:16px}
+.card-s h3{margin:2px 0 8px;color:var(--tmava);font-size:18.5px}
 .row5{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
 .objt{position:relative;background:#fff;border-radius:12px;box-shadow:var(--stin);padding:10px 12px;cursor:pointer}
 .objt .top{height:6px;border-radius:3px;margin:-2px -4px 8px}
 .objt .num{font-size:24px;font-weight:800;text-align:right}
-.objt .lab{font-size:11.5px;color:var(--seda);font-weight:700}
+.objt .lab{font-size:13px;color:var(--seda);font-weight:700}
 .objt .bdg{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;
-background:var(--cerv);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+background:var(--cerv);color:#fff;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
 .fab{position:fixed;right:20px;bottom:20px;width:56px;height:56px;border-radius:50%;border:0;cursor:pointer;
 color:#fff;font-size:28px;font-weight:800;background:linear-gradient(180deg,#34a85a,#239048);box-shadow:0 6px 18px rgba(11,58,102,.3)}
 
@@ -69,44 +69,44 @@ padding:24px;z-index:50;overflow:auto}
 .wiz-h b{font-size:20px;color:var(--tmava)}
 .wiz-h .x{cursor:pointer;color:var(--seda);font-size:20px;font-weight:700;border:0;background:none}
 .steps{display:flex;gap:6px;padding:12px 20px;flex-wrap:wrap;border-bottom:1px solid var(--ram)}
-.steps span{font-size:11.5px;font-weight:700;color:var(--seda);background:#f2f5f8;border-radius:12px;padding:4px 10px}
+.steps span{font-size:13px;font-weight:700;color:var(--seda);background:#f2f5f8;border-radius:12px;padding:4px 10px}
 .steps span.act{background:#e7f1fb;color:var(--tmava)}
 .steps span.done{background:#e5f6ec;color:#1d7a42}
 .wiz-b{padding:18px 20px;min-height:220px}
-.wiz-b h4{margin:0 0 4px;color:var(--tmava);font-size:15px}
-.hint{color:var(--seda);font-size:12.5px;margin:0 0 12px}
+.wiz-b h4{margin:0 0 4px;color:var(--tmava);font-size:17px}
+.hint{color:var(--seda);font-size:14.5px;margin:0 0 12px}
 .grp{margin-bottom:12px}
-.grp .gl{font-size:12px;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.grp .gl{font-size:14px;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:6px}
 .grp .gl i{width:8px;height:8px;border-radius:50%;display:inline-block}
 .chips{display:flex;flex-wrap:wrap;gap:7px}
-.chip{border:1px solid #dbe6f1;background:#f4f8fc;border-radius:13px;padding:6px 12px;font-size:12.5px;cursor:pointer;color:var(--text)}
+.chip{border:1px solid #dbe6f1;background:#f4f8fc;border-radius:13px;padding:6px 12px;font-size:14.5px;cursor:pointer;color:var(--text)}
 .chip:hover{border-color:var(--modra)}
 .chip.sel{background:var(--modra);color:#fff;border-color:var(--modra)}
 .fld{margin-bottom:12px}
-.fld label{display:block;font-size:12.5px;font-weight:700;color:var(--seda);margin-bottom:4px}
-.fld input,.fld select,.fld textarea{width:100%;padding:9px 10px;border:1px solid var(--ram);border-radius:9px;font-size:14px;font-family:inherit}
+.fld label{display:block;font-size:14.5px;font-weight:700;color:var(--seda);margin-bottom:4px}
+.fld input,.fld select,.fld textarea{width:100%;padding:9px 10px;border:1px solid var(--ram);border-radius:9px;font-size:16px;font-family:inherit}
 .fld textarea{min-height:64px;resize:vertical}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .zav-btns,.typ-btns,.str-btns{display:flex;flex-wrap:wrap;gap:7px}
-.pill{border:1px solid #dbe6f1;background:#fff;border-radius:20px;padding:6px 13px;font-size:13px;cursor:pointer}
+.pill{border:1px solid #dbe6f1;background:#fff;border-radius:20px;padding:6px 13px;font-size:15px;cursor:pointer}
 .pill.sel{color:#fff}
 .attach{display:flex;gap:8px;flex-wrap:wrap}
-.attach button{border:1px dashed #b9c6d6;background:#f7fbff;border-radius:10px;padding:9px 13px;font-size:13px;cursor:pointer;color:var(--tmava);font-weight:600}
+.attach button{border:1px dashed #b9c6d6;background:#f7fbff;border-radius:10px;padding:9px 13px;font-size:15px;cursor:pointer;color:var(--tmava);font-weight:600}
 .people{display:flex;flex-wrap:wrap;gap:7px}
-.person{border:1px solid #dbe6f1;background:#fff;border-radius:20px;padding:5px 11px;font-size:12.5px;cursor:pointer}
+.person{border:1px solid #dbe6f1;background:#fff;border-radius:20px;padding:5px 11px;font-size:14.5px;cursor:pointer}
 .person.sel{background:#eaf4fc;border-color:var(--modra);color:var(--tmava);font-weight:700}
-.sumline{font-size:13.5px;margin:4px 0}.sumline b{color:var(--tmava)}
+.sumline{font-size:15.5px;margin:4px 0}.sumline b{color:var(--tmava)}
 .bc{display:flex;flex-wrap:wrap;gap:6px;background:#eef5fc;border:1px solid #d6e4f2;border-radius:10px;padding:8px 10px;margin-bottom:14px}
-.bc .t{font-size:12px;background:#fff;border:1px solid #dbe6f1;border-radius:8px;padding:3px 9px;color:#1f2a37}
-.bc .t b{color:#6b7a8d;font-weight:700;font-size:9.5px;text-transform:uppercase;letter-spacing:.03em;margin-right:5px}
-.pl-mes{font-weight:800;color:#0b3a66;font-size:15px;margin:16px 0 8px;border-bottom:2px solid #cfe6f7;padding-bottom:4px}
+.bc .t{font-size:14px;background:#fff;border:1px solid #dbe6f1;border-radius:8px;padding:3px 9px;color:#1f2a37}
+.bc .t b{color:#6b7a8d;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.03em;margin-right:5px}
+.pl-mes{font-weight:800;color:#0b3a66;font-size:17px;margin:16px 0 8px;border-bottom:2px solid #cfe6f7;padding-bottom:4px}
 .pl-den{display:flex;gap:10px;margin-bottom:8px}
-.pl-datum{flex:none;width:80px;font-weight:700;color:#1577c8;font-size:13px;padding-top:6px}
+.pl-datum{flex:none;width:80px;font-weight:700;color:#1577c8;font-size:15px;padding-top:6px}
 .pl-odbery{display:flex;flex-wrap:wrap;gap:6px;flex:1}
-.pl-odber{background:#f4f8fc;border:1px solid #dbe6f1;border-radius:8px;padding:6px 10px;font-size:12.5px;cursor:pointer}
+.pl-odber{background:#f4f8fc;border:1px solid #dbe6f1;border-radius:8px;padding:6px 10px;font-size:14.5px;cursor:pointer}
 .pl-odber:hover{border-color:#1e8fe0;background:#eaf4fc}.pl-odber span{color:#6b7a8d}
 .wiz-f{display:flex;justify-content:space-between;gap:10px;padding:14px 20px;border-top:1px solid var(--ram)}
-.wiz-f button{border:0;border-radius:12px;padding:10px 20px;font-size:14px;font-weight:800;cursor:pointer}
+.wiz-f button{border:0;border-radius:12px;padding:10px 20px;font-size:16px;font-weight:800;cursor:pointer}
 .b-back{background:#eef2f7;color:var(--seda)}
 .b-next{background:linear-gradient(180deg,#2f9be0,#1577c8);color:#fff}
 .b-save{background:linear-gradient(180deg,#34a85a,#239048);color:#fff}
@@ -114,12 +114,12 @@ padding:24px;z-index:50;overflow:auto}
 .done-box .ok{font-size:46px}
 @media(max-width:680px){.row5{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}
  .menu{order:5;width:100%;margin:8px 0 0;justify-content:center;gap:5px;border-top:1px solid #e7f0f8;padding-top:8px}
- .menu a{font-size:12.5px;padding:6px 10px;background:#f1f7fc}}
-.sl-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 10px;border-bottom:1px solid #eef2f7;font-size:13.5px}
-.sl-map{background:#eaf4fc;color:#0b3a66;border-radius:8px;padding:4px 11px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap}
-.sl-map:hover{background:#d6e9fb}.sl-nogps{color:#9aa7b8;font-size:11.5px}
+ .menu a{font-size:14.5px;padding:6px 10px;background:#f1f7fc}}
+.sl-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 10px;border-bottom:1px solid #eef2f7;font-size:15.5px}
+.sl-map{background:#eaf4fc;color:#0b3a66;border-radius:8px;padding:4px 11px;font-size:14px;font-weight:700;text-decoration:none;white-space:nowrap}
+.sl-map:hover{background:#d6e9fb}.sl-nogps{color:#9aa7b8;font-size:13px}
 .sl-tech{cursor:pointer;user-select:none}
-.sl-cinfo{display:none;padding:4px 10px 10px;font-size:12.5px;color:#42526b;white-space:pre-wrap;line-height:1.45;border-bottom:1px solid #eef2f7;background:#f8fbfe}
+.sl-cinfo{display:none;padding:4px 10px 10px;font-size:14.5px;color:#42526b;white-space:pre-wrap;line-height:1.45;border-bottom:1px solid #eef2f7;background:#f8fbfe}
 .sl-cinfo.show{display:block}
 @keyframes slflash{0%{box-shadow:0 0 0 3px rgba(11,92,174,.55)}100%{box-shadow:0 0 0 3px rgba(11,92,174,0)}}
 .slFlash{animation:slflash 1.6s ease}
@@ -127,7 +127,7 @@ padding:24px;z-index:50;overflow:auto}
 </head>
 <body>
 <div class="testbar">🔔 TESTOVACÍ PROVOZ — události a úkoly se ukládají; po „Uložit" se odešle push a přidělené úkoly najdeš v „Moje úkoly" (potvrzení + plnění, hlídání termínů). Nejdřív se přihlas e-mailem a klikni „🔔 Povolit notifikace".</div>
-<div id="acPendBar" style="display:none;background:#fff3cd;border-bottom:1px solid #ffe69c;color:#7a5b00;padding:8px 14px;font-size:13px;text-align:center">⏳ Toto zařízení čeká na schválení správcem — notifikace zatím nechodí.</div>
+<div id="acPendBar" style="display:none;background:#fff3cd;border-bottom:1px solid #ffe69c;color:#7a5b00;padding:8px 14px;font-size:15px;text-align:center">⏳ Toto zařízení čeká na schválení správcem — notifikace zatím nechodí.</div>
 
 <header class="hlav">
   <img class="kap" src="logo-ac-icon.png" alt="AquaCtrl – VHOS a.s." width="46" height="46">
@@ -151,14 +151,14 @@ padding:24px;z-index:50;overflow:auto}
 
 <div class="topbar">
   <div class="dat" id="dat">—</div>
-  <div id="acWho" onclick="acEnablePush()" title="Přihlášený uživatel (identita podle přihlašovacího e-mailu)" style="cursor:pointer;font-size:12px;font-weight:800;border-radius:20px;padding:4px 11px;white-space:nowrap"></div>
+  <div id="acWho" onclick="acEnablePush()" title="Přihlášený uživatel (identita podle přihlašovacího e-mailu)" style="cursor:pointer;font-size:14px;font-weight:800;border-radius:20px;padding:4px 11px;white-space:nowrap"></div>
   <div class="online"><span class="l">Online:</span><span id="acOnlineList"></span></div>
   <button class="btn-nova" onclick="otevri()">＋ Nová událost</button>
 </div>
 
 <main id="prehled"></main>
 
-<footer style="text-align:center;color:#111;font-size:12px;padding:14px 10px 26px;line-height:1.6">
+<footer style="text-align:center;color:#111;font-size:14px;padding:14px 10px 26px;line-height:1.6">
   <b style="color:#1577c8">Aqua</b><b style="color:#0b3a66">Ctrl</b> <span id="acVer" style="color:#555"></span> · <b>© 2026 Petr Kobelka</b>
 </footer>
 
@@ -236,7 +236,7 @@ const ADMIN_KOD="TŘ";
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v77";  // drž v souladu s CACHE v sw.js
+const VERZE="v78";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -280,9 +280,9 @@ const SKLAD_CERPADLA_BEZ=["KSB- motor 16kW, Q 2,79- 19, 8 l/s, H 92- 35m, střed
 function openSkladCerpadel(){
  document.getElementById("seznamHead").textContent="Čerpadla na skladě ("+SKLAD_CERPADLA.length+")";
  const rows=SKLAD_CERPADLA.map(function(x){
-  return '<div class="sl-row"><div><b>'+esc(x.poz)+'. '+esc(x.misto)+'</b><br><span style="font-size:12px;color:#6b7a8d">'+esc(x.popis||"—")+'</span></div></div>';
+  return '<div class="sl-row"><div><b>'+esc(x.poz)+'. '+esc(x.misto)+'</b><br><span style="font-size:14px;color:#6b7a8d">'+esc(x.popis||"—")+'</span></div></div>';
  }).join("");
- const bez=SKLAD_CERPADLA_BEZ.length?'<div style="margin-top:10px;padding:10px;background:#f6f8fa;border-radius:10px"><b style="font-size:12.5px;color:#6b7a8d">Bez určení (stáří obou čerpadel min. 20 let):</b>'+SKLAD_CERPADLA_BEZ.map(function(t){return '<div style="font-size:12.5px;color:#33485e;margin-top:4px">'+esc(t)+'</div>';}).join("")+'</div>':"";
+ const bez=SKLAD_CERPADLA_BEZ.length?'<div style="margin-top:10px;padding:10px;background:#f6f8fa;border-radius:10px"><b style="font-size:14.5px;color:#6b7a8d">Bez určení (stáří obou čerpadel min. 20 let):</b>'+SKLAD_CERPADLA_BEZ.map(function(t){return '<div style="font-size:14.5px;color:#33485e;margin-top:4px">'+esc(t)+'</div>';}).join("")+'</div>':"";
  document.getElementById("seznamBody").innerHTML=rows+bez;
  document.getElementById("seznamOv").classList.add("show");
 }
@@ -370,19 +370,19 @@ function kolizeBlok(){
  // Automatické varování (vždy viditelné)
  let auto;
  if(!idx.length){
-  auto=`<div style="background:#e9f6ee;border:1px solid #bfe3cc;border-radius:10px;padding:9px 12px;font-size:13px;color:#1d7a42;font-weight:700">✓ Žádná kolize s plánem vzorkování v této obci</div>`;
+  auto=`<div style="background:#e9f6ee;border:1px solid #bfe3cc;border-radius:10px;padding:9px 12px;font-size:15px;color:#1d7a42;font-weight:700">✓ Žádná kolize s plánem vzorkování v této obci</div>`;
  }else if(vOkne){
-  const sez=near.map(i=>`<div style="font-size:12.5px;padding:2px 0">• <b>${fmtDatumCz(PLAN[i].datum)}</b> – ${esc(PLAN[i].misto)}${PLAN[i].rozsah?` <span style="color:#6b7a8d">(${esc(PLAN[i].rozsah)})</span>`:''}</div>`).join("");
-  auto=`<div style="background:#fde9e9;border:1px solid #f3c2c2;border-radius:10px;padding:10px 12px;color:#c0392b"><div style="font-weight:800;margin-bottom:5px">⚠️ Nebezpečí kolize s plánem vzorkování (${vOkne})</div>${sez}<div style="font-size:12px;margin-top:6px">Odstávka / změna zdroje / chlorace může znehodnotit plánovaný odběr – domluvte přesun vzorkování.</div></div>`;
+  const sez=near.map(i=>`<div style="font-size:14.5px;padding:2px 0">• <b>${fmtDatumCz(PLAN[i].datum)}</b> – ${esc(PLAN[i].misto)}${PLAN[i].rozsah?` <span style="color:#6b7a8d">(${esc(PLAN[i].rozsah)})</span>`:''}</div>`).join("");
+  auto=`<div style="background:#fde9e9;border:1px solid #f3c2c2;border-radius:10px;padding:10px 12px;color:#c0392b"><div style="font-weight:800;margin-bottom:5px">⚠️ Nebezpečí kolize s plánem vzorkování (${vOkne})</div>${sez}<div style="font-size:14px;margin-top:6px">Odstávka / změna zdroje / chlorace může znehodnotit plánovaný odběr – domluvte přesun vzorkování.</div></div>`;
  }else{
   const p=PLAN[idx[0]];
-  auto=`<div style="background:#fff6e6;border:1px solid #f0d8a8;border-radius:10px;padding:9px 12px;font-size:12.5px;color:#8a5a12">📅 Plán vzorkování: nejbližší odběr <b>${fmtDatumCz(p.datum)}</b> – ${linkTel(p.misto)} (mimo rizikové okno)</div>`;
+  auto=`<div style="background:#fff6e6;border:1px solid #f0d8a8;border-radius:10px;padding:9px 12px;font-size:14.5px;color:#8a5a12">📅 Plán vzorkování: nejbližší odběr <b>${fmtDatumCz(p.datum)}</b> – ${linkTel(p.misto)} (mimo rizikové okno)</div>`;
  }
  const autoBlok=`<div class="fld" style="margin-bottom:8px">${auto}</div>`;
  const bg=vOkne?"linear-gradient(180deg,#e8881b,#d2730f)":"linear-gradient(180deg,#2f9be0,#1577c8)";
  const hdr=autoBlok+`<div class="fld"><label>Ručně prověřit / označit vzorky</label>
    <div class="two">
-     <div><div style="font-size:11.5px;color:#6b7a8d;font-weight:700;margin-bottom:3px">Datum události</div>
+     <div><div style="font-size:13px;color:#6b7a8d;font-weight:700;margin-bottom:3px">Datum události</div>
        <input type="date" value="${esc(st.udDatum||'')}" onchange="st.udDatum=this.value;render()"></div>
      <div style="display:flex;align-items:flex-end">
        <button type="button" onclick="st.kolOpen=!st.kolOpen;render()" style="width:100%;border:0;border-radius:10px;padding:10px;font-weight:800;cursor:pointer;color:#fff;background:${bg}">${st.kolOpen?'Skrýt plán':'🔍 Prověřit v plánu'}${vOkne?` · ${vOkne} v okolí`:''}</button>
@@ -390,18 +390,18 @@ function kolizeBlok(){
    </div></div>`;
  if(!st.kolOpen) return hdr;
  const full=planAllIdx();
- if(!full.length) return hdr+`<div class="fld"><div style="background:#e9f6ee;border:1px solid #bfe3cc;border-radius:10px;padding:9px 12px;font-size:13px;color:#1d7a42;font-weight:700">✓ Od ${fmtDatumCz(st.udDatum||dnesISO())} nejsou v plánu žádné další odběry.</div></div>`;
+ if(!full.length) return hdr+`<div class="fld"><div style="background:#e9f6ee;border:1px solid #bfe3cc;border-radius:10px;padding:9px 12px;font-size:15px;color:#1d7a42;font-weight:700">✓ Od ${fmtDatumCz(st.udDatum||dnesISO())} nejsou v plánu žádné další odběry.</div></div>`;
  const scopeSet=new Set(idx);
  let html="",lastD=null;
  full.forEach(i=>{const p=PLAN[i];
   if(p.datum!==lastD){lastD=p.datum;const dnu=Math.round((new Date(p.datum+"T00:00:00")-od)/86400000);
-   html+=`<div style="font-weight:800;color:#0b3a66;margin:8px 0 4px;font-size:13px">${fmtDatumCz(p.datum)} <span style="color:#6b7a8d;font-weight:600">(+${dnu} dní)</span></div>`;}
+   html+=`<div style="font-weight:800;color:#0b3a66;margin:8px 0 4px;font-size:15px">${fmtDatumCz(p.datum)} <span style="color:#6b7a8d;font-weight:600">(+${dnu} dní)</span></div>`;}
   const sel=st.kolVzorky.includes(i);const zas=scopeSet.has(i);
-  html+=`<div onclick="togVzorek(${i})" style="cursor:pointer;display:flex;gap:8px;align-items:center;padding:6px 9px;border:1px solid ${sel?'#e8881b':'#e2e9f1'};border-left:${zas?'4px solid #e8881b':'1px solid '+(sel?'#e8881b':'#e2e9f1')};background:${sel?'#fff6e6':(zas?'#fffaf2':'#fff')};border-radius:9px;margin-bottom:5px;font-size:12.5px">
-    <span style="width:18px;height:18px;border-radius:5px;border:2px solid ${sel?'#e8881b':'#b9c6d6'};background:${sel?'#e8881b':'#fff'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex:none">${sel?'✓':''}</span>
+  html+=`<div onclick="togVzorek(${i})" style="cursor:pointer;display:flex;gap:8px;align-items:center;padding:6px 9px;border:1px solid ${sel?'#e8881b':'#e2e9f1'};border-left:${zas?'4px solid #e8881b':'1px solid '+(sel?'#e8881b':'#e2e9f1')};background:${sel?'#fff6e6':(zas?'#fffaf2':'#fff')};border-radius:9px;margin-bottom:5px;font-size:14.5px">
+    <span style="width:18px;height:18px;border-radius:5px;border:2px solid ${sel?'#e8881b':'#b9c6d6'};background:${sel?'#e8881b':'#fff'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex:none">${sel?'✓':''}</span>
     <span>${zas?'📍 ':''}${linkTel(p.misto)}${p.rozsah?` <span style="color:#6b7a8d">(${esc(p.rozsah)})</span>`:''}</span></div>`;
  });
- const oznaceno=st.kolVzorky.length?`<div style="font-weight:700;color:#d2730f;margin:6px 0 2px;font-size:13px">Označeno k přesunu: ${st.kolVzorky.length}</div>`:"";
+ const oznaceno=st.kolVzorky.length?`<div style="font-weight:700;color:#d2730f;margin:6px 0 2px;font-size:15px">Označeno k přesunu: ${st.kolVzorky.length}</div>`:"";
  return hdr+`<div class="fld" style="margin-top:-4px"><p class="hint" style="margin:2px 0 6px">Zobrazen celý plán od data události. 📍 = dotčené místo (objekt / vodovody). Klikni na odběr → označíš k přesunu. Roluj dolů pro další dny.</p>${oznaceno}<div style="max-height:300px;overflow:auto;border:1px solid #e2e9f1;border-radius:10px;padding:8px;background:#f6fafe">${html}</div></div>`;
 }
 function cisternaDetail(){
@@ -409,7 +409,7 @@ function cisternaDetail(){
   const chips=cisternySorted().map(i=>{const c=CISTERNY[i];const on=st.cisterny.includes(i);const k=_cistKonflikty(i,od,doo);
     if(k.length&&!on){const kx=k[0];return `<div class="person" title="Obsazená v tomto termínu jinou událostí" style="opacity:.55;cursor:not-allowed;background:#f3f5f7;color:#9aa7b8;border-style:dashed">${fmtL(c.obj)} · ${esc(c.typ)} · ${esc(c.stred)} · 🔴 obsazená ${_fmtCas(kx.od)}–${_fmtCas(kx.do)}</div>`;}
     return `<div class="person ${on?'sel':''}" onclick="togCist(${i})">${fmtL(c.obj)} · ${esc(c.typ)} · ${esc(c.stred)}${c.dispo?'':' ⛔'}${(k.length&&on)?' · ⚠️ kolize':''}</div>`;}).join("");
-  const selDet=st.cisterny.map(i=>{const c=CISTERNY[i];const k=_cistKonflikty(i,od,doo);return `<div class="bc" style="margin:6px 0 0"><span class="t"><b>Vybráno</b>${fmtL(c.obj)} · ${esc(c.typ)} (${esc(c.stred)})</span>${c.pozn?`<span class="t"><b>Pozn.</b>${esc(c.pozn)}</span>`:''}${c.dispo?'':'<span class="t" style="background:#fde9e9;border-color:#f3c2c2"><b>Stav</b>mimo provoz</span>'}${k.length?`<span class="t" style="background:#fde9e9;border-color:#f3c2c2;color:#a32626"><b>⚠️ Kolize</b>${esc(k.map(x=>(x.co||'událost')+' '+_fmtCas(x.od)+'–'+_fmtCas(x.do)).join('; '))}</span>`:''}<div class="fld" style="margin:6px 0 0"><label style="font-size:11px;color:#6b7a8d">Místo přistavení</label><input value="${esc((st.cistMista&&st.cistMista[i])||'')}" oninput="if(!st.cistMista)st.cistMista={};st.cistMista[${i}]=this.value" placeholder="Kam přistavit (obec, ulice, objekt)…"></div></div>`;}).join("");
+  const selDet=st.cisterny.map(i=>{const c=CISTERNY[i];const k=_cistKonflikty(i,od,doo);return `<div class="bc" style="margin:6px 0 0"><span class="t"><b>Vybráno</b>${fmtL(c.obj)} · ${esc(c.typ)} (${esc(c.stred)})</span>${c.pozn?`<span class="t"><b>Pozn.</b>${esc(c.pozn)}</span>`:''}${c.dispo?'':'<span class="t" style="background:#fde9e9;border-color:#f3c2c2"><b>Stav</b>mimo provoz</span>'}${k.length?`<span class="t" style="background:#fde9e9;border-color:#f3c2c2;color:#a32626"><b>⚠️ Kolize</b>${esc(k.map(x=>(x.co||'událost')+' '+_fmtCas(x.od)+'–'+_fmtCas(x.do)).join('; '))}</span>`:''}<div class="fld" style="margin:6px 0 0"><label style="font-size:12.5px;color:#6b7a8d">Místo přistavení</label><input value="${esc((st.cistMista&&st.cistMista[i])||'')}" oninput="if(!st.cistMista)st.cistMista={};st.cistMista[${i}]=this.value" placeholder="Kam přistavit (obec, ulice, objekt)…"></div></div>`;}).join("");
   const termHint=(od&&doo)?'<p class="hint" style="margin:2px 0 6px">Obsazené cisterny v tomto termínu nejdou vybrat (🔴 obsazená).</p>':'<p class="hint" style="margin:2px 0 6px">Zadej nejdřív termín Od/Do – obsazené cisterny se pak z nabídky vyřadí.</p>';
   return `<div class="two" style="margin-top:10px"><div class="fld"><label>Od – datum</label><input type="date" value="${esc(st.cistOd||'')}" onchange="st.cistOd=this.value;render()"></div>
     <div class="fld"><label>Od – čas</label>${casSelect('cistCas')}</div></div>
@@ -436,7 +436,7 @@ function krok2plan(){
  let h=`<h4>Vyber konkrétní odběr z plánu</h4><p class="hint">Začni u dneška, šipkami posuň na plánovaný den (i dozadu), nebo vyber datum.</p>`;
  h+=`<div style="display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:10px">
    ${nav(hasPrev,-1,"◀ Předchozí")}
-   <input type="date" value="${_datum}" onchange="selDatum(this.value)" style="padding:9px 10px;border:1px solid var(--ram);border-radius:9px;font-size:14px;font-family:inherit">
+   <input type="date" value="${_datum}" onchange="selDatum(this.value)" style="padding:9px 10px;border:1px solid var(--ram);border-radius:9px;font-size:16px;font-family:inherit">
    ${nav(hasNext,1,"Další ▶")}
  </div>`;
  h+=`<div class="pl-mes" style="text-align:center">${denTitul(_datum)} · ${list.length} ${list.length===1?'odběr':(list.length>=2&&list.length<=4?'odběry':'odběrů')}</div>`;
@@ -518,8 +518,8 @@ function renderPlan(){
  const nav=(en,dir,lbl)=>`<button onclick="planNav(${dir})" ${en?'':'disabled'} style="border:0;border-radius:10px;padding:9px 12px;font-weight:800;cursor:${en?'pointer':'default'};color:#fff;background:${en?'linear-gradient(180deg,#2f9be0,#1577c8)':'#c3d2e0'}">${lbl}</button>`;
  let h=`<div style="display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:12px">
    ${nav(hasPrev,-1,"◀ Předchozí")}
-   <div><div style="font-size:11.5px;color:#6b7a8d;font-weight:700;margin-bottom:3px;text-align:center">Vyber datum</div>
-     <input type="date" value="${_planDatum}" onchange="setPlanDatum(this.value)" style="padding:9px 10px;border:1px solid var(--ram);border-radius:9px;font-size:14px;font-family:inherit"></div>
+   <div><div style="font-size:13px;color:#6b7a8d;font-weight:700;margin-bottom:3px;text-align:center">Vyber datum</div>
+     <input type="date" value="${_planDatum}" onchange="setPlanDatum(this.value)" style="padding:9px 10px;border:1px solid var(--ram);border-radius:9px;font-size:16px;font-family:inherit"></div>
    ${nav(hasNext,1,"Další ▶")}
  </div>
  <div style="text-align:center;margin-bottom:12px"><button onclick="planDnes()" ${_planDatum===dnesISO()?'disabled':''} style="border:1px solid #1577c8;border-radius:10px;padding:7px 18px;font-weight:800;cursor:${_planDatum===dnesISO()?'default':'pointer'};color:${_planDatum===dnesISO()?'#9aa7b8':'#1577c8'};background:#fff">📅 Dnes</button></div>
@@ -547,10 +547,10 @@ function openSeznam(s,kl){
  _slCtx={s:s,kl:kl,objs:objs,loaded:null};
  document.getElementById("seznamHead").textContent=kl+" – "+s+" ("+objs.length+")";
  const evCount=_evCounts[s+"|"+kl]||0;
- const objHtml=objs.length?objs.map((o,i)=>{const cnt=_evObjCounts[s+"|"+kl+"|"+o.n]||0;return `<div><div class="sl-row"><div><b onclick="slToggleObj(${i})" style="cursor:pointer">${esc(o.n)}</b><span id="objBdg-${i}" onclick="slToggleObj(${i})" title="Zobrazit událost" style="cursor:pointer;background:#e23b3b;color:#fff;border-radius:9px;padding:1px 8px;font-size:11px;font-weight:800;margin-left:6px;${cnt>0?'':'display:none'}"><span id="objCnt-${i}">${cnt}</span> <span id="objArr-${i}">▸</span></span>${o.p?` <span style="color:#6b7a8d">· ${esc(o.p)}</span>`:""}${o.c?` <span class="sl-tech" title="Zobrazit info o čerpadle" onclick="document.getElementById('ci${i}').classList.toggle('show')">🔧</span>`:""}</div>`+(o.lat?`<a class="sl-map" target="_blank" href="https://www.openstreetmap.org/?mlat=${o.lat}&mlon=${o.lon}#map=16/${o.lat}/${o.lon}">📍 Mapa</a>`:`<span class="sl-nogps">bez GPS</span>`)+`</div>${o.c?`<div class="sl-cinfo" id="ci${i}">${esc(o.c)}</div>`:""}<div id="objEv-${i}" style="display:none;padding:2px 6px 6px;background:#f6fafe;border-bottom:1px solid #eef2f7"></div></div>`;}).join(""):`<p class="hint">Žádné objekty.</p>`;
+ const objHtml=objs.length?objs.map((o,i)=>{const cnt=_evObjCounts[s+"|"+kl+"|"+o.n]||0;return `<div><div class="sl-row"><div><b onclick="slToggleObj(${i})" style="cursor:pointer">${esc(o.n)}</b><span id="objBdg-${i}" onclick="slToggleObj(${i})" title="Zobrazit událost" style="cursor:pointer;background:#e23b3b;color:#fff;border-radius:9px;padding:1px 8px;font-size:12.5px;font-weight:800;margin-left:6px;${cnt>0?'':'display:none'}"><span id="objCnt-${i}">${cnt}</span> <span id="objArr-${i}">▸</span></span>${o.p?` <span style="color:#6b7a8d">· ${esc(o.p)}</span>`:""}${o.c?` <span class="sl-tech" title="Zobrazit info o čerpadle" onclick="document.getElementById('ci${i}').classList.toggle('show')">🔧</span>`:""}</div>`+(o.lat?`<a class="sl-map" target="_blank" href="https://www.openstreetmap.org/?mlat=${o.lat}&mlon=${o.lon}#map=16/${o.lat}/${o.lon}">📍 Mapa</a>`:`<span class="sl-nogps">bez GPS</span>`)+`</div>${o.c?`<div class="sl-cinfo" id="ci${i}">${esc(o.c)}</div>`:""}<div id="objEv-${i}" style="display:none;padding:2px 6px 6px;background:#f6fafe;border-bottom:1px solid #eef2f7"></div></div>`;}).join(""):`<p class="hint">Žádné objekty.</p>`;
  let html="";
  html+=`<div id="slEventy" style="margin-bottom:12px;display:none"></div>`;
- if(objs.length) html+=`<div style="font-size:12px;font-weight:800;color:#6b7a8d;margin:10px 0 4px">Objekty (${objs.length})</div>`;
+ if(objs.length) html+=`<div style="font-size:14px;font-weight:800;color:#6b7a8d;margin:10px 0 4px">Objekty (${objs.length})</div>`;
  html+=objHtml;
  document.getElementById("seznamBody").innerHTML=html;
  document.getElementById("seznamOv").classList.add("show");
@@ -568,7 +568,7 @@ function openSeznam(s,kl){
      _slCtx.loaded=filtered;_slCtx.byObj=byObj;
      // nahoře jen události bez konkrétního objektu (zbytek je rozbalovací u objektů)
      if(el){
-       if(orphans.length){el.style.display="block";el.innerHTML=`<div style="font-weight:800;color:#0b3a66;font-size:13px;margin-bottom:8px;border-bottom:2px solid #cfe6f7;padding-bottom:4px">Otevřené události bez objektu (${orphans.length})</div>`+orphans.map(function(x){return '<div id="udDet-'+x.ev.id+'" style="margin-bottom:8px">'+_safeKarta(x.ev,x.ukoly)+'</div>';}).join("");}
+       if(orphans.length){el.style.display="block";el.innerHTML=`<div style="font-weight:800;color:#0b3a66;font-size:15px;margin-bottom:8px;border-bottom:2px solid #cfe6f7;padding-bottom:4px">Otevřené události bez objektu (${orphans.length})</div>`+orphans.map(function(x){return '<div id="udDet-'+x.ev.id+'" style="margin-bottom:8px">'+_safeKarta(x.ev,x.ukoly)+'</div>';}).join("");}
        else{el.style.display="none";el.innerHTML="";}
      }
      // odznaky objektů: pouze DOPLŇ z čerstvých dat (nikdy nemaž – prázdné/pomalé čtení by nemělo „zhasínat" odznaky) + dotáhni rozbalené
@@ -621,13 +621,13 @@ function openJakTestovat(){
     ["4","Vyzkoušej příjem","Ten, komu jsi úkol zadal, ho najde v sekci Moje úkoly – potvrdí přijetí a označí splněno. Tobě (zadavateli) dorazí echo push."],
     ["5","Nahlas, co drhne","Cokoli nesedí nebo je nejasné – napiš. I drobnost pomůže. 🙏"]
   ];
-  document.getElementById("seznamBody").innerHTML='<p class="hint" style="margin:0 0 12px">Fakt to zabere 2 minuty. Projdi 5 kroků a dej vědět, co nefungovalo.</p>'+kroky.map(function(k){return '<div style="display:flex;gap:12px;align-items:flex-start;border:1px solid #dbe6f1;border-radius:12px;padding:12px;margin-bottom:10px;background:#fbfdff"><div style="flex:none;width:28px;height:28px;border-radius:50%;background:#0b5cae;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center">'+k[0]+'</div><div><div style="font-weight:800;color:#0b3a66;margin-bottom:2px">'+esc(k[1])+'</div><div style="font-size:13px;color:#42526b;line-height:1.45">'+esc(k[2])+'</div></div></div>';}).join("")+'<div style="text-align:center;margin-top:6px"><button onclick="zavriSeznam();otevri()" style="border:0;border-radius:12px;padding:11px 20px;background:#2faf5a;color:#fff;font-weight:800;cursor:pointer">＋ Začít – založit událost</button></div>';
+  document.getElementById("seznamBody").innerHTML='<p class="hint" style="margin:0 0 12px">Fakt to zabere 2 minuty. Projdi 5 kroků a dej vědět, co nefungovalo.</p>'+kroky.map(function(k){return '<div style="display:flex;gap:12px;align-items:flex-start;border:1px solid #dbe6f1;border-radius:12px;padding:12px;margin-bottom:10px;background:#fbfdff"><div style="flex:none;width:28px;height:28px;border-radius:50%;background:#0b5cae;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center">'+k[0]+'</div><div><div style="font-weight:800;color:#0b3a66;margin-bottom:2px">'+esc(k[1])+'</div><div style="font-size:15px;color:#42526b;line-height:1.45">'+esc(k[2])+'</div></div></div>';}).join("")+'<div style="text-align:center;margin-top:6px"><button onclick="zavriSeznam();otevri()" style="border:0;border-radius:12px;padding:11px 20px;background:#2faf5a;color:#fff;font-weight:800;cursor:pointer">＋ Začít – založit událost</button></div>';
   document.getElementById("seznamOv").classList.add("show");
 }
 function openDokumenty(){
   zavriPlan();
   document.getElementById("seznamHead").textContent="Dokumenty – metodické pokyny ("+DOKUMENTY.length+")";
-  document.getElementById("seznamBody").innerHTML='<p class="hint" style="margin:0 0 10px">Metodické pokyny VHOS a.s. Klikni na dokument pro otevření / stažení (PDF).</p>'+DOKUMENTY.map(function(d){return '<div style="border:1px solid #dbe6f1;border-radius:12px;padding:12px;margin-bottom:10px;background:#fbfdff;display:flex;justify-content:space-between;gap:10px;align-items:center"><div style="min-width:0"><div style="font-weight:800;color:#0b3a66">📄 '+esc(d.t)+'</div><div style="font-size:12px;color:#6b7a8d">'+esc(d.d)+'</div></div><a class="sl-map" href="'+esc(d.f)+'" target="_blank" rel="noopener" style="flex:none">Otevřít ▸</a></div>';}).join("");
+  document.getElementById("seznamBody").innerHTML='<p class="hint" style="margin:0 0 10px">Metodické pokyny VHOS a.s. Klikni na dokument pro otevření / stažení (PDF).</p>'+DOKUMENTY.map(function(d){return '<div style="border:1px solid #dbe6f1;border-radius:12px;padding:12px;margin-bottom:10px;background:#fbfdff;display:flex;justify-content:space-between;gap:10px;align-items:center"><div style="min-width:0"><div style="font-weight:800;color:#0b3a66">📄 '+esc(d.t)+'</div><div style="font-size:14px;color:#6b7a8d">'+esc(d.d)+'</div></div><a class="sl-map" href="'+esc(d.f)+'" target="_blank" rel="noopener" style="flex:none">Otevřít ▸</a></div>';}).join("");
   document.getElementById("seznamOv").classList.add("show");
 }
 // ===== Nepřítomnost (dovolená / nemoc) =====
@@ -651,7 +651,7 @@ function absPridej(kod){
   var dnes=dnesISO(); var typ="dovolená";
   ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:400px;width:100%;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
     +'<h3 style="margin:0 0 8px;color:#0b3a66">Přidat nepřítomnost</h3>'
-    +'<p style="margin:0 0 10px;font-size:13px;color:#555">'+esc(_jmenoZKod(cil))+(cil!==me?' <span style="color:#e8881b">(zadáváš za jiného)</span>':'')+'</p>'
+    +'<p style="margin:0 0 10px;font-size:15px;color:#555">'+esc(_jmenoZKod(cil))+(cil!==me?' <span style="color:#e8881b">(zadáváš za jiného)</span>':'')+'</p>'
     +'<div class="fld"><label>Typ</label><div class="zav-btns"><div class="pill sel" id="abDov" style="background:#0b5cae;color:#fff">🏖️ Dovolená</div><div class="pill" id="abNem">🤒 Nemoc</div><div class="pill" id="abJin">📌 Jiné</div></div></div>'
     +'<div class="two"><div class="fld"><label>Od</label><input type="date" id="abOd" value="'+dnes+'" style="width:100%"></div><div class="fld"><label>Do</label><input type="date" id="abDo" value="'+dnes+'" style="width:100%"></div></div>'
     +'<div class="fld"><label>Poznámka (nepovinné)</label><input id="abPozn" placeholder="např. zástup: Novák" style="width:100%"></div>'
@@ -683,9 +683,9 @@ function openKontakty(){
   const links=`${mail?`<a class="sl-map" title="Napsat e-mail" href="mailto:${esc(mail)}">✉</a>`:""}${tel?`<a class="sl-map" title="Zavolat" href="tel:${esc(telHref(tel))}">📞</a>`:""}`;
   const canManage=(z===me)||jsemAbsenceSpravce();
   const abs=_absAktNasl(z);
-  const absHtml=abs.length?`<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">`+abs.map(a=>{const bc=_absColor(a.typ);return `<span style="font-size:11px;background:${bc[0]};color:${bc[1]};border:1px solid ${bc[2]};border-radius:8px;padding:1px 7px">${esc(_absLabel(a))}${a.pozn?` · ${esc(a.pozn)}`:""}${canManage?` <span onclick="absSmaz('${z}','${a.id}')" title="Smazat" style="cursor:pointer;font-weight:800">✕</span>`:""}</span>`;}).join("")+`</div>`:"";
-  const selfBtn=canManage?`<div style="margin-top:5px"><span onclick="absPridej('${z}')" style="font-size:11.5px;color:#0b5cae;font-weight:700;cursor:pointer">＋ Přidat nepřítomnost${z===me?'':' (za '+esc(prijmeniMonogram(jm))+')'}</span></div>`:"";
-  return `<div class="sl-row"><div style="min-width:0"><b>${esc(prijmeniJmeno(jm))}</b>${fce?` <span style="color:#6b7a8d">· ${esc(fce)}</span>`:""}${z===me?` <span style="font-size:10px;background:#0b5cae;color:#fff;border-radius:6px;padding:0 5px">to jsi ty</span>`:""}<br><span style="font-size:12px;color:#6b7a8d">${det}</span>${absHtml}${selfBtn}</div><div style="display:flex;gap:6px">${links}</div></div>`;
+  const absHtml=abs.length?`<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">`+abs.map(a=>{const bc=_absColor(a.typ);return `<span style="font-size:12.5px;background:${bc[0]};color:${bc[1]};border:1px solid ${bc[2]};border-radius:8px;padding:1px 7px">${esc(_absLabel(a))}${a.pozn?` · ${esc(a.pozn)}`:""}${canManage?` <span onclick="absSmaz('${z}','${a.id}')" title="Smazat" style="cursor:pointer;font-weight:800">✕</span>`:""}</span>`;}).join("")+`</div>`:"";
+  const selfBtn=canManage?`<div style="margin-top:5px"><span onclick="absPridej('${z}')" style="font-size:13px;color:#0b5cae;font-weight:700;cursor:pointer">＋ Přidat nepřítomnost${z===me?'':' (za '+esc(prijmeniMonogram(jm))+')'}</span></div>`:"";
+  return `<div class="sl-row"><div style="min-width:0"><b>${esc(prijmeniJmeno(jm))}</b>${fce?` <span style="color:#6b7a8d">· ${esc(fce)}</span>`:""}${z===me?` <span style="font-size:11.5px;background:#0b5cae;color:#fff;border-radius:6px;padding:0 5px">to jsi ty</span>`:""}<br><span style="font-size:14px;color:#6b7a8d">${det}</span>${absHtml}${selfBtn}</div><div style="display:flex;gap:6px">${links}</div></div>`;
  }).join("");
  document.getElementById("seznamOv").classList.add("show");
 }
@@ -729,7 +729,7 @@ function krok2(){
   let h=`<h4>Kde – ${tp}</h4><p class="hint">Vyber pracoviště a pak konkrétní ${tp}.</p>`;
   h+=`<div class="fld"><label>Pracoviště <span style="color:#e23b3b">*</span></label><div class="str-btns">`+STR.map(([nm])=>`<div class="pill ${st.stredisko===nm?'sel':''}" style="${st.stredisko===nm?'background:#1577c8':''}" onclick="setStr('${esc(nm)}')">${nm}</div>`).join("")+`</div></div>`;
   if(st.stredisko){
-   const jine=st.objJiny?STR.map(([nm])=>nm).filter(nm=>nm!==st.stredisko).map(nm=>{const list=(OBJEKTY[nm]&&OBJEKTY[nm][tp])?OBJEKTY[nm][tp].map(o=>o.n):[];return list.length?`<div style="margin-top:8px"><div style="font-size:11.5px;font-weight:800;color:#6b7a8d;margin-bottom:4px">${esc(nm)}</div><div class="people" style="max-height:180px;overflow:auto">`+list.map(o=>`<div class="person ${(st.objekt===o&&st.objektStred===nm)?'sel':''}" onclick="setObjektJiny('${esc(nm).replace(/'/g,"\\'")}','${esc(o).replace(/'/g,"\\'")}')">${esc(o)}</div>`).join("")+`</div></div>`:"";}).join(""):"";
+   const jine=st.objJiny?STR.map(([nm])=>nm).filter(nm=>nm!==st.stredisko).map(nm=>{const list=(OBJEKTY[nm]&&OBJEKTY[nm][tp])?OBJEKTY[nm][tp].map(o=>o.n):[];return list.length?`<div style="margin-top:8px"><div style="font-size:13px;font-weight:800;color:#6b7a8d;margin-bottom:4px">${esc(nm)}</div><div class="people" style="max-height:180px;overflow:auto">`+list.map(o=>`<div class="person ${(st.objekt===o&&st.objektStred===nm)?'sel':''}" onclick="setObjektJiny('${esc(nm).replace(/'/g,"\\'")}','${esc(o).replace(/'/g,"\\'")}')">${esc(o)}</div>`).join("")+`</div></div>`:"";}).join(""):"";
    h+=`<div class="fld"><label>Vyber ${tp} (${objs.length})</label>`+(objs.length?`<div class="people" style="max-height:240px;overflow:auto">`+objs.map((o,i)=>`<div class="person ${(st.objekt===o&&!st.objektStred)?'sel':''}" onclick="setObjekt2(${i})">${esc(o)}</div>`).join("")+`</div>`:`<p class="hint">Seznam pro „${tp}" zatím není naimportovaný.</p>`)
      +`<button type="button" onclick="st.objJiny=!st.objJiny;render()" style="margin-top:8px;border:1px dashed #b9c6d6;background:#f7fbff;border-radius:10px;padding:8px 12px;font-weight:800;color:#1577c8;cursor:pointer">${st.objJiny?'▲ Skrýt jiná střediska':'➕ Z jiného střediska'}</button>`
      +jine+`</div>`;}
@@ -791,7 +791,7 @@ function krok4(){
   const res=LIDE_R.map(([z,jm])=>`<div class="person ${u.resitel===z?'sel':''}" title="${esc(jm)}" onclick="setRes(${ti},'${z}')">${esc(lidLbl(z))}</div>`).join("");
   const upo=LIDE_R.map(([z,jm])=>`<div class="person ${u.upozorneni.includes(z)?'sel':''}" title="${esc(jm)}" onclick="togUpoz(${ti},'${z}')">${esc(lidLbl(z))}</div>`).join("");
   return `<div style="border:1px solid #dbe6f1;border-radius:14px;padding:12px;margin-bottom:12px;background:#fbfdff">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b style="color:#0b3a66">Úkol ${ti+1}</b>${st.ukoly.length>1?`<button type="button" onclick="smazUkol(${ti})" style="border:0;background:none;color:#c0392b;font-weight:800;cursor:pointer;font-size:13px">✕ Smazat</button>`:''}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b style="color:#0b3a66">Úkol ${ti+1}</b>${st.ukoly.length>1?`<button type="button" onclick="smazUkol(${ti})" style="border:0;background:none;color:#c0392b;font-weight:800;cursor:pointer;font-size:15px">✕ Smazat</button>`:''}</div>
     <div class="fld"><label>Řešitel – komu přiřadit</label><div class="people">${res}</div></div>
     <div class="fld"><label>Co se má udělat</label><textarea placeholder="Např. odebrat vzorek, propláchnout řad…" oninput="st.ukoly[${ti}].popis=this.value">${esc(u.popis||"")}</textarea></div>
     <div class="two"><div class="fld"><label>Termín – datum</label><input type="date" value="${esc(u.tdatum||"")}" onchange="st.ukoly[${ti}].tdatum=this.value"></div>
@@ -887,8 +887,8 @@ function ukolKartaHTML(u){
   const now=Date.now();
   const poTerminu=u.termin&&now>u.termin&&u.stav!=="splneny";
   const s=UK_STAV[u.stav]||UK_STAV.novy;
-  const badge=poTerminu?`<span style="background:#e23b3b;color:#fff;border-radius:8px;padding:2px 8px;font-size:12px;font-weight:800">⏰ Po termínu</span>`
-                       :`<span style="background:${s[1]};color:#fff;border-radius:8px;padding:2px 8px;font-size:12px;font-weight:800">${s[0]}</span>`;
+  const badge=poTerminu?`<span style="background:#e23b3b;color:#fff;border-radius:8px;padding:2px 8px;font-size:14px;font-weight:800">⏰ Po termínu</span>`
+                       :`<span style="background:${s[1]};color:#fff;border-radius:8px;padding:2px 8px;font-size:14px;font-weight:800">${s[0]}</span>`;
   let btns="";
   if(u.stav==="novy") btns=`<button onclick="ukolPotvrd('${u.id}')" style="border:0;border-radius:10px;padding:8px 14px;background:#1577c8;color:#fff;font-weight:800;cursor:pointer">Potvrdit přijetí</button>`+
                            `<button onclick="ukolSplneno('${u.id}')" style="border:1px solid #2faf5a;border-radius:10px;padding:8px 14px;background:#fff;color:#2faf5a;font-weight:800;cursor:pointer">Splněno</button>`;
@@ -896,10 +896,10 @@ function ukolKartaHTML(u){
   return `<div style="border:1px solid #dbe6f1;border-radius:14px;padding:12px;margin-bottom:10px;background:#fbfdff">
     <div onclick="ukolTogDet('${u.id}')" style="cursor:pointer">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">${badge}
-      <span style="display:flex;align-items:center;gap:6px">${u.termin?`<span style="font-size:12px;color:${poTerminu?'#e23b3b':'#6b7a8d'};font-weight:700">termín ${esc(u.termin_txt||"")}</span>`:`<span style="font-size:12px;color:#9aa7b8">bez termínu</span>`}<span id="ukArr-${u.id}" style="font-size:11px;color:#b0bac8">▸</span></span></div>
+      <span style="display:flex;align-items:center;gap:6px">${u.termin?`<span style="font-size:14px;color:${poTerminu?'#e23b3b':'#6b7a8d'};font-weight:700">termín ${esc(u.termin_txt||"")}</span>`:`<span style="font-size:14px;color:#9aa7b8">bez termínu</span>`}<span id="ukArr-${u.id}" style="font-size:12.5px;color:#b0bac8">▸</span></span></div>
     <div style="font-weight:800;color:#0b3a66;margin-bottom:2px">${esc(u.popis||"(bez popisu)")}</div>
-    ${u.kontext?`<div style="font-size:12.5px;color:#6b7a8d;margin-bottom:2px">${esc(u.co?u.co+" · ":"")}${esc(u.kontext)}</div>`:""}
-    <div style="font-size:12px;color:#9aa7b8;margin-bottom:8px">zadal: ${esc(u.zadal_jmeno||"—")}</div>
+    ${u.kontext?`<div style="font-size:14.5px;color:#6b7a8d;margin-bottom:2px">${esc(u.co?u.co+" · ":"")}${esc(u.kontext)}</div>`:""}
+    <div style="font-size:14px;color:#9aa7b8;margin-bottom:8px">zadal: ${esc(u.zadal_jmeno||"—")}</div>
     </div>
     <div id="ukDet-${u.id}" style="display:none;margin-bottom:8px"></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">${btns}</div></div>`;
@@ -946,25 +946,25 @@ function ukolTogDet(id){
   if(u.potvrzeno_ts)tl.push("přijato "+_fmtCas(u.potvrzeno_ts));
   if(u.splneno_ts)tl.push("splněno "+_fmtCas(u.splneno_ts));
   var L=[];
-  L.push('<div style="font-size:12.5px;color:#33485e"><b>Stav:</b> '+esc((UK_STAV[u.stav]||UK_STAV.novy)[0])+'</div>');
-  L.push('<div style="font-size:11.5px;color:#9aa7b8;margin:2px 0">'+tl.map(esc).join(" → ")+'</div>');
-  if(u.termin_txt)L.push('<div style="font-size:12px;color:#6b7a8d"><b>Termín:</b> '+esc(u.termin_txt)+'</div>');
-  L.push('<div style="font-size:12px;color:#6b7a8d"><b>Zadal:</b> '+esc(u.zadal_jmeno||u.zadal||"—")+'</div>');
-  if(u.upozornit&&u.upozornit.length)L.push('<div style="font-size:12px;color:#6b7a8d"><b>Upozornit:</b> '+u.upozornit.map(function(z){return esc(lidLbl(z));}).join(", ")+'</div>');
+  L.push('<div style="font-size:14.5px;color:#33485e"><b>Stav:</b> '+esc((UK_STAV[u.stav]||UK_STAV.novy)[0])+'</div>');
+  L.push('<div style="font-size:13px;color:#9aa7b8;margin:2px 0">'+tl.map(esc).join(" → ")+'</div>');
+  if(u.termin_txt)L.push('<div style="font-size:14px;color:#6b7a8d"><b>Termín:</b> '+esc(u.termin_txt)+'</div>');
+  L.push('<div style="font-size:14px;color:#6b7a8d"><b>Zadal:</b> '+esc(u.zadal_jmeno||u.zadal||"—")+'</div>');
+  if(u.upozornit&&u.upozornit.length)L.push('<div style="font-size:14px;color:#6b7a8d"><b>Upozornit:</b> '+u.upozornit.map(function(z){return esc(lidLbl(z));}).join(", ")+'</div>');
   el.innerHTML='<div style="border-top:1px dashed #dbe6f1;padding-top:8px">'+L.join("")+'<div id="ukEv-'+id+'" style="margin-top:6px"></div></div>';
   if(u.eventId&&window.firebase&&firebase.database){
     firebase.database().ref("aquactrl_udalosti/"+u.eventId).get().then(function(s){
       var ev=s.val(); var box=document.getElementById("ukEv-"+id); if(!box)return;
-      if(!ev){ box.innerHTML='<div style="font-size:11.5px;color:#9aa7b8">Související událost nenalezena.</div>'; return; }
+      if(!ev){ box.innerHTML='<div style="font-size:13px;color:#9aa7b8">Související událost nenalezena.</div>'; return; }
       var zl=(ev.zavaznost&&ZAV[ev.zavaznost])?ZAV[ev.zavaznost]:null;
-      var zlB=zl?'<span style="background:'+zl[1]+';color:#fff;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:800">'+zl[0]+'</span> ':'';
+      var zlB=zl?'<span style="background:'+zl[1]+';color:#fff;border-radius:6px;padding:1px 7px;font-size:12.5px;font-weight:800">'+zl[0]+'</span> ':'';
       box.innerHTML='<div style="background:#f3f7fb;border-radius:10px;padding:8px">'+
-        '<div style="font-size:11px;color:#9aa7b8;margin-bottom:2px">Související událost</div>'+
+        '<div style="font-size:12.5px;color:#9aa7b8;margin-bottom:2px">Související událost</div>'+
         '<div style="font-weight:700;color:#0b3a66">'+zlB+esc(ev.co||"")+'</div>'+
-        (ev.kde?'<div style="font-size:12px;color:#6b7a8d">'+esc(ev.kde)+'</div>':'')+
-        (ev.popis?'<div style="font-size:12px;color:#33485e;margin-top:2px">'+esc(ev.popis)+'</div>':'')+
-        (ev.nahlasil?'<div style="font-size:11.5px;color:#9aa7b8;margin-top:2px">nahlásil: '+esc(ev.nahlasil)+(ev.tel?" · "+esc(ev.tel):"")+'</div>':'')+
-        '<div style="font-size:11px;color:#9aa7b8;margin-top:2px">zadal událost: '+esc(ev.zadal_jmeno||"—")+' · '+_fmtCas(ev.ts)+'</div></div>';
+        (ev.kde?'<div style="font-size:14px;color:#6b7a8d">'+esc(ev.kde)+'</div>':'')+
+        (ev.popis?'<div style="font-size:14px;color:#33485e;margin-top:2px">'+esc(ev.popis)+'</div>':'')+
+        (ev.nahlasil?'<div style="font-size:13px;color:#9aa7b8;margin-top:2px">nahlásil: '+esc(ev.nahlasil)+(ev.tel?" · "+esc(ev.tel):"")+'</div>':'')+
+        '<div style="font-size:12.5px;color:#9aa7b8;margin-top:2px">zadal událost: '+esc(ev.zadal_jmeno||"—")+' · '+_fmtCas(ev.ts)+'</div></div>';
     }).catch(function(){});
   }
 }
@@ -1002,16 +1002,16 @@ function _ukolRadek(u){
   if(u.precteno_ts)tl.push("přečteno "+_fmtCas(u.precteno_ts));
   const fajfky=(u.resitel&&u.resitel!==u.zadal)
     ? (u.precteno
-      ? `<span title="Přečteno ${esc(_fmtCas(u.precteno_ts))}" style="color:#2faf5a;font-weight:800;font-size:12px;margin-left:4px">✓✓</span>`
-      : `<span title="Odesláno, zatím nepřečteno" style="color:#9aa7b8;font-weight:800;font-size:12px;margin-left:4px">✓</span>`)
+      ? `<span title="Přečteno ${esc(_fmtCas(u.precteno_ts))}" style="color:#2faf5a;font-weight:800;font-size:14px;margin-left:4px">✓✓</span>`
+      : `<span title="Odesláno, zatím nepřečteno" style="color:#9aa7b8;font-weight:800;font-size:14px;margin-left:4px">✓</span>`)
     : "";
   return `<div style="border-left:3px solid ${col};padding:5px 8px;margin:6px 0;background:#fff;border-radius:6px">
     <div style="display:flex;justify-content:space-between;gap:6px;align-items:center">
-      <b style="color:#0b3a66;font-size:13px">${esc(u.popis||"(úkol)")}</b>
-      <span style="background:${col};color:#fff;border-radius:7px;padding:1px 7px;font-size:11px;font-weight:800;white-space:nowrap">${lab}</span></div>
-    <div style="font-size:11.5px;color:#6b7a8d">řešitel: ${esc(u.resitel_jmeno||u.resitel||"—")}${fajfky}${u.termin_txt?` · termín ${esc(u.termin_txt)}`:""}</div>
-    ${(u.upozornit&&u.upozornit.length)?`<div style="font-size:11.5px;color:#6b7a8d">🔔 upozornit: ${u.upozornit.map(z=>esc(lidLbl(z))).join(", ")}</div>`:""}
-    <div style="font-size:11px;color:#9aa7b8">${tl.map(esc).join(" → ")}</div></div>`;
+      <b style="color:#0b3a66;font-size:15px">${esc(u.popis||"(úkol)")}</b>
+      <span style="background:${col};color:#fff;border-radius:7px;padding:1px 7px;font-size:12.5px;font-weight:800;white-space:nowrap">${lab}</span></div>
+    <div style="font-size:13px;color:#6b7a8d">řešitel: ${esc(u.resitel_jmeno||u.resitel||"—")}${fajfky}${u.termin_txt?` · termín ${esc(u.termin_txt)}`:""}</div>
+    ${(u.upozornit&&u.upozornit.length)?`<div style="font-size:13px;color:#6b7a8d">🔔 upozornit: ${u.upozornit.map(z=>esc(lidLbl(z))).join(", ")}</div>`:""}
+    <div style="font-size:12.5px;color:#9aa7b8">${tl.map(esc).join(" → ")}</div></div>`;
 }
 // chronologický průběh události (založení, cisterny, úkoly zadáno/přijato/splněno, uzavření)
 function _udProbeh(ev,ukoly){
@@ -1030,8 +1030,8 @@ function _udProbeh(ev,ukoly){
   if(ev.navrhy)Object.keys(ev.navrhy).forEach(function(k){var n=ev.navrhy[k]||{}; if(n.ts!=null)it.push([n.ts,"📣",(n.kdo||"Někdo")+" navrhl/a uzavřít"+(n.note?" · "+n.note:"")]);});
   if(ev.uzavreno&&ev.uzavreno_ts)it.push([ev.uzavreno_ts,"🔒","Událost uzavřena — "+(ev.uzavrel_jmeno||"")+(ev.uzavreno_pozn?" · "+ev.uzavreno_pozn:"")]);
   it.sort(function(a,b){return a[0]-b[0];});
-  if(!it.length)return '<div style="font-size:12px;color:#9aa7b8">Zatím žádný průběh.</div>';
-  return it.map(function(x){return `<div style="display:flex;gap:8px;font-size:12px;color:#33485e;padding:3px 0;border-bottom:1px dashed #eef2f6"><span>${x[1]}</span><span style="color:#9aa7b8;white-space:nowrap">${_fmtCas(x[0])}</span><span>${esc(x[2])}</span></div>`;}).join("");
+  if(!it.length)return '<div style="font-size:14px;color:#9aa7b8">Zatím žádný průběh.</div>';
+  return it.map(function(x){return `<div style="display:flex;gap:8px;font-size:14px;color:#33485e;padding:3px 0;border-bottom:1px dashed #eef2f6"><span>${x[1]}</span><span style="color:#9aa7b8;white-space:nowrap">${_fmtCas(x[0])}</span><span>${esc(x[2])}</span></div>`;}).join("");
 }
 function _udTog(id){ const d=document.getElementById('prub-'+id),a=document.getElementById('prubA-'+id); if(!d)return; const show=d.style.display==='none'; d.style.display=show?'block':'none'; if(a)a.textContent=show?'📜 Průběh ▴':'📜 Průběh ▾'; }
 // Bezpečný obal: když _udalostKarta na nějakém poli spadne, nezhroutí celý seznam,
@@ -1042,26 +1042,26 @@ function _safeKarta(ev,ukoly){
     var m=(e&&e.message)?e.message:String(e);
     return '<div style="border:1px solid #f3c2c2;background:#fff5f5;border-radius:12px;padding:12px;margin-bottom:8px">'
       +'<b style="color:#c0392b">⚠️ Událost nešla zobrazit</b>'
-      +'<div style="font-size:12.5px;color:#0b3a66;margin-top:3px">'+esc((ev&&ev.co)||"Událost")+(ev&&ev.kde?" · "+esc(ev.kde):"")+'</div>'
-      +'<div style="font-size:11px;color:#c0392b;font-family:monospace;margin-top:4px;word-break:break-all">'+esc(m)+'</div></div>';
+      +'<div style="font-size:14.5px;color:#0b3a66;margin-top:3px">'+esc((ev&&ev.co)||"Událost")+(ev&&ev.kde?" · "+esc(ev.kde):"")+'</div>'
+      +'<div style="font-size:12.5px;color:#c0392b;font-family:monospace;margin-top:4px;word-break:break-all">'+esc(m)+'</div></div>';
   }
 }
 function _udalostKarta(ev,ukoly){
   const zl=(ev.zavaznost&&ZAV[ev.zavaznost])?ZAV[ev.zavaznost]:null;
-  const zlB=zl?`<span style="background:${zl[1]};color:#fff;border-radius:7px;padding:1px 8px;font-size:11px;font-weight:800">${zl[0]}</span>`:"";
+  const zlB=zl?`<span style="background:${zl[1]};color:#fff;border-radius:7px;padding:1px 8px;font-size:12.5px;font-weight:800">${zl[0]}</span>`:"";
   const now=Date.now(), total=ukoly.length, done=ukoly.filter(u=>u.stav==="splneny").length;
   const late=ukoly.filter(u=>u.termin&&now>u.termin&&u.stav!=="splneny").length;
-  const stavTag = total===0 ? `<span style="font-size:11px;color:#9aa7b8">bez úkolů</span>`
-    : (done===total) ? `<span style="background:#2faf5a;color:#fff;border-radius:7px;padding:1px 8px;font-size:11px;font-weight:800">✔️ Hotovo</span>`
-    : `<span style="font-size:11.5px;color:${late?'#e23b3b':'#6b7a8d'};font-weight:700">${done}/${total} splněno${late?` · ${late} po termínu`:""}</span>`;
-  const nahl=ev.nahlasil?`<div style="font-size:12px;color:#6b7a8d">nahlásil: ${esc(ev.nahlasil)}${ev.tel?` · ${esc(ev.tel)}`:""}</div>`:"";
+  const stavTag = total===0 ? `<span style="font-size:12.5px;color:#9aa7b8">bez úkolů</span>`
+    : (done===total) ? `<span style="background:#2faf5a;color:#fff;border-radius:7px;padding:1px 8px;font-size:12.5px;font-weight:800">✔️ Hotovo</span>`
+    : `<span style="font-size:13px;color:${late?'#e23b3b':'#6b7a8d'};font-weight:700">${done}/${total} splněno${late?` · ${late} po termínu`:""}</span>`;
+  const nahl=ev.nahlasil?`<div style="font-size:14px;color:#6b7a8d">nahlásil: ${esc(ev.nahlasil)}${ev.tel?` · ${esc(ev.tel)}`:""}</div>`:"";
   let cistLine="";
   { const arr=_cistArr(ev); if(arr.length){ const c0=arr[0];
-    cistLine=`<div style="font-size:12px;color:#33485e;margin-top:2px">🚚 ${arr.map(c=>esc(fmtL(c.obj)+" · "+(c.typ||""))).join(", ")}${c0.misto?` → ${esc(c0.misto)}`:""}${(c0.od||c0.do)?` · ${c0.od?_fmtCas(c0.od):"?"}–${c0.do?_fmtCas(c0.do):"?"}`:""}${!ev.uzavreno?` <a onclick="upravCisternu('${ev.id}')" style="color:#0b5cae;cursor:pointer;font-weight:700">✏️ upravit</a>`:""}</div>`; } }
+    cistLine=`<div style="font-size:14px;color:#33485e;margin-top:2px">🚚 ${arr.map(c=>esc(fmtL(c.obj)+" · "+(c.typ||""))).join(", ")}${c0.misto?` → ${esc(c0.misto)}`:""}${(c0.od||c0.do)?` · ${c0.od?_fmtCas(c0.od):"?"}–${c0.do?_fmtCas(c0.do):"?"}`:""}${!ev.uzavreno?` <a onclick="upravCisternu('${ev.id}')" style="color:#0b5cae;cursor:pointer;font-weight:700">✏️ upravit</a>`:""}</div>`; } }
   const akce=ev.uzavreno?"":'<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button onclick="udalostUkol(\''+ev.id+'\')" style="border:0;border-radius:10px;padding:7px 12px;background:#1577c8;color:#fff;font-weight:800;cursor:pointer">➕ Úkol</button><button onclick="udalostPoznamka(\''+ev.id+'\')" style="border:1px solid #1577c8;border-radius:10px;padding:7px 12px;background:#fff;color:#1577c8;font-weight:800;cursor:pointer">➕ Poznámka</button></div>';
   let footer;
   if(ev.uzavreno){
-    footer=`<div style="margin-top:8px;font-size:12px;color:#2faf5a;font-weight:700">🔒 Uzavřeno — ${esc(ev.uzavrel_jmeno||"")} · ${_fmtCas(ev.uzavreno_ts)}${ev.uzavreno_pozn?` · ${esc(ev.uzavreno_pozn)}`:""}</div>`;
+    footer=`<div style="margin-top:8px;font-size:14px;color:#2faf5a;font-weight:700">🔒 Uzavřeno — ${esc(ev.uzavrel_jmeno||"")} · ${_fmtCas(ev.uzavreno_ts)}${ev.uzavreno_pozn?` · ${esc(ev.uzavreno_pozn)}`:""}</div>`;
   }else{
     const muzu=MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");
     footer=`<div style="display:flex;gap:8px;margin-top:8px">${muzu
@@ -1071,14 +1071,14 @@ function _udalostKarta(ev,ukoly){
   return `<div style="border:1px solid #dbe6f1;border-radius:14px;padding:12px;margin-bottom:12px;background:${ev.uzavreno?'#f6f8fa':'#fbfdff'};${ev.uzavreno?'opacity:.78':''}">
     <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:4px">
       <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">${zlB}<b style="color:#0b3a66">${esc(ev.co||"Událost")}</b></div>${stavTag}</div>
-    ${ev.kde?`<div style="font-size:12.5px;color:#6b7a8d">${esc(ev.kde)}</div>`:""}
-    ${ev.popis?`<div style="font-size:12.5px;color:#33485e;margin:2px 0">${esc(ev.popis)}</div>`:""}
-    <div style="font-size:11.5px;color:#9aa7b8;margin-bottom:2px">zadal: ${esc(ev.zadal_jmeno||"—")} · ${_fmtCas(ev.ts)}</div>
+    ${ev.kde?`<div style="font-size:14.5px;color:#6b7a8d">${esc(ev.kde)}</div>`:""}
+    ${ev.popis?`<div style="font-size:14.5px;color:#33485e;margin:2px 0">${esc(ev.popis)}</div>`:""}
+    <div style="font-size:13px;color:#9aa7b8;margin-bottom:2px">zadal: ${esc(ev.zadal_jmeno||"—")} · ${_fmtCas(ev.ts)}</div>
     ${nahl}
     ${cistLine}
     ${ukoly.length?`<div style="margin-top:6px">${ukoly.map(_ukolRadek).join("")}</div>`:""}
     ${akce}
-    <div id="prubA-${ev.id}" onclick="_udTog('${ev.id}')" style="cursor:pointer;margin-top:8px;font-size:12px;font-weight:800;color:#0b5cae;user-select:none">📜 Průběh / historie ▴</div>
+    <div id="prubA-${ev.id}" onclick="_udTog('${ev.id}')" style="cursor:pointer;margin-top:8px;font-size:14px;font-weight:800;color:#0b5cae;user-select:none">📜 Průběh / historie ▴</div>
     <div id="prub-${ev.id}" style="display:block;margin-top:4px;border-top:1px solid #eef2f6;padding-top:6px">${_udProbeh(ev,ukoly)}</div>
     ${footer}</div>`;
 }
@@ -1103,15 +1103,15 @@ function acRefreshBadge(evs){
 }
 function _udalostRadek(ev){
   var zl=(ev.zavaznost&&ZAV[ev.zavaznost])?ZAV[ev.zavaznost]:null;
-  var zlB=zl?'<span style="background:'+zl[1]+';color:#fff;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:800;white-space:nowrap">'+zl[0]+'</span>':"";
+  var zlB=zl?'<span style="background:'+zl[1]+';color:#fff;border-radius:6px;padding:1px 7px;font-size:12.5px;font-weight:800;white-space:nowrap">'+zl[0]+'</span>':"";
   var eid=ev.id;
   return '<div style="border-bottom:1px solid #eef2f7">'+
     '<div onclick="acTogDet(\''+eid+'\')" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:10px 12px;flex-wrap:wrap">'+
       zlB+
       '<span style="font-weight:700;color:#0b3a66;flex:1;min-width:0">'+esc(ev.co||"Událost")+'</span>'+
-      '<span style="font-size:12px;color:#6b7a8d">'+esc(ev.kde||"")+'</span>'+
-      '<span style="font-size:11px;color:#9aa7b8;white-space:nowrap">'+_fmtCas(ev.ts)+'</span>'+
-      '<span id="udArr-'+eid+'" style="font-size:11px;color:#b0bac8">▸</span>'+
+      '<span style="font-size:14px;color:#6b7a8d">'+esc(ev.kde||"")+'</span>'+
+      '<span style="font-size:12.5px;color:#9aa7b8;white-space:nowrap">'+_fmtCas(ev.ts)+'</span>'+
+      '<span id="udArr-'+eid+'" style="font-size:12.5px;color:#b0bac8">▸</span>'+
     '</div>'+
     '<div id="udDet-'+eid+'" style="display:none;padding:0 10px 10px"></div>'+
   '</div>';
@@ -1121,16 +1121,16 @@ function acTogDet(id){
   var arr=document.getElementById("udArr-"+id);
   if(!el)return;
   if(el.style.display!=="none"){el.style.display="none";if(arr)arr.textContent="▸";return;}
-  el.innerHTML='<p style="font-size:12px;color:#9aa7b8;padding:8px 0">Načítám…</p>';
+  el.innerHTML='<p style="font-size:14px;color:#9aa7b8;padding:8px 0">Načítám…</p>';
   el.style.display="block";if(arr)arr.textContent="▾";
   var ev=_cachedOpenEvs.find(function(e){return e.id===id;});
-  if(!ev){el.innerHTML='<p style="font-size:12px;color:#e23b3b">Událost nenalezena.</p>';return;}
+  if(!ev){el.innerHTML='<p style="font-size:14px;color:#e23b3b">Událost nenalezena.</p>';return;}
   firebase.database().ref("aquactrl_ukoly").get().then(function(s){
     var ukoly=[];
     s.forEach(function(c){var u=c.val()||{};if(u.eventId===id)ukoly.push(Object.assign({id:c.key},u));});
     ukoly.sort(function(a,b){var ad=a.stav==="splneny"?1:0,bd=b.stav==="splneny"?1:0;if(ad!==bd)return ad-bd;return(a.termin||9e15)-(b.termin||9e15);});
     el.innerHTML=_safeKarta(ev,ukoly);
-  }).catch(function(){el.innerHTML='<p style="font-size:12px;color:#e23b3b;padding:8px 0">Chyba načtení.</p>';});
+  }).catch(function(){el.innerHTML='<p style="font-size:14px;color:#e23b3b;padding:8px 0">Chyba načtení.</p>';});
 }
 // Obnoví otevřený detail události (po přidání poznámky/úkolu) – dotáhne čerstvá data
 function _udRefreshDetail(id){
@@ -1219,10 +1219,10 @@ function acVyberLidi(opt){
     const upozChips=LIDE_R.map(function(p){return '<span class="person'+(selUpoz.has(p[0])?' sel':'')+'" data-z="'+p[0]+'" style="cursor:pointer">'+esc(lidLbl(p[0]))+'</span>';}).join("");
     let _hopt='<option value="">—</option>'; for(let _h=0;_h<24;_h++){const _hh=("0"+_h).slice(-2); _hopt+='<option value="'+_hh+'">'+_hh+'</option>';}
     const _mopt=['00','10','20','30','40','50'].map(function(m){return '<option value="'+m+'">'+m+'</option>';}).join('');
-    const terminHtml=opt.withTermin?'<div class="two"><div class="fld"><label>Termín – datum</label><input type="date" id="acvDat" style="width:100%"></div><div class="fld"><label>Čas (hod / min)</label><div style="display:flex;gap:6px"><select id="acvHod" style="flex:1;padding:9px;border:1px solid #ccc;border-radius:8px;font-size:15px;font-family:inherit">'+_hopt+'</select><select id="acvMin" style="flex:1;padding:9px;border:1px solid #ccc;border-radius:8px;font-size:15px;font-family:inherit">'+_mopt+'</select></div></div></div>':'';
+    const terminHtml=opt.withTermin?'<div class="two"><div class="fld"><label>Termín – datum</label><input type="date" id="acvDat" style="width:100%"></div><div class="fld"><label>Čas (hod / min)</label><div style="display:flex;gap:6px"><select id="acvHod" style="flex:1;padding:9px;border:1px solid #ccc;border-radius:8px;font-size:17px;font-family:inherit">'+_hopt+'</select><select id="acvMin" style="flex:1;padding:9px;border:1px solid #ccc;border-radius:8px;font-size:17px;font-family:inherit">'+_mopt+'</select></div></div></div>':'';
     ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:460px;width:100%;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.3);max-height:86vh;overflow:auto">'
       +'<h3 style="margin:0 0 4px;color:#0b3a66">'+esc(opt.head||"Vybrat")+'</h3>'
-      +(opt.sub?'<p style="margin:0 0 10px;font-size:13px;color:#555">'+esc(opt.sub)+'</p>':'')
+      +(opt.sub?'<p style="margin:0 0 10px;font-size:15px;color:#555">'+esc(opt.sub)+'</p>':'')
       +'<div class="fld"><label>'+esc(opt.noteLabel||"Poznámka (nepovinné)")+'</label><textarea id="acvNote" placeholder="'+esc(opt.notePh||"")+'" style="width:100%"></textarea></div>'
       +terminHtml
       +(opt.people!==false?'<div class="fld"><label>'+esc(opt.peopleLabel||"Koho upozornit")+'</label><div class="people" id="acvPeople">'+chips+'</div></div>':'')
@@ -1283,7 +1283,7 @@ function upravCisternu(id){
     ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px";
     ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:460px;width:100%;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.3);max-height:86vh;overflow:auto">'
       +'<h3 style="margin:0 0 4px;color:#0b3a66">Upravit cisternu</h3>'
-      +'<p style="margin:0 0 10px;font-size:13px;color:#555">'+esc(arr.map(function(x){return fmtL(x.obj)+" · "+(x.typ||"");}).join(", "))+'</p>'
+      +'<p style="margin:0 0 10px;font-size:15px;color:#555">'+esc(arr.map(function(x){return fmtL(x.obj)+" · "+(x.typ||"");}).join(", "))+'</p>'
       +'<div class="fld"><label>Místo přistavení</label><input id="ucMisto" value="'+esc(c.misto||"")+'"></div>'
       +'<div class="two"><div class="fld"><label>Od – datum</label><input type="date" id="ucOdD" value="'+dISO(od)+'"></div><div class="fld"><label>Od – čas</label><input type="time" id="ucOdT" step="600" value="'+tHM(od)+'"></div></div>'
       +'<div class="two"><div class="fld"><label>Do – datum</label><input type="date" id="ucDoD" value="'+dISO(doo)+'"></div><div class="fld"><label>Do – čas</label><input type="time" id="ucDoT" step="600" value="'+tHM(doo)+'"></div></div>'
@@ -1332,13 +1332,13 @@ function openZarizeni(){
     if(!rows.length){ body.innerHTML='<p class="hint">Žádná registrovaná zařízení.</p>'; return; }
     body.innerHTML=rows.map(function(r){
       const pend=r.schvaleno===false;
-      const stav=pend?'<span style="background:#e8881b;color:#fff;border-radius:7px;padding:1px 8px;font-size:11px;font-weight:800">⏳ Čeká</span>'
-                     :'<span style="background:#2faf5a;color:#fff;border-radius:7px;padding:1px 8px;font-size:11px;font-weight:800">✅ Schváleno</span>';
+      const stav=pend?'<span style="background:#e8881b;color:#fff;border-radius:7px;padding:1px 8px;font-size:12.5px;font-weight:800">⏳ Čeká</span>'
+                     :'<span style="background:#2faf5a;color:#fff;border-radius:7px;padding:1px 8px;font-size:12.5px;font-weight:800">✅ Schváleno</span>';
       const jm=r.person?lidLbl(r.person):'(bez jména)';
       return '<div style="border:1px solid #dbe6f1;border-radius:14px;padding:12px;margin-bottom:10px;background:#fbfdff">'
         +'<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="color:#0b3a66">'+esc(jm)+'</b>'+stav+'</div>'
-        +'<div style="font-size:11.5px;color:#9aa7b8;margin:2px 0">'+esc(r.ua||"—")+'</div>'
-        +'<div style="font-size:11px;color:#9aa7b8">registrace: '+_fmtCas(r.ts)+'</div>'
+        +'<div style="font-size:13px;color:#9aa7b8;margin:2px 0">'+esc(r.ua||"—")+'</div>'
+        +'<div style="font-size:12.5px;color:#9aa7b8">registrace: '+_fmtCas(r.ts)+'</div>'
         +'<div style="display:flex;gap:8px;margin-top:8px">'
         +(pend?'<button onclick="zarizSchval(\''+r.id+'\')" style="border:0;border-radius:10px;padding:8px 14px;background:#2faf5a;color:#fff;font-weight:800;cursor:pointer">✅ Schválit</button>':'')
         +'<button onclick="zarizZamit(\''+r.id+'\')" style="border:1px solid #c0392b;border-radius:10px;padding:8px 14px;background:#fff;color:#c0392b;font-weight:800;cursor:pointer">🗑️ Odebrat</button>'
@@ -1376,7 +1376,7 @@ function openLoginEmaily(){
       +'<button onclick="leAdd()" style="width:100%;border:0;border-radius:10px;padding:9px;background:#0b5cae;color:#fff;font-weight:800;cursor:pointer">Přidat</button></div>';
     const list=rows.length?rows.map(function(r){
       return '<div style="border:1px solid #dbe6f1;border-radius:14px;padding:10px 12px;margin-bottom:8px;background:#fbfdff;display:flex;justify-content:space-between;align-items:center;gap:8px">'
-        +'<div><b style="color:#0b3a66">'+esc(lidLbl(r.kod))+'</b><br><span style="font-size:11.5px;color:#9aa7b8">'+esc(r.key.replace(/,/g,"."))+'</span></div>'
+        +'<div><b style="color:#0b3a66">'+esc(lidLbl(r.kod))+'</b><br><span style="font-size:13px;color:#9aa7b8">'+esc(r.key.replace(/,/g,"."))+'</span></div>'
         +'<button onclick="leRemove(\''+r.key+'\')" style="border:1px solid #c0392b;border-radius:10px;padding:6px 12px;background:#fff;color:#c0392b;font-weight:800;cursor:pointer">🗑️</button>'
         +'</div>';
     }).join(""):'<p class="hint">Zatím žádné povolené e-maily.</p>';
@@ -1426,9 +1426,9 @@ function openCisterny(){
       const html=`<div ${klik?`onclick="openCistDetail(${i})"`:""} style="border:1px solid #dbe6f1;border-radius:14px;padding:12px;margin-bottom:10px;background:#fbfdff;cursor:${klik?'pointer':'default'}">
         <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:2px">
           <b style="color:#0b3a66">${fmtL(c.obj)} · ${esc(c.typ)}</b>
-          <span style="background:${col};color:#fff;border-radius:7px;padding:1px 8px;font-size:11px;font-weight:800;white-space:nowrap">${stav}${klik?' ▸':''}</span></div>
-        <div style="font-size:12px;color:#33485e">${detail}</div>
-        <div style="font-size:11px;color:#9aa7b8">stanoviště ${esc(c.stred)}${c.spz?` · SPZ ${esc(c.spz)}`:""}${c.opr?` · ${esc(c.opr)}`:""}${c.pozn?` · ${esc(c.pozn)}`:""}${mine.length>1?` · další rezervace: ${mine.length-1}`:""}</div>
+          <span style="background:${col};color:#fff;border-radius:7px;padding:1px 8px;font-size:12.5px;font-weight:800;white-space:nowrap">${stav}${klik?' ▸':''}</span></div>
+        <div style="font-size:14px;color:#33485e">${detail}</div>
+        <div style="font-size:12.5px;color:#9aa7b8">stanoviště ${esc(c.stred)}${c.spz?` · SPZ ${esc(c.spz)}`:""}${c.opr?` · ${esc(c.opr)}`:""}${c.pozn?` · ${esc(c.pozn)}`:""}${mine.length>1?` · další rezervace: ${mine.length-1}`:""}</div>
       </div>`;
       return {prio:prio, obj:c.obj, html:html};
     });
@@ -1441,15 +1441,15 @@ function openCistDetail(i){
   i=+i; const c=CISTERNY[i], now=Date.now();
   const mine=_cistRez.filter(r=>r.idx===i&&r.od!=null&&r.do!=null).sort((a,b)=>a.od-b.od);
   const rezHtml=mine.length?mine.map(function(r){const act=r.od<=now&&now<=r.do;return `<div style="border:1px solid #dbe6f1;border-radius:10px;padding:10px;margin-top:8px;background:${act?'#fff5f5':'#fffaf0'}">
-      <div style="font-weight:800;font-size:12px;color:${act?'#e23b3b':'#e8881b'}">${act?'🔴 Právě obsazená':'🟡 Rezervace'} · ${_fmtCas(r.od)} – ${_fmtCas(r.do)}</div>
-      <div style="font-size:13px;color:#0b3a66;margin-top:3px"><b>Kde stojí:</b> ${esc(r.misto||'—')}</div>
-      <div style="font-size:12px;color:#6b7a8d">Událost: ${esc(r.co||'—')}</div>
-      ${act?`<div style="font-size:12px;color:#2faf5a;font-weight:700">K dispozici od ${_fmtCas(r.do)}</div>`:''}</div>`;}).join(""):'<p class="hint" style="margin-top:8px">Žádná rezervace — cisterna je volná na stanovišti '+esc(c.stred)+'.</p>';
+      <div style="font-weight:800;font-size:14px;color:${act?'#e23b3b':'#e8881b'}">${act?'🔴 Právě obsazená':'🟡 Rezervace'} · ${_fmtCas(r.od)} – ${_fmtCas(r.do)}</div>
+      <div style="font-size:15px;color:#0b3a66;margin-top:3px"><b>Kde stojí:</b> ${esc(r.misto||'—')}</div>
+      <div style="font-size:14px;color:#6b7a8d">Událost: ${esc(r.co||'—')}</div>
+      ${act?`<div style="font-size:14px;color:#2faf5a;font-weight:700">K dispozici od ${_fmtCas(r.do)}</div>`:''}</div>`;}).join(""):'<p class="hint" style="margin-top:8px">Žádná rezervace — cisterna je volná na stanovišti '+esc(c.stred)+'.</p>';
   const ov=document.createElement("div");
   ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px";
   ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:460px;width:100%;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,.3);max-height:86vh;overflow:auto">'
     +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3 style="margin:0;color:#0b3a66">'+esc(fmtL(c.obj)+" · "+c.typ)+'</h3><button id="cdX" style="border:0;background:none;font-size:20px;cursor:pointer;color:#888">✕</button></div>'
-    +'<div style="font-size:12px;color:#9aa7b8;margin:2px 0 4px">stanoviště '+esc(c.stred)+(c.spz?" · SPZ "+esc(c.spz):"")+(c.opr?" · řidičák "+esc(c.opr):"")+(c.pozn?" · "+esc(c.pozn):"")+'</div>'
+    +'<div style="font-size:14px;color:#9aa7b8;margin:2px 0 4px">stanoviště '+esc(c.stred)+(c.spz?" · SPZ "+esc(c.spz):"")+(c.opr?" · řidičák "+esc(c.opr):"")+(c.pozn?" · "+esc(c.pozn):"")+'</div>'
     +rezHtml+'</div>';
   document.body.appendChild(ov);
   const close=function(){ if(ov.parentNode)document.body.removeChild(ov); };
@@ -1552,10 +1552,10 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
     ov.style.cssText="position:fixed;inset:0;background:rgba(11,40,70,.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px";
     ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:380px;width:100%;padding:22px;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
       +'<h3 style="margin:0 0 8px;color:#0b3a66">🔒 Přihlášení do AquaCtrlu</h3>'
-      +'<p style="margin:0 0 14px;font-size:13px;color:#555">'+(msg||'Zadej svůj e-mail, pošleme ti přihlašovací odkaz. Funguje s jakoukoli schránkou.')+'</p>'
-      +'<input id="acLoginEmail" type="email" placeholder="tvuj@email.cz" style="width:100%;padding:10px;font-size:15px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box">'
+      +'<p style="margin:0 0 14px;font-size:15px;color:#555">'+(msg||'Zadej svůj e-mail, pošleme ti přihlašovací odkaz. Funguje s jakoukoli schránkou.')+'</p>'
+      +'<input id="acLoginEmail" type="email" placeholder="tvuj@email.cz" style="width:100%;padding:10px;font-size:17px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box">'
       +'<button id="acLoginSend" style="margin-top:12px;width:100%;padding:11px;border:0;background:#0b5cae;color:#fff;border-radius:8px;font-weight:700;cursor:pointer">Poslat přihlašovací odkaz</button>'
-      +'<div id="acLoginMsg" style="margin-top:10px;font-size:12.5px;color:#6b7a8d"></div>'
+      +'<div id="acLoginMsg" style="margin-top:10px;font-size:14.5px;color:#6b7a8d"></div>'
       +'</div>';
     document.body.appendChild(ov);
     ov.querySelector('#acLoginSend').onclick=function(){
