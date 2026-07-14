@@ -144,7 +144,6 @@ padding:24px;z-index:50;overflow:auto}
     <a id="navLoginEmaily" onclick="openLoginEmaily()" style="display:none">Přístup (e-maily)</a>
     <a id="navSdilet" onclick="acSdilej()" style="display:none">📤 Sdílet appku</a>
     <a onclick="openDokumenty()">Dokumenty</a>
-    <a onclick="openMediaTest()">🎙️ Test: hlas a foto</a>
     <a id="btnPush" onclick="acEnablePush()">🔔 Povolit notifikace</a>
   </nav>
   <div class="vhos"><b>VHOS</b><i>a.s.</i></div>
@@ -240,7 +239,7 @@ function autoUpoz(zadal,resitel){ const out=[]; [zadal,resitel,ADMIN_KOD].forEac
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v85";  // drž v souladu s CACHE v sw.js
+const VERZE="v86";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -483,11 +482,11 @@ renderPrehled();
 // ---- WIZARD ----
 const KROKY=["1. Co se stalo?","2. Kde?","3. Podrobnosti","4. Lidé"];
 let st={krok:1,podminka:null,zavaznost:null,stredisko:null,typ:null,objekt:null,objektStred:"",objJiny:false,adresa:"",
-popis:"",nahlasil:"",tel:"",ukoly:[{resitel:null,popis:"",tdatum:"",tcas:""}],info:[],cistAno:null,cisterny:[],cistMista:{},cistOd:"",cistCas:"",cistDoDatum:"",cistDoCas:"",udDatum:"",kolOpen:false,kolVzorky:[],hotovo:false};
+popis:"",nahlasil:"",tel:"",ukoly:[{resitel:null,popis:"",tdatum:"",tcas:""}],info:[],cistAno:null,cisterny:[],cistMista:{},cistOd:"",cistCas:"",cistDoDatum:"",cistDoCas:"",udDatum:"",kolOpen:false,kolVzorky:[],prilohy:[],hotovo:false};
 
-function otevri(){st={krok:1,podminka:null,zavaznost:null,stredisko:null,typ:null,objekt:null,objektStred:"",objJiny:false,adresa:"",dotcene:[],popis:"",nahlasil:"",tel:"",ukoly:[{resitel:null,popis:"",tdatum:"",tcas:""}],info:[],cistAno:null,cisterny:[],cistMista:{},cistOd:"",cistCas:"",cistDoDatum:"",cistDoCas:"",udDatum:"",kolOpen:false,kolVzorky:[],hotovo:false};
+function otevri(){st={krok:1,podminka:null,zavaznost:null,stredisko:null,typ:null,objekt:null,objektStred:"",objJiny:false,adresa:"",dotcene:[],popis:"",nahlasil:"",tel:"",ukoly:[{resitel:null,popis:"",tdatum:"",tcas:""}],info:[],cistAno:null,cisterny:[],cistMista:{},cistOd:"",cistCas:"",cistDoDatum:"",cistDoCas:"",udDatum:"",kolOpen:false,kolVzorky:[],prilohy:[],hotovo:false};
 st.udDatum=dnesISO();_datum=dnesISO();_loadCistRez();document.getElementById("ov").classList.add("show");render();}
-function zavri(){document.getElementById("ov").classList.remove("show");}
+function zavri(){ try{ if(_prRec&&_prMR){_prMR.stop();} _prRec=false; _prMR=null; acPrilStopStream(); }catch(_){} document.getElementById("ov").classList.remove("show"); }
 
 function render(){
  // kroky
@@ -580,74 +579,7 @@ function openSeznam(s,kl){
    });
  }
 }
-function zavriSeznam(){ try{ if(typeof _mtStopStream==='function')_mtStopStream(); }catch(_){} document.getElementById("seznamOv").classList.remove("show"); }
-// ===== TEST: hlasová poznámka + foto + příloha (jen náhled, zatím se nikam neukládá) =====
-var _mtMediaRec=null, _mtChunks=[], _mtStream=null, _mtAudioURL=null, _mtT0=0, _mtTimer=null;
-function _mtStopStream(){ if(_mtTimer){clearInterval(_mtTimer);_mtTimer=null;} if(_mtStream){try{_mtStream.getTracks().forEach(function(t){t.stop();});}catch(_){} _mtStream=null;} if(_mtMediaRec&&_mtMediaRec.state==="recording"){try{_mtMediaRec.stop();}catch(_){}} _mtMediaRec=null; }
-function openMediaTest(){
-  try{ zavriPlan(); }catch(_){}
-  document.getElementById("seznamHead").textContent="Test: hlas a foto";
-  document.getElementById("seznamOv").classList.add("show");
-  var secure=(location.protocol==="https:"||location.hostname==="localhost");
-  var body=document.getElementById("seznamBody");
-  body.innerHTML=
-    '<p class="hint">Testovací obrazovka – nahraj hlasovou poznámku, přidej fotku nebo přílohu a rovnou si to přehraj/prohlédni. <b>Zatím se nikam neukládá</b> (nic neopouští tvůj telefon).</p>'
-    +(secure?"":'<p style="color:#c0392b;font-weight:700">⚠️ Mikrofon/kamera fungují jen přes HTTPS – tady to nemusí jít.</p>')
-    +'<div style="border:1px solid #dbe6f1;border-radius:14px;padding:12px;margin:10px 0;background:#fbfdff">'
-      +'<b style="color:#0b3a66">🎙️ Hlasová poznámka</b>'
-      +'<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><button id="mtRec" onclick="mtToggleRec()" style="border:0;border-radius:10px;padding:9px 14px;background:#e23b3b;color:#fff;font-weight:800;cursor:pointer">● Nahrát</button><span id="mtRecStav" style="align-self:center;font-size:14px;color:#6b7a8d"></span></div>'
-      +'<div id="mtAudioWrap" style="margin-top:8px"></div>'
-    +'</div>'
-    +'<div style="border:1px solid #dbe6f1;border-radius:14px;padding:12px;margin:10px 0;background:#fbfdff">'
-      +'<b style="color:#0b3a66">📷 Fotka</b>'
-      +'<div style="margin-top:8px"><input id="mtFoto" type="file" accept="image/*" capture="environment" onchange="mtFoto(this)"></div>'
-      +'<div id="mtFotoWrap" style="margin-top:8px"></div>'
-    +'</div>'
-    +'<div style="border:1px solid #dbe6f1;border-radius:14px;padding:12px;margin:10px 0;background:#fbfdff">'
-      +'<b style="color:#0b3a66">📎 Příloha (jakýkoli soubor)</b>'
-      +'<div style="margin-top:8px"><input id="mtSoubor" type="file" onchange="mtSoubor(this)"></div>'
-      +'<div id="mtSouborWrap" style="margin-top:8px;font-size:14px;color:#33485e"></div>'
-    +'</div>';
-  _mtStopStream(); _mtChunks=[]; if(_mtAudioURL){try{URL.revokeObjectURL(_mtAudioURL);}catch(_){} _mtAudioURL=null;}
-}
-function mtToggleRec(){
-  var btn=document.getElementById("mtRec");
-  if(_mtMediaRec&&_mtMediaRec.state==="recording"){ try{_mtMediaRec.stop();}catch(_){} return; }
-  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder)){ alert("Tenhle prohlížeč neumí nahrávání zvuku (MediaRecorder)."); return; }
-  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
-    _mtStream=stream; _mtChunks=[];
-    var mr; try{ mr=new MediaRecorder(stream); }catch(e){ try{ mr=new MediaRecorder(stream,{mimeType:"audio/webm"}); }catch(e2){ alert("Nahrávání není podporováno."); _mtStopStream(); return; } }
-    _mtMediaRec=mr;
-    mr.ondataavailable=function(e){ if(e.data&&e.data.size)_mtChunks.push(e.data); };
-    mr.onstop=function(){
-      var typ=(_mtChunks[0]&&_mtChunks[0].type)||"audio/webm";
-      var blob=new Blob(_mtChunks,{type:typ});
-      if(_mtAudioURL){try{URL.revokeObjectURL(_mtAudioURL);}catch(_){}}
-      _mtAudioURL=URL.createObjectURL(blob);
-      var kb=Math.round(blob.size/1024);
-      var wrap=document.getElementById("mtAudioWrap");
-      if(wrap) wrap.innerHTML='<audio controls src="'+_mtAudioURL+'" style="width:100%"></audio><div style="font-size:12.5px;color:#9aa7b8;margin-top:2px">nahráno · ~'+kb+' kB (jen náhled, neukládá se)</div>';
-      _mtStopStream();
-      var b=document.getElementById("mtRec"); if(b){ b.textContent="● Nahrát znovu"; b.style.background="#e23b3b"; }
-      var s=document.getElementById("mtRecStav"); if(s)s.textContent="";
-    };
-    mr.start(); _mtT0=Date.now();
-    if(btn){ btn.textContent="■ Stop"; btn.style.background="#0b5cae"; }
-    _mtTimer=setInterval(function(){ var s=document.getElementById("mtRecStav"); if(s){ var sec=Math.floor((Date.now()-_mtT0)/1000); s.textContent="● nahrávám… "+Math.floor(sec/60)+":"+("0"+(sec%60)).slice(-2); } },250);
-  }).catch(function(e){ alert("Nepodařilo se získat mikrofon: "+(e&&e.message?e.message:e)+"\n\nPovol prosím oprávnění mikrofonu v prohlížeči."); });
-}
-function mtFoto(inp){
-  var f=inp.files&&inp.files[0], wrap=document.getElementById("mtFotoWrap"); if(!wrap)return;
-  if(!f){ wrap.innerHTML=""; return; }
-  var url=URL.createObjectURL(f), kb=Math.round(f.size/1024);
-  wrap.innerHTML='<img src="'+url+'" style="max-width:100%;border-radius:10px;border:1px solid #dbe6f1"><div style="font-size:12.5px;color:#9aa7b8;margin-top:2px">'+esc(f.name||"foto")+' · ~'+kb+' kB (jen náhled)</div>';
-}
-function mtSoubor(inp){
-  var f=inp.files&&inp.files[0], wrap=document.getElementById("mtSouborWrap"); if(!wrap)return;
-  if(!f){ wrap.innerHTML=""; return; }
-  var kb=Math.round(f.size/1024);
-  wrap.innerHTML='📎 <b>'+esc(f.name||"soubor")+'</b> · '+esc(f.type||"neznámý typ")+' · ~'+kb+' kB <span style="color:#9aa7b8">(jen náhled, neukládá se)</span>';
-}
+function zavriSeznam(){document.getElementById("seznamOv").classList.remove("show");}
 // Klik na odznak/název objektu → rozbalí jeho otevřenou událost přímo pod objektem
 function _setObjArrow(i,open){var a=document.getElementById("objArr-"+i);if(a)a.textContent=open?"▾":"▸";}
 function slToggleObj(i){
@@ -835,12 +767,55 @@ function krok3(){
  ${(nabidnoutCisternu()&&st.podminka!=="Použití cisterny")?cisternaBlok():""}
  ${jePodnet()?`<div class="two"><div class="fld"><label>Kdo nahlásil (občan)</label><input value="${esc(st.nahlasil)}" oninput="st.nahlasil=this.value" placeholder="Jméno"></div><div class="fld"><label>Telefon</label><input value="${esc(st.tel)}" oninput="st.tel=this.value" placeholder="+420…"></div></div>`:""}
  <div class="fld"><label>Přílohy</label><div class="attach">
-   <button onclick="alert('🎤 Nahrávání mluveného popisu (mimka)')">🎤 Mluvený popis</button>
-   <button onclick="alert('📷 Vyfotit / nahrát foto (mimka)')">📷 Foto</button>
-   <button onclick="alert('📎 Přiložit dokument (mimka)')">📎 Dokument</button>
- </div></div>`;
+   <button type="button" onclick="acPrilRec()">${_prRec?'■ Zastavit nahrávání':'🎤 Mluvený popis'}</button>
+   <button type="button" onclick="document.getElementById('prFotoInp').click()">📷 Foto</button><input id="prFotoInp" type="file" accept="image/*" capture="environment" style="display:none" onchange="acPrilFile(this,'foto')">
+   <button type="button" onclick="document.getElementById('prDokInp').click()">📎 Dokument</button><input id="prDokInp" type="file" style="display:none" onchange="acPrilFile(this,'dok')">
+ </div>${_prRec?'<div id="prRecStav" style="font-size:13px;color:#e23b3b;margin-top:6px">● nahrávám…</div>':''}${acPrilohyNahled()}</div>`;
 }
 function setZav(k){st.zavaznost=k;render();}
+// ===== Přílohy události: mluvený popis (nahrávka), foto, dokument – náhled; ukládání přijde s Firebase Storage =====
+var _prRec=false, _prMR=null, _prStream=null, _prChunks=[], _prT0=0, _prTimer=null;
+function acPrilStopStream(){ if(_prTimer){clearInterval(_prTimer);_prTimer=null;} if(_prStream){try{_prStream.getTracks().forEach(function(t){t.stop();});}catch(_){} _prStream=null;} }
+function acPrilRec(){
+  if(_prRec&&_prMR){ try{_prMR.stop();}catch(_){} return; }
+  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder)){ alert("Tenhle prohlížeč neumí nahrávání zvuku (MediaRecorder)."); return; }
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    _prStream=stream; _prChunks=[];
+    var mr; try{ mr=new MediaRecorder(stream); }catch(e){ try{ mr=new MediaRecorder(stream,{mimeType:"audio/webm"}); }catch(e2){ alert("Nahrávání není podporováno."); acPrilStopStream(); return; } }
+    _prMR=mr; _prRec=true;
+    mr.ondataavailable=function(e){ if(e.data&&e.data.size)_prChunks.push(e.data); };
+    mr.onstop=function(){
+      var typ=(_prChunks[0]&&_prChunks[0].type)||"audio/webm";
+      var blob=new Blob(_prChunks,{type:typ});
+      if(!st.prilohy)st.prilohy=[];
+      st.prilohy.push({kind:"audio", name:"Mluvený popis", typ:typ, size:blob.size, url:URL.createObjectURL(blob)});
+      _prRec=false; _prMR=null; acPrilStopStream(); render();
+    };
+    mr.start(); _prT0=Date.now(); render();
+    _prTimer=setInterval(function(){ var s=document.getElementById("prRecStav"); if(s){ var sec=Math.floor((Date.now()-_prT0)/1000); s.textContent="● nahrávám… "+Math.floor(sec/60)+":"+("0"+(sec%60)).slice(-2)+"  (znovu ťukni pro stop)"; } },250);
+  }).catch(function(e){ alert("Nepodařilo se získat mikrofon: "+(e&&e.message?e.message:e)+"\n\nPovol prosím oprávnění mikrofonu v prohlížeči."); });
+}
+function acPrilFile(inp,kind){
+  var f=inp.files&&inp.files[0]; if(!f){ return; }
+  if(!st.prilohy)st.prilohy=[];
+  st.prilohy.push({kind:kind, name:f.name||(kind==="foto"?"foto":"soubor"), typ:f.type||"", size:f.size, url:URL.createObjectURL(f)});
+  inp.value=""; render();
+}
+function acPrilSmaz(i){ var p=st.prilohy&&st.prilohy[i]; if(p&&p.url){try{URL.revokeObjectURL(p.url);}catch(_){}} if(st.prilohy)st.prilohy.splice(i,1); render(); }
+function acPrilohyNahled(){
+  if(!st.prilohy||!st.prilohy.length) return '';
+  var items=st.prilohy.map(function(p,i){
+    var nadpis=(p.kind==="audio")?"🎤 Mluvený popis":(p.kind==="foto")?"📷 Foto":"📎 Dokument";
+    var head='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px"><b style="color:#0b3a66;font-size:14px">'+nadpis+'</b><button type="button" onclick="acPrilSmaz('+i+')" style="border:0;background:none;color:#c0392b;font-weight:800;cursor:pointer;font-size:15px">✕</button></div>';
+    var body;
+    if(p.kind==="audio") body='<audio controls src="'+p.url+'" style="width:100%"></audio>';
+    else if(p.kind==="foto") body='<img src="'+p.url+'" style="max-width:100%;border-radius:8px;border:1px solid #dbe6f1">';
+    else body='<div style="font-size:14px;color:#33485e">'+esc(p.name)+'</div>';
+    var meta='<div style="font-size:12px;color:#9aa7b8;margin-top:2px">'+((p.kind!=="dok")?esc(p.name)+' · ':'')+(p.typ?esc(p.typ)+' · ':'')+'~'+Math.round((p.size||0)/1024)+' kB</div>';
+    return '<div style="border:1px solid #dbe6f1;border-radius:10px;padding:8px;background:#fff">'+head+body+meta+'</div>';
+  }).join("");
+  return '<div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">'+items+'</div><p class="hint" style="margin:6px 0 0">Náhled – přílohy se zatím <b>neukládají</b> (uložení do úložiště přidáme v další fázi).</p>';
+}
 
 // vedení zůstává jako kód (GŘ/TŘ/PŘ), ostatní se zobrazují plným jménem
 function lidLbl(z){if(z==="GŘ"||z==="TŘ"||z==="PŘ")return z;const f=LIDE.find(x=>x[0]===z);return f?prijmeniMonogram(f[1]):z;}
