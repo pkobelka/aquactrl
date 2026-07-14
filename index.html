@@ -239,7 +239,7 @@ function autoUpoz(zadal,resitel){ const out=[]; [zadal,resitel,ADMIN_KOD].forEac
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v87";  // drž v souladu s CACHE v sw.js
+const VERZE="v88";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -803,6 +803,29 @@ function acPrilFile(inp,kind){
 }
 // přípona pro soubor v úložišti – z názvu, jinak z MIME typu
 function _prPripona(p){ var n=(p&&p.name)||""; var m=n.match(/\.[A-Za-z0-9]{1,6}$/); if(m)return m[0].toLowerCase(); var t=(p&&p.typ)||""; if(/webm/.test(t))return ".webm"; if(/mp4|m4a|aac/.test(t))return ".m4a"; if(/ogg/.test(t))return ".ogg"; if(/png/.test(t))return ".png"; if(/jpe?g/.test(t))return ".jpg"; if(/pdf/.test(t))return ".pdf"; return ""; }
+// Zmenší fotku na max. rozměr (delší strana) a překóduje do JPEG – rychlé a spolehlivé nahrání.
+// Při jakémkoli problému vrátí původní soubor (radši nahrát velké než nic).
+function _prZmensiFoto(file, maxDim, quality){
+  return new Promise(function(resolve){
+    try{
+      var url=URL.createObjectURL(file);
+      var img=new Image();
+      img.onload=function(){
+        try{
+          var w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+          var scale=Math.min(1, maxDim/Math.max(w,h||1));
+          if(!(scale<1)){ URL.revokeObjectURL(url); resolve(file); return; }
+          var cw=Math.max(1,Math.round(w*scale)), ch=Math.max(1,Math.round(h*scale));
+          var cv=document.createElement("canvas"); cv.width=cw; cv.height=ch;
+          cv.getContext("2d").drawImage(img,0,0,cw,ch);
+          cv.toBlob(function(b){ URL.revokeObjectURL(url); resolve(b&&b.size?b:file); }, "image/jpeg", quality||0.82);
+        }catch(e){ try{URL.revokeObjectURL(url);}catch(_){}; resolve(file); }
+      };
+      img.onerror=function(){ try{URL.revokeObjectURL(url);}catch(_){}; resolve(file); };
+      img.src=url;
+    }catch(e){ resolve(file); }
+  });
+}
 function acPrilSmaz(i){ var p=st.prilohy&&st.prilohy[i]; if(p&&p.url){try{URL.revokeObjectURL(p.url);}catch(_){}} if(st.prilohy)st.prilohy.splice(i,1); render(); }
 function acPrilohyNahled(){
   if(!st.prilohy||!st.prilohy.length) return '';
@@ -919,17 +942,23 @@ function acSaveEvent(){
         upozornit: autoUpoz(zadalKod, u.resitel), stav: "novy", vznik_ts: now
       });
     });
-    // přílohy → Firebase Storage; odkazy se doplní k události, jak dobíhá nahrávání
+    // přílohy → Firebase Storage; odkazy se doplní k události, jak dobíhá nahrávání.
+    // Fotky se před nahráním zmenší (mobilní fotka má i 5–8 MB → jinak pomalé/nespolehlivé).
     try{
       const _pril=st.prilohy||[];
       if(_pril.length && firebase.storage){
         _pril.forEach(function(p,i){
           if(!p||!p.blob) return;
-          const path="aquactrl_prilohy/"+eventId+"/"+now+"_"+i+_prPripona(p);
-          const sref=firebase.storage().ref(path);
-          sref.put(p.blob).then(function(){ return sref.getDownloadURL(); }).then(function(url){
-            db.ref("aquactrl_udalosti/"+eventId+"/prilohy/"+i).set({kind:p.kind, name:p.name||"", typ:p.typ||"", size:p.size||0, path:path, url:url, ts:now});
-          }).catch(function(e){ console.warn("AC upload přílohy:",e); });
+          const prep=(p.kind==="foto")?_prZmensiFoto(p.blob,1600,0.82):Promise.resolve(p.blob);
+          prep.then(function(blob){
+            const foto=(p.kind==="foto");
+            const path="aquactrl_prilohy/"+eventId+"/"+now+"_"+i+(foto?".jpg":_prPripona(p));
+            const sref=firebase.storage().ref(path);
+            const meta=foto?{contentType:"image/jpeg"}:(p.typ?{contentType:p.typ}:undefined);
+            return sref.put(blob,meta).then(function(){ return sref.getDownloadURL(); }).then(function(url){
+              return db.ref("aquactrl_udalosti/"+eventId+"/prilohy/"+i).set({kind:p.kind, name:p.name||"", typ:foto?"image/jpeg":(p.typ||""), size:(blob&&blob.size)||p.size||0, path:path, url:url, ts:now});
+            });
+          }).catch(function(e){ console.warn("AC upload přílohy["+i+"]:",e); });
         });
       }
     }catch(e){ console.warn("AC přílohy:",e); }
