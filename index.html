@@ -238,7 +238,7 @@ function autoUpoz(zadal,resitel){ const out=[]; [zadal,resitel,ADMIN_KOD].forEac
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v98";  // drž v souladu s CACHE v sw.js
+const VERZE="v99";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -1213,14 +1213,16 @@ function _prilohyHTML(ev){
   var arr=Array.isArray(pr)?pr.slice():Object.keys(pr).map(function(k){return pr[k];});
   arr=arr.filter(function(p){return p&&p.url;}); if(!arr.length)return"";
   var items=arr.map(function(p){
-    if(p.kind==="audio") return '<div style="margin-top:6px"><div style="font-size:13px;color:#6b7a8d">🎤 Mluvený popis</div><audio controls preload="none" src="'+esc(p.url)+'" style="width:100%"></audio></div>';
+    if(p.kind==="audio") return '<div style="margin-top:6px"><a href="javascript:void(0)" data-url="'+esc(p.url)+'" onclick="_prShowAudio(this)" style="display:inline-flex;align-items:center;gap:6px;color:#0b5cae;font-weight:700;cursor:pointer;text-decoration:underline">▶ Přehrát mluvený popis</a></div>';
     if(p.kind==="foto")  return '<div style="margin-top:6px"><a href="javascript:void(0)" data-url="'+esc(p.url)+'" onclick="_prShowFoto(this)" style="display:inline-block;color:#0b5cae;font-weight:700;cursor:pointer;text-decoration:underline">📷 Zobrazit foto</a></div>';
     return '<div style="margin-top:6px;font-size:14px">📎 <a href="'+esc(p.url)+'" target="_blank" rel="noopener" style="color:#0b5cae;font-weight:700">'+esc(p.name||"dokument")+'</a></div>';
   }).join("");
-  return '<div style="margin-top:8px"><div style="font-size:13px;font-weight:800;color:#0b3a66">📎 Přílohy</div>'+items+'</div>';
+  return '<div style="margin-top:8px"><div style="font-size:13px;font-weight:800;color:#0b3a66">📎 Přílohy ('+arr.length+')</div>'+items+'</div>';
 }
 // Foto se v kartě události zobrazí až po kliknutí (nenačítá se automaticky)
 function _prShowFoto(el){ try{ var u=el.getAttribute("data-url")||""; el.outerHTML='<a href="'+esc(u)+'" target="_blank" rel="noopener"><img src="'+esc(u)+'" style="max-width:100%;border-radius:8px;border:1px solid #dbe6f1"></a>'; }catch(_){} }
+// Mluvený popis se přehraje až po kliknutí na ▶ (rozbalí přehrávač a rovnou spustí)
+function _prShowAudio(el){ try{ var u=el.getAttribute("data-url")||""; el.outerHTML='<div style="font-size:13px;color:#6b7a8d;margin-bottom:2px">🎤 Mluvený popis</div><audio controls autoplay src="'+esc(u)+'" style="width:100%"></audio>'; }catch(_){} }
 function _udProbeh(ev,ukoly){
   const it=[];
   if(ev.ts)it.push([ev.ts,"🟦","Událost založena — "+(ev.zadal_jmeno||"?")+(ev.nahlasil?" · nahlásil: "+ev.nahlasil:"")]);
