@@ -238,7 +238,7 @@ function autoUpoz(zadal,resitel){ const out=[]; [zadal,resitel,ADMIN_KOD].forEac
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v96";  // drž v souladu s CACHE v sw.js
+const VERZE="v97";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -644,8 +644,8 @@ function openJakTestovat(){
   zavriPlan();
   document.getElementById("seznamHead").textContent="Jak otestovat za 2 minuty";
   var kroky=[
-    ["1","Přihlas se, kdo jsi","Nahoře ťukni na chip 👤 (nebo na 🔔 Povolit notifikace) a vyber své jméno. Během testu se zařízení schválí hned – notifikace fungují bez čekání."],
-    ["2","Založ událost","Vpravo nahoře ＋ Nová událost. Vyber, co se stalo → pracoviště → objekt → ulož. Objeví se v Aktuálních událostech i pod objektem."],
+    ["1","Přihlas se e-mailem","Zadej svou e-mailovou adresu — přijde ti e-mail s přihlašovacím odkazem. Ten otevři na tomtéž zařízení, kde appku testuješ (mobil / PC), a jsi přihlášený. Appka tě pozná podle e-mailu (jméno nevybíráš). Pak ťukni 🔔 Povolit notifikace — v testu se zařízení schválí hned. (Kdyby hlásilo, že e-mail není povolený, napiš Petru Kobelkovi, ať tě přidá do „Přístup (e-maily)\".)"],
+    ["2","Založ událost","Ťukni na zelené ＋ vpravo dole. Vyber, co se stalo → pracoviště → objekt → ulož. Objeví se v Aktuálních událostech i pod objektem."],
     ["3","Zadej někomu úkol","U události ťukni ➕ Úkol, vyber řešitele, popis a termín. Komu úkol zadáš, přijde mu push. Při nesplnění do termínu se automaticky upozorní zadavatel, řešitel i TŘ; řešiteli navíc přijde připomínka před termínem."],
     ["4","Vyzkoušej příjem","Ten, komu jsi úkol zadal, ho najde v sekci Moje úkoly – potvrdí přijetí a označí splněno. Tobě (zadavateli) dorazí echo push."],
     ["5","Nahlas, co drhne","Cokoli nesedí nebo je nejasné – napiš. I drobnost pomůže. 🙏"]
