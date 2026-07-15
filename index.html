@@ -239,7 +239,7 @@ function autoUpoz(zadal,resitel){ const out=[]; [zadal,resitel,ADMIN_KOD].forEac
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v89";  // drž v souladu s CACHE v sw.js
+const VERZE="v90";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -1812,6 +1812,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
           localStorage.setItem('ac_person', person);
           try{ acInitGate(); }catch(_){}
           try{ acPresenceStart(person); }catch(_){}
+          try{ _acTokenRefresh(); }catch(_){} // obnov push token tohoto zařízení (aby nezvětral → push chodí i po čase, na každém zařízení)
           // Nový účet: `person` claim může dorazit se zpožděním (funkce aquaSetPersonClaim).
           // Když ho token ještě nemá, jednou po chvíli obnov token a doplň identitu.
           if(!_claimPerson){ setTimeout(function(){ _acDoplnClaim(user); }, 4000); }
@@ -1927,6 +1928,31 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
       alert('Chyba při zapínání notifikací:\n'+(err&&err.message?err.message:err));
     }
   };
+
+  // Tiché obnovení push tokenu tohoto zařízení při otevření appky (po přihlášení).
+  // FCM token může časem zvětrat / se změnit; bez obnovy by dané zařízení přestalo
+  // dostávat push, dokud uživatel ručně neťukne „Povolit notifikace". Tohle to řeší
+  // samo – na každém zařízení (NB i mobil) se token drží čerstvý a navázaný na osobu.
+  async function _acTokenRefresh(){
+    try{
+      if(!(supported() && Notification.permission==='granted' && localStorage.getItem('ac_push_on')==='1')) return;
+      var person=localStorage.getItem('ac_person')||''; if(!person) return;
+      var reg=await navigator.serviceWorker.register('firebase-messaging-sw.js',{scope:'/aquactrl/fcm/'});
+      await navigator.serviceWorker.ready;
+      var msg=firebase.messaging();
+      var token=await msg.getToken({vapidKey:VAPID,serviceWorkerRegistration:reg});
+      if(!token) return;
+      var tref=firebase.database().ref('aquactrl_push_tokens/'+devId());
+      var snapEx=await tref.get();
+      var rec={token:token,person:person,ts:Date.now(),ua:navigator.userAgent.slice(0,90)};
+      if(snapEx.exists()){ var exv=snapEx.val()||{}; if(exv.schvaleno!==undefined) rec.schvaleno=exv.schvaleno; if(TEST_AUTO_SCHVALENI===true && rec.schvaleno===false) rec.schvaleno=true; }
+      else { rec.schvaleno=(TEST_AUTO_SCHVALENI===true); }
+      await tref.set(rec);
+      try{ await firebase.database().ref('aquactrl_zarizeni/'+devId()).set({person:person, ua:rec.ua, schvaleno:(rec.schvaleno!==false), ts:rec.ts}); }catch(_){}
+      try{ msg.onMessage(acShowFgNotif); }catch(_){}
+      localStorage.setItem('ac_push_on','1');
+    }catch(e){ console.warn('AC token refresh:',e); }
+  }
 
   // při startu: „zapnuté" jen když už máme uložený AC token
   document.addEventListener('DOMContentLoaded',function(){
