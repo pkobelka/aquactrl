@@ -41,7 +41,7 @@ border-bottom:3px solid #cfe6f7;flex-wrap:wrap}
 .topbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;max-width:1080px;margin:14px auto 0;
 padding:9px 16px;background:#fff;border-radius:12px;box-shadow:var(--stin)}
 .topbar .dat{font-weight:700;color:var(--tmava)}
-.online{flex:1;display:flex;align-items:center;gap:6px}.online .l{color:var(--seda);font-size:15px;font-weight:600}
+.online{flex:1;display:flex;align-items:center;flex-wrap:wrap;gap:6px}.online .l{color:var(--seda);font-size:15px;font-weight:600}
 .online .l::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#2faf5a;margin-right:6px}
 .mono{background:#e9f6ee;color:var(--zel);border:1px solid #bfe3cc;border-radius:7px;padding:3px 8px;font-size:14px;font-weight:800}
 .btn-nova{border:0;cursor:pointer;color:#fff;font-weight:800;font-size:16px;
@@ -153,7 +153,6 @@ padding:24px;z-index:50;overflow:auto}
   <div class="dat" id="dat">—</div>
   <div id="acWho" onclick="acEnablePush()" title="Přihlášený uživatel (identita podle přihlašovacího e-mailu)" style="cursor:pointer;font-size:14px;font-weight:800;border-radius:20px;padding:4px 11px;white-space:nowrap"></div>
   <div class="online"><span class="l">Online:</span><span id="acOnlineList"></span></div>
-  <button class="btn-nova" onclick="otevri()">＋ Nová událost</button>
 </div>
 
 <main id="prehled"></main>
@@ -239,7 +238,7 @@ function autoUpoz(zadal,resitel){ const out=[]; [zadal,resitel,ADMIN_KOD].forEac
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v94";  // drž v souladu s CACHE v sw.js
+const VERZE="v95";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
