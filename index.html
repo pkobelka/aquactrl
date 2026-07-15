@@ -238,7 +238,7 @@ function autoUpoz(zadal,resitel){ const out=[]; [zadal,resitel,ADMIN_KOD].forEac
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v99";  // drž v souladu s CACHE v sw.js
+const VERZE="v100";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -648,9 +648,10 @@ function openJakTestovat(){
     ["2","Založ událost","Ťukni na zelené ＋ vpravo dole. Vyber, co se stalo → pracoviště → objekt → ulož. Objeví se v Aktuálních událostech i pod objektem."],
     ["3","Zadej někomu úkol","U události ťukni ➕ Úkol, vyber řešitele, popis a termín. Komu úkol zadáš, přijde mu push. Při nesplnění do termínu se automaticky upozorní zadavatel, řešitel i TŘ; řešiteli navíc přijde připomínka před termínem."],
     ["4","Vyzkoušej příjem","Ten, komu jsi úkol zadal, ho najde v sekci Moje úkoly – potvrdí přijetí a označí splněno. Tobě (zadavateli) dorazí echo push."],
-    ["5","Nahlas, co drhne","Cokoli nesedí nebo je nejasné – napiš. I drobnost pomůže. 🙏"]
+    ["5","Přidej svou nepřítomnost","V Kontaktech najdeš u svého jména (odznak „to jsi ty\") odkaz ＋ Přidat nepřítomnost – zadej dovolenou / nemoc / jiné. Appka pak při zadávání úkolu upozorní, když má řešitel v daném termínu nepřítomnost."],
+    ["6","Nahlas, co drhne","Cokoli nesedí nebo je nejasné – napiš. I drobnost pomůže. 🙏"]
   ];
-  document.getElementById("seznamBody").innerHTML='<p class="hint" style="margin:0 0 12px">Fakt to zabere 2 minuty. Projdi 5 kroků a dej vědět, co nefungovalo.</p>'+kroky.map(function(k){return '<div style="display:flex;gap:12px;align-items:flex-start;border:1px solid #dbe6f1;border-radius:12px;padding:12px;margin-bottom:10px;background:#fbfdff"><div style="flex:none;width:28px;height:28px;border-radius:50%;background:#0b5cae;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center">'+k[0]+'</div><div><div style="font-weight:800;color:#0b3a66;margin-bottom:2px">'+esc(k[1])+'</div><div style="font-size:15px;color:#42526b;line-height:1.45">'+esc(k[2])+'</div></div></div>';}).join("")+'<div style="text-align:center;margin-top:6px"><button onclick="zavriSeznam();otevri()" style="border:0;border-radius:12px;padding:11px 20px;background:#2faf5a;color:#fff;font-weight:800;cursor:pointer">＋ Začít – založit událost</button></div>';
+  document.getElementById("seznamBody").innerHTML='<p class="hint" style="margin:0 0 12px">Fakt to zabere 2 minuty. Projdi kroky a dej vědět, co nefungovalo.</p>'+kroky.map(function(k){return '<div style="display:flex;gap:12px;align-items:flex-start;border:1px solid #dbe6f1;border-radius:12px;padding:12px;margin-bottom:10px;background:#fbfdff"><div style="flex:none;width:28px;height:28px;border-radius:50%;background:#0b5cae;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center">'+k[0]+'</div><div><div style="font-weight:800;color:#0b3a66;margin-bottom:2px">'+esc(k[1])+'</div><div style="font-size:15px;color:#42526b;line-height:1.45">'+esc(k[2])+'</div></div></div>';}).join("")+'<div style="text-align:center;margin-top:6px"><button onclick="zavriSeznam();otevri()" style="border:0;border-radius:12px;padding:11px 20px;background:#2faf5a;color:#fff;font-weight:800;cursor:pointer">＋ Začít – založit událost</button></div>';
   document.getElementById("seznamOv").classList.add("show");
 }
 function openDokumenty(){
