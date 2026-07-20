@@ -140,7 +140,6 @@ padding:24px;z-index:50;overflow:auto}
     <a onclick="openCisterny()">Cisterny<span class="bdg" id="bdgCist" title="v akci" style="display:none;background:#e23b3b">0</span><span class="bdg" id="bdgCistRez" title="rezervace" style="display:none;background:#e8881b">0</span></a>
     <a onclick="openKontakty()">Kontakty</a>
     <a onclick="openSkladCerpadel()">Čerpadla na skladě</a>
-    <a onclick="openHydranty()">🗺️ Hydranty</a>
     <a id="navZariz" onclick="openZarizeni()" style="display:none">Zařízení<span class="bdg" id="bdgZar" style="display:none;background:#e8881b">0</span></a>
     <a id="navLoginEmaily" onclick="openLoginEmaily()" style="display:none">Přístup (e-maily)</a>
     <a id="navSdilet" onclick="acSdilej()" style="display:none">📤 Sdílet appku</a>
@@ -175,23 +174,6 @@ padding:24px;z-index:50;overflow:auto}
   <div class="wiz" style="max-width:780px">
     <div class="wiz-h"><b>Plán vzorkování 2026</b><button class="x" onclick="zavriPlan()">✕</button></div>
     <div class="wiz-b" id="planBody" style="max-height:72vh;overflow:auto"></div>
-  </div>
-</div>
-<div class="overlay" id="hydrOv" onclick="if(event.target===this)hydClose()">
-  <div class="hydr-wrap">
-    <div class="hydr-top"><b>🗺️ Hydranty — pokrytí požárních</b><button class="x" onclick="hydClose()">✕</button></div>
-    <div id="hydrMap"></div>
-    <button class="hydr-burger" id="hydrBurger" onclick="hydTogglePanel()" title="Nabídka">☰</button>
-    <div class="hydr-panel" id="hydrPanel">
-      <div class="hydr-cnt" id="hydrCnt">Načítám…</div>
-      <div class="hydr-strediska" id="hydrStred"></div>
-      <label class="hydr-row"><input type="checkbox" id="hyCkFire" checked> <span><span class="hy-dot" style="background:#e11d48"></span> Požární + 200 m pokrytí</span></label>
-      <label class="hydr-row"><input type="checkbox" id="hyCkAll"> <span><span class="hy-dot" style="background:#1577c8"></span> Všechny (ostatní) hydranty</span></label>
-      <label class="hydr-row"><input type="checkbox" id="hyCkGap"> <span>💡 Zvýraznit mimo pokrytí</span></label>
-      <div class="hydr-row" style="cursor:default">Poloměr: <select id="hyRad" style="margin:0 6px"><option>200</option><option>300</option><option>500</option></select> m</div>
-      <div class="hydr-hint">● podzemní · ○ nadzemní. Klik na hydrant → detail (mapka + foto), okruh a „Označit k doměření".</div>
-      <div id="hydrSel"></div>
-    </div>
   </div>
 </div>
 <div class="overlay" id="ov">
@@ -256,7 +238,7 @@ function autoUpoz(zadal,resitel){ const out=[]; [zadal,resitel,ADMIN_KOD].forEac
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v104";  // drž v souladu s CACHE v sw.js
+const VERZE="v102";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -2120,224 +2102,6 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
     }
   });
 })();
-</script>
-<style>
-#hydrOv{padding:0;z-index:60;align-items:stretch;justify-content:center;overflow:hidden}
-.hydr-wrap{position:relative;width:100%;height:100%;display:flex;flex-direction:column;background:#fff}
-.hydr-top{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid #e7f0f8;font-size:16px;flex:0 0 auto}
-.hydr-top .x{border:none;background:#f1f5f9;border-radius:8px;width:34px;height:34px;font-size:17px;cursor:pointer}
-#hydrMap{flex:1 1 auto;min-height:0;background:#e8eef3}
-.hydr-panel{position:absolute;top:56px;left:10px;z-index:1000;background:#fff;border-radius:12px;box-shadow:0 6px 22px rgba(0,0,0,.22);padding:10px 12px;max-width:272px;font-size:14px;max-height:calc(100% - 74px);overflow:auto}
-.hydr-burger{position:absolute;top:60px;left:10px;z-index:1001;display:none;background:#fff;border:none;border-radius:11px;box-shadow:0 6px 22px rgba(0,0,0,.22);width:44px;height:44px;font-size:21px;cursor:pointer}
-.hydr-cnt{font-size:12px;color:#6b7a8d;margin-bottom:8px}
-.hydr-strediska{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
-.hy-sb{border:1px solid #cfe0f0;background:#f5faff;border-radius:8px;padding:4px 8px;font-size:12px;font-weight:700;color:#2a5b86;cursor:pointer}
-.hy-sb.act{background:#1577c8;color:#fff;border-color:#1577c8}
-.hydr-row{display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer}
-.hydr-row input{width:17px;height:17px}
-.hy-dot{width:13px;height:13px;border-radius:50%;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #0003;vertical-align:middle}
-.hydr-hint{font-size:11.5px;color:#8a97a6;margin:8px 0;line-height:1.35}
-.hydr-selh{font-size:13px;font-weight:800;margin-top:8px;border-top:1px solid #eef2f6;padding-top:8px}
-.hydr-selit{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:#0b3a66;margin:3px 0;gap:8px}
-.hydr-selit button{border:none;background:#fbe9e9;color:#c0392b;border-radius:6px;padding:1px 6px;cursor:pointer;font-size:11px}
-@media(max-width:640px){.hydr-panel{max-width:calc(100% - 20px)}}
-/* Kompaktní detail hydrantu (klik na bod) – výřez mapy + foto, vejde se na jednu obrazovku */
-.hydd-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:11000;display:flex;align-items:flex-end;justify-content:center}
-.hydd-card{background:#fff;width:100%;max-width:460px;border-radius:16px 16px 0 0;box-shadow:0 -6px 30px rgba(0,0,0,.3);max-height:94vh;display:flex;flex-direction:column;overflow-y:auto}
-.hydd-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:3px solid #e11d48}
-.hydd-title{font-size:16px;font-weight:800;color:#0b3a66;display:flex;align-items:center;gap:8px}
-.hydd-dot{width:13px;height:13px;border-radius:50%;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px #0003}
-.hydd-sub{font-size:13px;color:#6b7a8d;margin-top:3px}
-.hydd-x{border:none;background:#f1f5f9;border-radius:9px;width:34px;height:34px;font-size:16px;cursor:pointer;flex:0 0 auto}
-.hydd-body{display:flex;gap:8px;padding:10px 12px 0}
-.hydd-map{flex:1 1 55%;height:32vh;max-height:230px;min-height:150px;border-radius:12px;overflow:hidden;border:1px solid #dbe6f1;background:#e8eef3}
-.hydd-foto{flex:1 1 45%;height:32vh;max-height:230px;min-height:150px;border-radius:12px;overflow:hidden;border:1px solid #dbe6f1;background:#f6f9fc;display:flex;align-items:center;justify-content:center}
-.hydd-foto img{width:100%;height:100%;object-fit:cover;cursor:zoom-in}
-.hydd-foto-ph{font-size:12.5px;color:#9aa7b8;text-align:center;padding:8px;line-height:1.4}
-.hydd-foto-ph span{font-size:11.5px}
-.hydd-facts{display:flex;flex-wrap:wrap;gap:6px 14px;padding:10px 14px 2px;font-size:13px;color:#33485e}
-.hydd-facts a{color:#1577c8;text-decoration:none}
-.hydd-actions{display:flex;gap:8px;padding:12px 14px;flex-wrap:wrap}
-.hydd-btn{flex:1 1 46%;min-width:150px;padding:11px 10px;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer}
-.hydd-foto-add{background:#eef5fc;color:#0b5cae;border:1px solid #cfe0f0}
-.hydd-mark{background:#1577c8;color:#fff}
-.hydd-unmark{background:#fbe9e9;color:#c0392b}
-@media(min-width:560px){.hydd-ov{align-items:center}.hydd-card{border-radius:16px}}
-</style>
-<script>
-/* ===== Hydranty – mapová vrstva pokrytí požárních ===== */
-var HYD={loaded:false,map:null,data:null,canvas:null,byId:{},filter:null,radius:200,marked:{},selCircle:null,
-  gCover:null,gFire:null,gOther:null,gMarked:null};
-function hydTogglePanel(){var p=document.getElementById('hydrPanel'),b=document.getElementById('hydrBurger');
-  if(p.style.display==='none'){p.style.display='';b.style.display='none';}else{p.style.display='none';b.style.display='block';}}
-function openHydranty(){document.getElementById('hydrOv').classList.add('show');
-  if(HYD.loaded){setTimeout(function(){HYD.map.invalidateSize();},60);return;}
-  hydLoadLeaflet(function(){hydLoadData();});}
-function hydClose(){document.getElementById('hydrOv').classList.remove('show');}
-function hydLoadLeaflet(cb){ if(window.L){cb();return;}
-  var css=document.createElement('link');css.rel='stylesheet';css.href='leaflet.css';document.head.appendChild(css);
-  var s=document.createElement('script');s.src='leaflet.js';s.onload=cb;
-  s.onerror=function(){document.getElementById('hydrCnt').textContent='Chyba: nepodařilo se načíst mapu (leaflet.js).';};
-  document.head.appendChild(s);}
-function hydLoadData(){document.getElementById('hydrCnt').textContent='Načítám hydranty…';
-  fetch('hydranty.json').then(function(r){return r.json();}).then(function(d){HYD.data=d;HYD.loaded=true;hydInit();})
-  .catch(function(){document.getElementById('hydrCnt').textContent='Chyba: nepodařilo se načíst data (hydranty.json).';});}
-function hydDist(a,b,c,d){var R=6371000,r=Math.PI/180;var dphi=(c-a)*r,dl=(d-b)*r,p1=a*r,p2=c*r;
-  var h=Math.sin(dphi/2)*Math.sin(dphi/2)+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)*Math.sin(dl/2);
-  return 2*R*Math.asin(Math.sqrt(h));}
-function hydInit(){
-  try{HYD.marked=JSON.parse(localStorage.getItem('hyd_marked')||'{}');}catch(e){HYD.marked={};}
-  HYD.data.body.forEach(function(p){HYD.byId[p.id]=p;});
-  HYD.canvas=L.canvas({padding:0.5});
-  HYD.map=L.map('hydrMap',{renderer:HYD.canvas,zoomControl:true}).setView([49.7,16.5],10);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(HYD.map);
-  HYD.gCover=L.layerGroup().addTo(HYD.map);HYD.gFire=L.layerGroup().addTo(HYD.map);
-  HYD.gOther=L.layerGroup();HYD.gMarked=L.layerGroup().addTo(HYD.map);
-  var sh=document.getElementById('hydrStred');
-  var btns='<button class="hy-sb act" onclick="hydSetFilter(null,this)">Vše</button>';
-  HYD.data.strediska.forEach(function(s){btns+='<button class="hy-sb" onclick="hydSetFilter(\''+s.kod+'\',this)" title="'+s.nazev+'">'+s.kod+'</button>';});
-  sh.innerHTML=btns;
-  document.getElementById('hyCkFire').onchange=hydRender;
-  document.getElementById('hyCkAll').onchange=hydRender;
-  document.getElementById('hyCkGap').onchange=hydRender;
-  document.getElementById('hyRad').onchange=function(e){HYD.radius=+e.target.value;if(HYD.selCircle)HYD.selCircle.setRadius(HYD.radius);hydRender();};
-  HYD.map.on('click',function(){if(window.matchMedia('(max-width:640px)').matches){
-    document.getElementById('hydrPanel').style.display='none';document.getElementById('hydrBurger').style.display='block';}});
-  hydSetFilter(null,null);
-  setTimeout(function(){HYD.map.invalidateSize();},80);
-}
-function hydActive(){return HYD.data.body.filter(function(p){return !HYD.filter||p.s===HYD.filter;});}
-function hydSetFilter(kod,btn){HYD.filter=kod;
-  var sh=document.getElementById('hydrStred');
-  if(sh){Array.prototype.forEach.call(sh.querySelectorAll('.hy-sb'),function(b){b.classList.remove('act');});if(btn)btn.classList.add('act');}
-  if(kod){var s=null;HYD.data.strediska.forEach(function(x){if(x.kod===kod)s=x;});
-    if(s)HYD.map.fitBounds([[s.bbox[0],s.bbox[1]],[s.bbox[2],s.bbox[3]]],{padding:[20,20]});}
-  else{var la0=90,lo0=90,la1=-90,lo1=-90;HYD.data.body.forEach(function(p){la0=Math.min(la0,p.lat);lo0=Math.min(lo0,p.lon);la1=Math.max(la1,p.lat);lo1=Math.max(lo1,p.lon);});
-    HYD.map.fitBounds([[la0,lo0],[la1,lo1]],{padding:[20,20]});}
-  hydRender();}
-function hydMarker(p,color,isFire){var podz=(p.t==='pz');var st;
-  if(isFire){st={radius:6,color:'#fff',weight:1.5,fillColor:color,fillOpacity:1};}
-  else if(podz){st={radius:5,color:color,weight:1,fillColor:color,fillOpacity:.95};}
-  else{st={radius:5,color:color,weight:2,fillColor:color,fillOpacity:0};}
-  st.renderer=HYD.canvas;
-  var m=L.circleMarker([p.lat,p.lon],st);
-  m.on('click',function(){if(HYD.selCircle)HYD.map.removeLayer(HYD.selCircle);
-    HYD.selCircle=L.circle([p.lat,p.lon],{radius:HYD.radius,renderer:HYD.canvas,color:'#f59e0b',weight:2,dashArray:'6 5',fillColor:'#f59e0b',fillOpacity:.12}).addTo(HYD.map);
-    hydOpenDetail(p);});
-  return m;}
-/* ---- Detail hydrantu po kliknutí: kompaktní karta (výřez mapy + foto) – vejde se na jednu obrazovku ---- */
-var HYDD={ov:null,map:null,id:null};
-function hydFnLabel(f){return {P:'Požární hydrant',O:'Hydrant (bez rozlišení)',OK:'Hydrant k odkalení',OV:'Hydrant k odvzdušnění'}[f]||'Hydrant';}
-function hydTypLabel(t){return {pz:'podzemní',nz:'nadzemní',x:'jiný'}[t]||'—';}
-function hydStredNazev(kod){var n=kod||'—';if(HYD.data&&HYD.data.strediska)HYD.data.strediska.forEach(function(s){if(s.kod===kod)n=s.nazev;});return n;}
-function hydCloseDetail(){ if(HYDD.map){try{HYDD.map.remove();}catch(_){}} HYDD.map=null; if(HYDD.ov&&HYDD.ov.parentNode)document.body.removeChild(HYDD.ov); HYDD.ov=null; HYDD.id=null; }
-function hydOpenDetail(p){
-  hydCloseDetail();
-  HYDD.id=p.id;
-  var mk=HYD.marked[p.id];
-  var col=(p.f==='P')?'#e11d48':((p.f==='O')?'#1577c8':'#8a97a6');
-  var ov=document.createElement('div');
-  ov.className='hydd-ov';
-  ov.addEventListener('click',function(e){if(e.target===ov)hydCloseDetail();});
-  ov.innerHTML=
-    '<div class="hydd-card">'
-    +'<div class="hydd-head" style="border-color:'+col+'">'
-      +'<div><div class="hydd-title"><span class="hydd-dot" style="background:'+col+'"></span>'+esc(hydFnLabel(p.f))+'</div>'
-      +'<div class="hydd-sub">'+esc(hydTypLabel(p.t))+' · '+(p.m?'<span style="color:#16a34a">změřený</span>':'<span style="color:#8a97a6">nezměřený</span>')+'</div></div>'
-      +'<button class="hydd-x" onclick="hydCloseDetail()">✕</button>'
-    +'</div>'
-    +'<div class="hydd-body">'
-      +'<div class="hydd-map" id="hyddMap"></div>'
-      +'<div class="hydd-foto" id="hyddFoto"><div class="hydd-foto-ph">Načítám fotku…</div></div>'
-    +'</div>'
-    +'<div class="hydd-facts">'
-      +'<span>🆔 '+esc(p.id)+'</span>'
-      +'<span>🏢 '+esc(hydStredNazev(p.s))+'</span>'
-      +'<a href="https://www.google.com/maps?q='+p.lat+','+p.lon+'" target="_blank" rel="noopener">📍 '+p.lat.toFixed(6)+', '+p.lon.toFixed(6)+'</a>'
-    +'</div>'
-    +'<div class="hydd-actions">'
-      +'<button class="hydd-btn hydd-foto-add" onclick="hydFotoPick()">📷 Přidat / změnit fotku</button>'
-      +'<button class="hydd-btn '+(mk?'hydd-unmark':'hydd-mark')+'" id="hyddMarkBtn" onclick="hydDetailMark()">'+(mk?('✓ Označeno '+mk.idx+' — zrušit'):'➕ Označit k doměření')+'</button>'
-    +'</div>'
-    +'<input id="hyddFile" type="file" accept="image/*" capture="environment" style="display:none">'
-    +'</div>';
-  document.body.appendChild(ov);
-  HYDD.ov=ov;
-  ov.querySelector('#hyddFile').onchange=function(){hydFotoUpload(this);};
-  try{
-    var m=L.map('hyddMap',{zoomControl:false,attributionControl:false,scrollWheelZoom:false}).setView([p.lat,p.lon],17);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(m);
-    L.circle([p.lat,p.lon],{radius:200,color:col,weight:1,fillColor:col,fillOpacity:.08}).addTo(m);
-    L.circleMarker([p.lat,p.lon],{radius:7,color:'#fff',weight:2,fillColor:col,fillOpacity:1}).addTo(m);
-    HYDD.map=m;
-    setTimeout(function(){try{m.invalidateSize();}catch(_){}},80);
-  }catch(e){}
-  hydFotoLoad(p.id);
-}
-function hydFotoLoad(id){
-  var box=HYDD.ov&&HYDD.ov.querySelector('#hyddFoto'); if(!box)return;
-  if(!(window.firebase&&firebase.database)){ box.innerHTML='<div class="hydd-foto-ph">Bez fotky</div>'; return; }
-  firebase.database().ref('aquactrl_hydranty/'+id+'/foto').get().then(function(s){
-    if(HYDD.id!==id||!box.parentNode)return;
-    var f=s.val();
-    if(f&&f.url){ box.innerHTML='<img src="'+f.url+'" alt="foto hydrantu" onclick="window.open(this.src,\'_blank\')">'; }
-    else{ box.innerHTML='<div class="hydd-foto-ph">Zatím bez fotky<br><span>ťukni „📷 Přidat fotku"</span></div>'; }
-  }).catch(function(){ if(box&&box.parentNode)box.innerHTML='<div class="hydd-foto-ph">Bez fotky</div>'; });
-}
-function hydFotoPick(){ var f=HYDD.ov&&HYDD.ov.querySelector('#hyddFile'); if(f)f.click(); }
-function hydFotoUpload(inp){
-  var file=inp.files&&inp.files[0]; inp.value=''; if(!file)return;
-  var id=HYDD.id; if(!id)return;
-  if(!(window.firebase&&firebase.database&&firebase.storage)){ alert('Úložiště/databáze není dostupné.'); return; }
-  var box=HYDD.ov&&HYDD.ov.querySelector('#hyddFoto'); if(box)box.innerHTML='<div class="hydd-foto-ph">Nahrávám fotku…</div>';
-  var db=firebase.database(), now=Date.now(), by=localStorage.getItem('ac_person')||'', oldPath=null;
-  db.ref('aquactrl_hydranty/'+id+'/foto/path').get().then(function(s){ oldPath=s.val(); return _prZmensiFoto(file,1600,0.82); }).then(function(blob){
-    var path='aquactrl_hydranty/'+id+'/'+now+'.jpg';
-    var sref=firebase.storage().ref(path);
-    return sref.put(blob,{contentType:'image/jpeg'}).then(function(){return sref.getDownloadURL();}).then(function(url){
-      return db.ref('aquactrl_hydranty/'+id+'/foto').set({url:url,path:path,ts:now,by:by});
-    }).then(function(){
-      if(oldPath&&oldPath!==path){ try{firebase.storage().ref(oldPath).delete().catch(function(){});}catch(_){} }
-      if(HYDD.id===id)hydFotoLoad(id);
-    });
-  }).catch(function(e){ alert('Nahrání fotky selhalo: '+(e&&e.message?e.message:e)); if(HYDD.id===id)hydFotoLoad(id); });
-}
-function hydDetailMark(){ var id=HYDD.id; if(!id)return;
-  if(HYD.marked[id]){ hydUnmark(id); } else { hydMark(id); }
-  var b=HYDD.ov&&HYDD.ov.querySelector('#hyddMarkBtn'), mk=HYD.marked[id];
-  if(b){ b.className='hydd-btn '+(mk?'hydd-unmark':'hydd-mark'); b.textContent=mk?('✓ Označeno '+mk.idx+' — zrušit'):'➕ Označit k doměření'; }
-}
-function hydMark(id){var p=HYD.byId[id];if(!p||HYD.marked[id])return;
-  var idx='K'+(Object.keys(HYD.marked).length+1);
-  HYD.marked[id]={idx:idx,lat:p.lat,lon:p.lon,s:p.s,t:p.t,id:id};
-  try{localStorage.setItem('hyd_marked',JSON.stringify(HYD.marked));}catch(e){}
-  if(HYD.map)HYD.map.closePopup();hydRender();}
-function hydUnmark(id){delete HYD.marked[id];
-  try{localStorage.setItem('hyd_marked',JSON.stringify(HYD.marked));}catch(e){}hydRender();}
-function hydRenderSel(){var el=document.getElementById('hydrSel');var ks=Object.keys(HYD.marked);
-  if(!ks.length){el.innerHTML='';return;}
-  el.innerHTML='<div class="hydr-selh">Kandidáti k doměření ('+ks.length+'):</div>'+ks.map(function(id){var m=HYD.marked[id];
-    return '<div class="hydr-selit"><span><b>'+m.idx+'</b> · '+(m.t==='pz'?'podz.':'nadz.')+' · id '+id+'</span><button onclick="hydUnmark(\''+id+'\')">✕</button></div>';}).join('');}
-function hydRender(){if(!HYD.map)return;
-  HYD.gCover.clearLayers();HYD.gFire.clearLayers();HYD.gOther.clearLayers();HYD.gMarked.clearLayers();
-  var act=hydActive();var fire=act.filter(function(p){return p.f==='P';});
-  var showFire=document.getElementById('hyCkFire').checked;
-  var showAll=document.getElementById('hyCkAll').checked;
-  var showGap=document.getElementById('hyCkGap').checked;
-  if(showFire){if(!HYD.map.hasLayer(HYD.gCover))HYD.gCover.addTo(HYD.map);if(!HYD.map.hasLayer(HYD.gFire))HYD.gFire.addTo(HYD.map);
-    fire.forEach(function(p){L.circle([p.lat,p.lon],{radius:200,renderer:HYD.canvas,color:'#e11d48',weight:1,fillColor:'#e11d48',fillOpacity:.07}).addTo(HYD.gCover);
-      hydMarker(p,'#e11d48',true).addTo(HYD.gFire);});}
-  else{HYD.map.removeLayer(HYD.gCover);HYD.map.removeLayer(HYD.gFire);}
-  if(showAll){if(!HYD.map.hasLayer(HYD.gOther))HYD.gOther.addTo(HYD.map);
-    act.filter(function(p){return p.f!=='P';}).forEach(function(p){var col=(p.f==='O')?'#1577c8':'#8a97a6';
-      if(showGap&&p.f==='O'){var out=fire.every(function(f){return hydDist(p.lat,p.lon,f.lat,f.lon)>200;});if(out)col='#f59e0b';}
-      hydMarker(p,col,false).addTo(HYD.gOther);});}
-  else{HYD.map.removeLayer(HYD.gOther);}
-  Object.keys(HYD.marked).forEach(function(id){var m=HYD.marked[id];if(HYD.filter&&m.s!==HYD.filter)return;
-    L.circle([m.lat,m.lon],{radius:HYD.radius,renderer:HYD.canvas,color:'#16a34a',weight:2,dashArray:'5 4',fillColor:'#16a34a',fillOpacity:.1}).addTo(HYD.gMarked);});
-  hydRenderSel();
-  var others=act.length-fire.length;
-  document.getElementById('hydrCnt').textContent=(HYD.filter||'Vše')+' · '+fire.length+' požárních · '+others+' ostatních · '+Object.keys(HYD.marked).length+' označeno';}
 </script>
 </body>
 </html>
