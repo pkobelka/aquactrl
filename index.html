@@ -239,7 +239,7 @@ function autoUpoz(zadal,resitel){ const out=[]; [zadal,resitel,ADMIN_KOD].forEac
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v110";  // drž v souladu s CACHE v sw.js
+const VERZE="v111";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -294,7 +294,7 @@ let _datum=null;
 // Cisterny pro náhradní zásobování (objem v litrech). dispo:true = k dispozici, false = právě používaná / mimo provoz
 const CISTERNY=[
  {obj:400, typ:"přívěs",   stred:"Svitavy",          spz:"7E4 0857", opr:"B",   dispo:true, pozn:""},
- {obj:400, typ:"přívěs",   stred:"Jevíčko",          spz:"7E40780",  opr:"B",   dispo:true, pozn:""},
+ {obj:400, typ:"přívěs",   stred:"Jevíčko",          spz:"7E40780",  opr:"B",   dispo:true, pozn:"", foto:"cisterny/je-privec.jpg"},
  {obj:1000,typ:"přívěs",   stred:"Polička",          spz:"6E71649",  opr:"B96", dispo:true, pozn:"AMAROK, Bidmon, Heger, Nunvář", foto:"cisterny/po-privec.jpg"},
  {obj:1000,typ:"přívěs",   stred:"Moravská Třebová", spz:"6E43364",  opr:"B96", dispo:true, pozn:"AMAROK, Š-OCTAVIA 4x4, pouze Voznička", foto:"cisterny/mt-privec.jpg"},
  {obj:3000,typ:"kontejner",stred:"Svitavy",          spz:"",         opr:"",    dispo:true, pozn:"malý MAN", foto:"cisterny/sy-3000.jpg"},
