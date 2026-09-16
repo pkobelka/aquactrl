@@ -61,6 +61,7 @@ Firebase Console → projekt **moje-budky** → **Realtime Database** → zálo�
     "aquactrl_push_tokens": { ".read": "auth != null", ".write": "auth != null" },
     "aquactrl_outbox":      { ".read": "auth != null", ".write": "auth != null" },
     "aquactrl_login_email": { ".read": "auth != null", ".write": "auth.token.admin === true" },
+    "aquactrl_qr_login":    { ".read": "auth.token.admin === true", ".write": "auth.token.admin === true" },
 
     "presence":           { ".read": true, ".write": true },
     "aktivita":           { ".read": true, ".write": true },
@@ -82,6 +83,8 @@ Firebase Console → projekt **moje-budky** → **Realtime Database** → zálo�
 
 Co to dělá:
 - **`aquactrl_login_email`** (řídí, kdo se smí přihlásit) smí **měnit jen admin** → zavírá nález 2 na serveru.
+- **`aquactrl_qr_login`** (čekající přihlašovací QR, viz níže) smí **číst i měnit jen admin** —
+  leží v něm jednorázový přihlašovací odkaz, takže ho nesmí vidět ani ostatní přihlášení.
 - Všechny ostatní `aquactrl_*` uzly jsou přístupné **jen přihlášeným** → zavírá nález 1.
 - `.indexOn` u `aquactrl_ukoly` zůstává kvůli dotazu appky přes `orderByChild("resitel")`.
 - **Nikoho to nevyhodí:** appka už dnes přihlášení vyžaduje. GitHub Actions skripty i
@@ -101,6 +104,26 @@ Co to dělá:
    `aquactrl_login_email` pravidlo odmítne. ✅ nález 2
 
 ---
+
+## Přihlašovací QR (`aquactrl_qr_login`)
+
+Kdo nemá e-mail, dostane **jednorázový přihlašovací odkaz** vygenerovaný Admin SDK
+(workflow „Přihlašovací QR (AquaCtrl)" → `login_qr_aquactrl.py`) a naskenuje ho jako QR.
+
+> ⚠️ **Odkaz je plnohodnotný klíč do appky** (přihlásí kohokoli, kdo ho otevře, jako
+> danou osobu). Repozitář je **veřejný**, takže logy i artefakty běhů Actions si může
+> stáhnout kdokoli — odkaz se proto do Actions **nikdy nevypisuje**. Workflow ho uloží
+> jen do `aquactrl_qr_login` a appka ho ukáže pouze adminovi (menu „Přihlašovací QR").
+> Skript má i pojistku: přepínač `--odkaz` v prostředí GitHub Actions odmítne běžet.
+
+Další ochrany: odkaz **platí jen jednou** (Firebase ho po použití zneplatní) a má
+krátkou platnost (výchozí 60 min, `--minut`). Prošlé pozvánky skript maže při každém
+běhu, admin je může smazat i ručně v appce (🗑️) hned po naskenování.
+
+**Bez pravidla `aquactrl_qr_login` výše appka QR nenačte** (kořenové `".read": false`
+ho zablokuje) a v „Přihlašovací QR" se objeví hláška o chybějícím pravidle. Pravidlo se
+— jako všechna ostatní — mění v `database.rules.json` v repu
+[`mojebudky`](https://github.com/pkobelka/mojebudky), ne jen v konzoli.
 
 ## App Check (volitelné doporučení z auditu)
 

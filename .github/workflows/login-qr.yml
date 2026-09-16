@@ -1,0 +1,52 @@
+name: Přihlašovací QR (AquaCtrl)
+
+# Vygeneruje jednorázový přihlašovací odkaz + QR pro člověka bez e-mailu.
+# Odkaz se ZÁMĚRNĚ nikam do Actions nevypisuje (repo je veřejné = logy i artefakty
+# vidí kdokoli) – uloží se do Firebase a QR se zobrazí v appce v menu
+# „Přihlašovací QR“, které vidí jen admin.
+
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: 'E-mail dotyčného (kdo žádný nemá: třeba jan.novak@aquactrl.local – nemusí existovat)'
+        required: true
+      kod:
+        description: 'Kód osoby z LIDE (nepovinné, když už má přístup v „Přístup (e-maily)")'
+        required: false
+        default: ''
+      minut:
+        description: 'Platnost QR v minutách (výchozí 60)'
+        required: false
+        default: '60'
+
+jobs:
+  login-qr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Nastav Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instaluj závislosti
+        run: pip install firebase-admin "qrcode[pil]"
+
+      - name: Ulož service account key
+        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > service-account-key.json
+
+      - name: Vygeneruj přihlašovací QR
+        env:
+          AC_EMAIL: ${{ github.event.inputs.email }}
+          AC_KOD: ${{ github.event.inputs.kod }}
+          AC_MINUT: ${{ github.event.inputs.minut }}
+        run: python login_qr_aquactrl.py "$AC_EMAIL" "$AC_KOD" --minut "${AC_MINUT:-60}"
+
+      - name: Co dál
+        run: |
+          echo "### Přihlašovací QR je připravené" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Otevři appku → menu **Přihlašovací QR** a nech dotyčného naskenovat (nebo mu odtud pošli odkaz)." >> $GITHUB_STEP_SUMMARY
+          echo "Odkaz tady schválně není – repozitář je veřejný." >> $GITHUB_STEP_SUMMARY
