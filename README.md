@@ -53,6 +53,17 @@ samotný odkaz (SMS/WhatsApp) — pro iPhone s appkou na ploše je to jistějš�
   `python login_qr_aquactrl.py jan.novak@aquactrl.local JN --png qr.png` — QR rovnou do souboru
   k vytištění.
 
+### Kdo které sekce vidí
+
+Menu **„Sekce (kdo co vidí)"** (jen admin): vybereš osobu, zaškrtáš, které části appky vidí,
+a uložíš. **Kdo tam není uvedený, vidí všechno** — nastavuje se jen výjimka, u ostatních
+se nic měnit nemusí. Hotové nastavení jde tlačítkem 📋 **zkopírovat** a pak ho jedním vložením
+nastavit rovnou více lidem najednou (📥 Vložit dalším → zaškrtáš lidi → Použít u vybraných).
+
+Omezení drží i na serveru u **Aktuálních událostí** a **Karet vrtů** (pravidla `aquactrl_pristup_sekce`).
+Plán, Kontakty, Čerpadla a Dokumenty jsou natvrdo v `index.html` / v souborech repa, takže
+u nich jde jen o skrytí v menu — podrobnosti v [SECURITY.md](SECURITY.md#kdo-které-sekce-vidí-aquactrl_pristup_sekce).
+
 ## Odeslání push notifikace
 
 GitHub → Actions → **Odeslat push (AquaCtrl)** → *Run workflow* (titulek + text, případně Device ID jednoho příjemce). Tokeny se čtou z uzlu `aquactrl_push_tokens` ve sdílené Firebase DB.

@@ -62,6 +62,9 @@ Firebase Console → projekt **moje-budky** → **Realtime Database** → zálo�
     "aquactrl_outbox":      { ".read": "auth != null", ".write": "auth != null" },
     "aquactrl_login_email": { ".read": "auth != null", ".write": "auth.token.admin === true" },
     "aquactrl_qr_login":    { ".read": "auth.token.admin === true", ".write": "auth.token.admin === true" },
+    "aquactrl_karty_vrtu":  { ".read": "auth != null && (…viz aquactrl_pristup_sekce…)", ".write": "auth != null" },
+    "aquactrl_pristup_sekce": { ".read": "auth.token.admin === true", ".write": "auth.token.admin === true",
+                                "$kdo": { ".read": "auth != null && (auth.token.admin === true || auth.token.person === $kdo)" } },
 
     "presence":           { ".read": true, ".write": true },
     "aktivita":           { ".read": true, ".write": true },
@@ -85,6 +88,10 @@ Co to dělá:
 - **`aquactrl_login_email`** (řídí, kdo se smí přihlásit) smí **měnit jen admin** → zavírá nález 2 na serveru.
 - **`aquactrl_qr_login`** (čekající přihlašovací QR, viz níže) smí **číst i měnit jen admin** —
   leží v něm jednorázový přihlašovací odkaz, takže ho nesmí vidět ani ostatní přihlášení.
+- **`aquactrl_pristup_sekce`** (kdo které sekce vidí, viz níže) mění jen admin; každý si smí
+  přečíst jen **svůj** záznam, celý seznam vidí admin.
+- **`aquactrl_karty_vrtu`** v pravidlech dřív **vůbec nebyl**, takže ho kořenové `".read": false`
+  blokovalo a sekce „Karty vrtů" hlásila `Permission denied`. Teď má pravidlo jako ostatní.
 - Všechny ostatní `aquactrl_*` uzly jsou přístupné **jen přihlášeným** → zavírá nález 1.
 - `.indexOn` u `aquactrl_ukoly` zůstává kvůli dotazu appky přes `orderByChild("resitel")`.
 - **Nikoho to nevyhodí:** appka už dnes přihlášení vyžaduje. GitHub Actions skripty i
@@ -124,6 +131,28 @@ běhu, admin je může smazat i ručně v appce (🗑️) hned po naskenování.
 ho zablokuje) a v „Přihlašovací QR" se objeví hláška o chybějícím pravidle. Pravidlo se
 — jako všechna ostatní — mění v `database.rules.json` v repu
 [`mojebudky`](https://github.com/pkobelka/mojebudky), ne jen v konzoli.
+
+## Kdo které sekce vidí (`aquactrl_pristup_sekce`)
+
+Admin může jednotlivým lidem schovat části appky (menu „Sekce (kdo co vidí)"). Uzel
+`aquactrl_pristup_sekce/<kód osoby>` drží mapu `sekce -> true/false`; **kdo v uzlu není,
+vidí všechno**, takže pro naprostou většinu lidí se nenastavuje nic. Admin vidí vždy vše.
+
+Co to opravdu zamyká:
+
+| sekce | vynuceno pravidly? |
+|---|---|
+| Aktuální události | **ano** — bez práva nejde načíst seznam `aquactrl_udalosti`. Jednotlivá událost podle ID zůstává čitelná všem přihlášeným, aby fungoval odkaz z úkolu a z cisteren. |
+| Karty vrtů | **ano** — `aquactrl_karty_vrtu`. |
+| Moje úkoly | částečně — appka je už dnes čte dotazem „kde jsem řešitel". |
+| Plán vzorkování, Kontakty, Čerpadla, Dokumenty | **ne** — data jsou natvrdo v `index.html`, případně jako soubory v repu, a ten je veřejný. Skrytí v menu je jen pro přehlednost, ne utajení. |
+
+> ⚠️ Kdo ještě nemá claim `person` (nespustil se pro něj `sync_person_claims.py`), na tyhle
+> uzly dosáhne — pravidlo v takovém případě záměrně pouští dál, aby se nikomu nerozbila
+> appka dřív, než se claimy nastaví. U omezovaného člověka proto claim nastav.
+
+Cisterny se nastavují společně s událostmi (rezervace jsou uložené uvnitř událostí) —
+appka to hlídá sama: odškrtnutí událostí odškrtne i cisterny.
 
 ## App Check (volitelné doporučení z auditu)
 
