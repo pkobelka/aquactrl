@@ -134,18 +134,19 @@ padding:24px;z-index:50;overflow:auto}
   <div class="nazev"><span class="a">Aqua</span><span class="c">Ctrl</span></div>
   <nav class="menu">
     <a onclick="openJakTestovat()">❓ Jak testovat</a>
-    <a onclick="openUdalosti()">Aktuální události<span class="bdg" id="bdgUd" style="display:none;background:#e23b3b">0</span></a>
-    <a onclick="otevriPlan()">Plán vzorkování 2026<span class="bdg" id="bdgPlan" title="události z plánu" style="display:none;background:#e23b3b">0</span></a>
-    <a onclick="openMojeUkoly()">Moje úkoly<span class="bdg" id="bdgUk" style="display:none;background:#e8881b">0</span></a>
-    <a onclick="openCisterny()">Cisterny<span class="bdg" id="bdgCist" title="v akci" style="display:none;background:#e23b3b">0</span><span class="bdg" id="bdgCistRez" title="rezervace" style="display:none;background:#e8881b">0</span></a>
-    <a onclick="openKartyVrtu()">Karty vrtů<span class="bdg" id="bdgKarty" title="nové karty ke stažení" style="display:none;background:#7a5ea8">0</span></a>
-    <a onclick="openKontakty()">Kontakty</a>
-    <a onclick="openSkladCerpadel()">Čerpadla na skladě</a>
+    <a id="navUdalosti" onclick="openUdalosti()">Aktuální události<span class="bdg" id="bdgUd" style="display:none;background:#e23b3b">0</span></a>
+    <a id="navPlan" onclick="otevriPlan()">Plán vzorkování 2026<span class="bdg" id="bdgPlan" title="události z plánu" style="display:none;background:#e23b3b">0</span></a>
+    <a id="navUkoly" onclick="openMojeUkoly()">Moje úkoly<span class="bdg" id="bdgUk" style="display:none;background:#e8881b">0</span></a>
+    <a id="navCist" onclick="openCisterny()">Cisterny<span class="bdg" id="bdgCist" title="v akci" style="display:none;background:#e23b3b">0</span><span class="bdg" id="bdgCistRez" title="rezervace" style="display:none;background:#e8881b">0</span></a>
+    <a id="navKarty" onclick="openKartyVrtu()">Karty vrtů<span class="bdg" id="bdgKarty" title="nové karty ke stažení" style="display:none;background:#7a5ea8">0</span></a>
+    <a id="navKontakty" onclick="openKontakty()">Kontakty</a>
+    <a id="navCerpadla" onclick="openSkladCerpadel()">Čerpadla na skladě</a>
     <a id="navZariz" onclick="openZarizeni()" style="display:none">Zařízení<span class="bdg" id="bdgZar" style="display:none;background:#e8881b">0</span></a>
     <a id="navLoginEmaily" onclick="openLoginEmaily()" style="display:none">Přístup (e-maily)</a>
     <a id="navLoginQr" onclick="openLoginQr()" style="display:none">Přihlašovací QR</a>
+    <a id="navSekce" onclick="openSekcePrava()" style="display:none">Sekce (kdo co vidí)</a>
     <a id="navSdilet" onclick="acSdilej()" style="display:none">📤 Sdílet appku</a>
-    <a onclick="openDokumenty()">Dokumenty</a>
+    <a id="navDokumenty" onclick="openDokumenty()">Dokumenty</a>
     <a id="btnPush" onclick="acEnablePush()">🔔 Povolit notifikace</a>
   </nav>
   <div class="vhos"><b>VHOS</b><i>a.s.</i></div>
@@ -163,7 +164,7 @@ padding:24px;z-index:50;overflow:auto}
   <b style="color:#1577c8">Aqua</b><b style="color:#0b3a66">Ctrl</b> <span id="acVer" style="color:#555"></span> · <b>© 2026 Petr Kobelka</b>
 </footer>
 
-<button class="fab" title="Nová událost" onclick="otevri()">＋</button>
+<button id="fabNova" class="fab" title="Nová událost" onclick="otevri()">＋</button>
 
 <!-- WIZARD -->
 <div class="overlay" id="seznamOv" onclick="if(event.target===this)zavriSeznam()">
@@ -240,7 +241,7 @@ function autoUpoz(zadal,resitel){ const out=[]; [zadal,resitel,ADMIN_KOD].forEac
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v116";  // drž v souladu s CACHE v sw.js
+const VERZE="v117";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -282,6 +283,7 @@ const KONTAKTY={
 const SKLAD_CERPADLA=[{"poz":1,"misto":"SEBRANICE VRT V5","popis":"nový motor- původní hydraulika- bez kabelu"},{"poz":2,"misto":"SEBRANICE VRT V3","popis":"LOWARA Z6YZ/9- s kabelem"},{"poz":3,"misto":"PROVOZ SY","popis":"UVN 10"},{"poz":4,"misto":"OPATOVEC","popis":"UBG 5- s kabelem- odvoz vrt V2 Hradec nad Svitavou"},{"poz":5,"misto":"OPATOVEC","popis":"CUBU 0708- s kabelem"},{"poz":6,"misto":"PUSTÁ KAMENICE","popis":"UBA 6- s kabelem"},{"poz":7,"misto":"KOSTELNÍ LUKA","popis":"UDN 6- s kabelem"},{"poz":8,"misto":"BUDISLAV","popis":"A-UBA 6- s kabelem"},{"poz":9,"misto":"DĚTŘICHOV","popis":"CALPEDA-již použité čerpadlo bez kabelu"},{"poz":10,"misto":"OPATOV","popis":"čerpadlo již vydáno"},{"poz":11,"misto":"VRT JANOV","popis":"LOWARA- s kabelem- čerpadlo již vydáno"},{"poz":12,"misto":"DLOUHÁ LOUČKA","popis":"WILO- s kabelem"},{"poz":13,"misto":"HARTINKOV","popis":"EVGU- s kabelem"},{"poz":14,"misto":"VRT MLADĚJOV","popis":"KSB- s kabelem"},{"poz":15,"misto":"ČS OLDŘÍŠ","popis":"KSB , v tlakovém plášti- s kabelem"},{"poz":16,"misto":"MAŘÍN","popis":"CALPEDA- s kabelem"},{"poz":17,"misto":"POHLEDY","popis":"CALPEDA- s kabelem"},{"poz":18,"misto":"PACOV","popis":"čerpadlo již vydáno"},{"poz":19,"misto":"BĚLÁ NAD SVIT.","popis":"UBA 6- s kabelem"},{"poz":20,"misto":"PUSTÁ KAMENICE","popis":"UVN 4- s kabelem"},{"poz":21,"misto":"TRSTĚNICE","popis":"A- UBA 8- s kabelem"},{"poz":22,"misto":"POLIČKA VRT V6","popis":"CVBU 0709- s kabelem (pouze hydraulika)"},{"poz":23,"misto":"POLIČKA VRT V8","popis":"CALPEDA- s kabelem"},{"poz":24,"misto":"DĚTŘICHOV- SY","popis":"GRUNDFOS- s kabelem"},{"poz":25,"misto":"SUCHÁ LHOTA","popis":"LOWARA- s kabelem"},{"poz":26,"misto":"KRASÍKOV","popis":"LOWARA- s kabelem"},{"poz":27,"misto":"JEDLOVÁ VRT- HV5","popis":"UG 14A-23 s kabelem"},{"poz":28,"misto":"TRPÍN","popis":"UG 14A-23,chladící plášť+ kabel 50m"},{"poz":29,"misto":"RAIFOVA PILA","popis":"Z612 08F, chladicí plášť, 10 m kabelu"},{"poz":30,"misto":"JEDLOVÁ VRT- HV3","popis":"UG 8A-12 + Franklin 3kW s kabelem 30m"}];
 const SKLAD_CERPADLA_BEZ=["KSB- motor 16kW, Q 2,79- 19, 8 l/s, H 92- 35m, střed 70m 10,5 l/s","KSB- motor 7kW, Q 0,8-10 l/s, H 86- 39m, střed 60m 6,5 l/s"];
 function openSkladCerpadel(){
+  if(sekceStop("cerpadla"))return;
  document.getElementById("seznamHead").textContent="Čerpadla na skladě ("+SKLAD_CERPADLA.length+" ks)";
  const rows=SKLAD_CERPADLA.map(function(x){
   return '<div class="sl-row"><div><b><span style="color:#6b7a8d;font-weight:700">Poz. '+esc(x.poz)+'</span> · '+esc(x.misto)+'</b><br><span style="font-size:14px;color:#6b7a8d">'+esc(x.popis||"—")+'</span></div></div>';
@@ -490,7 +492,7 @@ const KROKY=["1. Co se stalo?","2. Kde?","3. Podrobnosti","4. Lidé"];
 let st={krok:1,podminka:null,zavaznost:null,stredisko:null,typ:null,objekt:null,objektStred:"",objJiny:false,adresa:"",
 popis:"",nahlasil:"",tel:"",ukoly:[{resitel:null,popis:"",tdatum:"",tcas:""}],info:[],cistAno:null,cisterny:[],cistMista:{},cistOd:"",cistCas:"",cistDoDatum:"",cistDoCas:"",udDatum:"",kolOpen:false,kolVzorky:[],prilohy:[],hotovo:false};
 
-function otevri(){st={krok:1,podminka:null,zavaznost:null,stredisko:null,typ:null,objekt:null,objektStred:"",objJiny:false,adresa:"",dotcene:[],popis:"",nahlasil:"",tel:"",ukoly:[{resitel:null,popis:"",tdatum:"",tcas:""}],info:[],cistAno:null,cisterny:[],cistMista:{},cistOd:"",cistCas:"",cistDoDatum:"",cistDoCas:"",udDatum:"",kolOpen:false,kolVzorky:[],prilohy:[],hotovo:false};
+function otevri(){if(sekceStop("nova"))return;st={krok:1,podminka:null,zavaznost:null,stredisko:null,typ:null,objekt:null,objektStred:"",objJiny:false,adresa:"",dotcene:[],popis:"",nahlasil:"",tel:"",ukoly:[{resitel:null,popis:"",tdatum:"",tcas:""}],info:[],cistAno:null,cisterny:[],cistMista:{},cistOd:"",cistCas:"",cistDoDatum:"",cistDoCas:"",udDatum:"",kolOpen:false,kolVzorky:[],prilohy:[],hotovo:false};
 st.udDatum=dnesISO();_datum=dnesISO();_loadCistRez();document.getElementById("ov").classList.add("show");render();}
 function zavri(){ try{ if(_prRec&&_prMR){_prMR.stop();} _prRec=false; _prMR=null; acPrilStopStream(); }catch(_){} document.getElementById("ov").classList.remove("show"); }
 
@@ -516,7 +518,7 @@ function render(){
 let _planDatum=null;
 function planDaty(){return [...new Set(PLAN.map(p=>p.datum))].sort();}
 function denTitul(iso){const dny=["Neděle","Pondělí","Úterý","Středa","Čtvrtek","Pátek","Sobota"];return dny[new Date(iso+"T00:00:00").getDay()]+" "+fmtDatumCz(iso);}
-function otevriPlan(){_planDatum=dnesISO();document.getElementById("planOv").classList.add("show");renderPlan();try{acPrehledCounts();}catch(_){}}
+function otevriPlan(){if(sekceStop("plan"))return;_planDatum=dnesISO();document.getElementById("planOv").classList.add("show");renderPlan();try{acPrehledCounts();}catch(_){}}
 function zavriPlan(){document.getElementById("planOv").classList.remove("show");}
 function setPlanDatum(v){if(v)_planDatum=v;renderPlan();}
 function planNav(dir){const d=planDaty();const cand=dir>0?d.find(x=>x>_planDatum):[...d].reverse().find(x=>x<_planDatum);if(cand){_planDatum=cand;renderPlan();}}
@@ -809,6 +811,7 @@ function acKartyBadge(){
   }catch(_){}
 }
 function openKartyVrtu(){
+  if(sekceStop("karty"))return;
   zavriPlan();
   document.getElementById("seznamHead").textContent="Karty vrtů";
   var bodyEl=document.getElementById("seznamBody");
@@ -857,6 +860,7 @@ function openJakTestovat(){
   document.getElementById("seznamOv").classList.add("show");
 }
 function openDokumenty(){
+  if(sekceStop("dokumenty"))return;
   zavriPlan();
   document.getElementById("seznamHead").textContent="Dokumenty – metodické pokyny ("+DOKUMENTY.length+")";
   document.getElementById("seznamBody").innerHTML='<p class="hint" style="margin:0 0 10px">Metodické pokyny VHOS a.s. Klikni na dokument pro otevření / stažení (PDF).</p>'+DOKUMENTY.map(function(d){return '<div style="border:1px solid #dbe6f1;border-radius:12px;padding:12px;margin-bottom:10px;background:#fbfdff;display:flex;justify-content:space-between;gap:10px;align-items:center"><div style="min-width:0"><div style="font-weight:800;color:#0b3a66">📄 '+esc(d.t)+'</div><div style="font-size:14px;color:#6b7a8d">'+esc(d.d)+'</div></div><a class="sl-map" href="'+esc(d.f)+'" target="_blank" rel="noopener" style="flex:none">Otevřít ▸</a></div>';}).join("");
@@ -906,6 +910,7 @@ function absPridej(kod){
 }
 function absSmaz(kod,id){ var me=localStorage.getItem("ac_person")||""; if(!(kod===me||jsemAbsenceSpravce())){ alert("Smazat nepřítomnost jiného může jen správce."); return; } if(!confirm("Smazat tuto nepřítomnost?"))return; firebase.database().ref("aquactrl_absence/"+kod+"/"+id).remove().then(function(){ acLoadAbsence(); setTimeout(openKontakty,200); }).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));}); }
 function openKontakty(){
+  if(sekceStop("kontakty"))return;
  document.getElementById("seznamHead").textContent="Kontakty ("+LIDE_R.length+")";
  const telHref=t=>t.replace(/[^+0-9]/g,"");
  const me=localStorage.getItem("ac_person")||"";
@@ -1302,6 +1307,7 @@ function ukolKartaHTML(u){
     <div style="display:flex;gap:8px;flex-wrap:wrap">${btns}</div></div>`;
 }
 function openMojeUkoly(){
+  if(sekceStop("ukoly"))return;
   zavriPlan();
   document.getElementById("seznamHead").textContent="Moje úkoly";
   const body=document.getElementById("seznamBody");
@@ -1627,6 +1633,7 @@ function _renderUdalostiList(){
   body.innerHTML=_cachedOpenEvs.length?_cachedOpenEvs.map(_udalostRadek).join(""):(_udNacteno?'<p class="hint">Žádné otevřené události. 🎉</p>':'<p class="hint">Načítám…</p>');
 }
 function openUdalosti(){
+  if(sekceStop("udalosti"))return;
   zavriPlan();
   document.getElementById("seznamHead").textContent="Aktuální události";
   document.getElementById("seznamOv").classList.add("show");
@@ -1798,7 +1805,7 @@ function upravUdalost(id){
 // ===== Schvalování zařízení (jen správce) =====
 function acCheckPending(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aquactrl_push_tokens/"+devId()).get().then(function(s){ const v=s.val()||{}; const bar=document.getElementById("acPendBar"); if(bar) bar.style.display=(s.exists()&&v.schvaleno===false)?"":"none"; }).catch(function(){}); }catch(_){} }
 function acRenderWho(){ try{ var el=document.getElementById("acWho"); if(!el)return; var k=localStorage.getItem("ac_person")||""; if(k){ el.innerHTML="👤 "+esc(uzivatelJmeno()); el.style.background="#eaf4fc"; el.style.color="#0b3a66"; el.style.border="1px solid #cfe6f7"; } else { el.innerHTML="👤 Přihlas se"; el.style.background="#fff3cd"; el.style.color="#7a5b00"; el.style.border="1px solid #ffe69c"; } }catch(_){} }
-function acInitGate(){ try{ const a=document.getElementById("navZariz"); const le=document.getElementById("navLoginEmaily"); const qr=document.getElementById("navLoginQr"); const sd=document.getElementById("navSdilet"); if(jsemAdmin()){ if(a){a.style.display="";acZarWatch();} if(le)le.style.display=""; if(qr)qr.style.display=""; if(sd)sd.style.display=""; } acCheckPending(); acUkolyWatch(); acRenderWho(); }catch(_){} }
+function acInitGate(){ try{ const a=document.getElementById("navZariz"); const le=document.getElementById("navLoginEmaily"); const qr=document.getElementById("navLoginQr"); const sd=document.getElementById("navSdilet"); if(jsemAdmin()){ if(a){a.style.display="";acZarWatch();} if(le)le.style.display=""; if(qr)qr.style.display=""; if(sd)sd.style.display=""; const sk=document.getElementById("navSekce"); if(sk)sk.style.display=""; } acAplikujSekce(); acCheckPending(); acUkolyWatch(); acRenderWho(); }catch(_){} }
 // Snadné sdílení odkazu na appku (jen pro admina) – na mobilu nativní nabídka sdílení, na PC zkopíruje do schránky
 function acSdilej(){
   const url="https://pkobelka.github.io/aquactrl/";
@@ -1950,6 +1957,166 @@ function qrSmaz(id){
   firebase.database().ref("aquactrl_qr_login/"+id).remove().then(openLoginQr).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
 }
 
+// ===== Omezení sekcí (kdo co vidí) =====
+// Uzel aquactrl_pristup_sekce/<kód osoby> = mapa sekce -> true/false. Kdo v uzlu není,
+// vidí všechno — pro 99 % lidí se nenastavuje nic, zapisuje se jen výjimka. Admin vidí vždy vše.
+// U „Aktuální události" a „Karty vrtů" drží omezení i pravidla databáze; u zbytku jsou data
+// natvrdo v index.html (veřejný soubor), takže jde jen o skrytí v menu — ne o utajení.
+const SEKCE=[["udalosti","Aktuální události"],["plan","Plán vzorkování"],["ukoly","Moje úkoly"],["cisterny","Cisterny"],["karty","Karty vrtů"],["kontakty","Kontakty"],["cerpadla","Čerpadla na skladě"],["dokumenty","Dokumenty"],["nova","Zakládat události (＋)"]];
+const SEKCE_NAV={udalosti:"navUdalosti",plan:"navPlan",ukoly:"navUkoly",cisterny:"navCist",karty:"navKarty",kontakty:"navKontakty",cerpadla:"navCerpadla",dokumenty:"navDokumenty",nova:"fabNova"};
+let _acSekce=null;          // null = bez omezení
+let _sekceSchranka=null;    // zkopírované nastavení (kód osoby + mapa)
+let _sekceEdit=null;        // rozeditované nastavení {kod, mapa}
+function _sekJmeno(kod){ const f=LIDE.find(x=>x[0]===kod); return f?f[1]:kod; }
+function smiSekci(k){ return jsemAdmin() || !_acSekce || _acSekce[k]!==false; }
+// Vrátí true = sekce je zakázaná (a rovnou to uživateli řekne) → volající se má vrátit.
+function sekceStop(k){ if(smiSekci(k))return false; alert("Tuhle část appky nemáš zpřístupněnou. Kdybys ji potřeboval, ozvi se Petru Kobelkovi."); return true; }
+function acNactiSekce(person){
+  try{
+    if(!(window.firebase&&firebase.database)||!person){ _acSekce=null; acAplikujSekce(); return; }
+    firebase.database().ref("aquactrl_pristup_sekce/"+person).get().then(function(s){
+      _acSekce=s.exists()?(s.val()||{}):null; acAplikujSekce();
+    }).catch(function(){ _acSekce=null; acAplikujSekce(); });
+  }catch(_){}
+}
+function acAplikujSekce(){
+  try{ Object.keys(SEKCE_NAV).forEach(function(k){ const el=document.getElementById(SEKCE_NAV[k]); if(el) el.style.display=smiSekci(k)?"":"none"; }); }catch(_){}
+}
+// --- Správa (jen admin) ---
+function openSekcePrava(){
+  if(!jsemAdmin()){ alert("Nastavení sekcí je jen pro správce."); return; }
+  zavriPlan();
+  _sekceEdit=null;
+  document.getElementById("seznamHead").textContent="Sekce (kdo co vidí)";
+  const body=document.getElementById("seznamBody");
+  document.getElementById("seznamOv").classList.add("show");
+  body.innerHTML='<p class="hint">Načítám…</p>';
+  firebase.database().ref("aquactrl_pristup_sekce").get().then(function(s){
+    const rows=[]; s.forEach(function(c){ rows.push({kod:c.key, mapa:c.val()||{}}); });
+    rows.sort(function(a,b){ return _sekJmeno(a.kod).localeCompare(_sekJmeno(b.kod),"cs"); });
+    const opts='<option value="">— vyber osobu —</option>'+LIDE_R.map(p=>'<option value="'+p[0]+'">'+esc(p[1])+'</option>').join("");
+    const hint='<div style="border:1px dashed #cfe6f7;border-radius:14px;padding:12px;margin-bottom:12px;background:#f6fbff;font-size:13.5px;color:#4a5b6e;line-height:1.5">'
+      +'<div style="font-weight:800;color:#0b3a66;margin-bottom:6px">👁️ Kdo co vidí</div>'
+      +'Kdo tu není uvedený, <b>vidí všechno</b> — nastavuje se jen výjimka. Správce vidí vždy vše.<br>'
+      +'Hotové nastavení jde <b>zkopírovat</b> (📋) a vložit rovnou více lidem najednou.'
+      +'</div>';
+    const schr=_sekceSchranka?'<div style="border:1px solid #f0d8a8;border-radius:14px;padding:10px 12px;margin-bottom:12px;background:#fffaf0;display:flex;justify-content:space-between;align-items:center;gap:8px">'
+      +'<div style="font-size:13.5px;color:#7a5b00">📋 Ve schránce: nastavení od <b>'+esc(_sekJmeno(_sekceSchranka.kod))+'</b></div>'
+      +'<button onclick="sekceVlozOtevri()" style="border:0;border-radius:10px;padding:8px 12px;background:#0b5cae;color:#fff;font-weight:800;cursor:pointer;white-space:nowrap">📥 Vložit dalším</button>'
+      +'</div>':'';
+    const addForm='<div style="border:1px dashed #cfe6f7;border-radius:14px;padding:12px;margin-bottom:12px;background:#f6fbff">'
+      +'<div style="font-weight:800;color:#0b3a66;margin-bottom:8px">➕ Omezit další osobu</div>'
+      +'<select id="sekNewKod" style="width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px">'+opts+'</select>'
+      +'<button onclick="sekceEditNovy()" style="width:100%;border:0;border-radius:10px;padding:9px;background:#0b5cae;color:#fff;font-weight:800;cursor:pointer">Nastavit sekce</button></div>';
+    const list=rows.length?rows.map(function(r){
+      const skryte=SEKCE.filter(function(s2){ return r.mapa[s2[0]]===false; }).map(function(s2){ return s2[1]; });
+      return '<div style="border:1px solid #dbe6f1;border-radius:14px;padding:12px;margin-bottom:8px;background:#fbfdff">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
+        +'<div><b style="color:#0b3a66">'+esc(_sekJmeno(r.kod))+'</b><br><span style="font-size:13px;color:#9aa7b8">'+(skryte.length?'nevidí: '+esc(skryte.join(", ")):'vidí všechno')+'</span></div>'
+        +'</div>'
+        +'<div style="display:flex;gap:8px;margin-top:10px">'
+        +'<button onclick="sekceEdit(\''+r.kod+'\')" style="flex:1;border:1px solid #0b5cae;border-radius:10px;padding:8px;background:#fff;color:#0b5cae;font-weight:800;cursor:pointer">✏️ Upravit</button>'
+        +'<button onclick="sekceKopiruj(\''+r.kod+'\')" style="flex:1;border:1px solid #0b5cae;border-radius:10px;padding:8px;background:#fff;color:#0b5cae;font-weight:800;cursor:pointer">📋 Kopírovat</button>'
+        +'<button onclick="sekceZrus(\''+r.kod+'\')" title="Zrušit omezení" style="border:1px solid #c0392b;border-radius:10px;padding:8px 12px;background:#fff;color:#c0392b;font-weight:800;cursor:pointer">🗑️</button>'
+        +'</div></div>';
+    }).join(""):'<p class="hint">Zatím nikdo omezený — všichni vidí všechno.</p>';
+    body.innerHTML=hint+schr+addForm+list;
+  }).catch(function(e){ const m=(e&&e.message?e.message:String(e)); body.innerHTML='<p class="hint">Chyba: '+esc(m)+'</p>'; });
+}
+function sekceEditNovy(){
+  const kod=document.getElementById("sekNewKod").value;
+  if(!kod){ alert("Vyber osobu."); return; }
+  sekceEdit(kod);
+}
+function sekceEdit(kod){
+  firebase.database().ref("aquactrl_pristup_sekce/"+kod).get().then(function(s){
+    const ulozene=s.exists()?(s.val()||{}):{};
+    const mapa={}; SEKCE.forEach(function(x){ mapa[x[0]]=ulozene[x[0]]!==false; });
+    // Předvyplň ze schránky, když se zakládá nové omezení a nějaké nastavení je zkopírované.
+    if(!s.exists()&&_sekceSchranka){ SEKCE.forEach(function(x){ mapa[x[0]]=_sekceSchranka.mapa[x[0]]!==false; }); }
+    _sekceEdit={kod:kod, mapa:mapa};
+    _sekceRenderEdit();
+  }).catch(function(e){ alert("Chyba: "+(e&&e.message?e.message:e)); });
+}
+function _sekceRenderEdit(){
+  const body=document.getElementById("seznamBody");
+  document.getElementById("seznamHead").textContent="Sekce – "+_sekJmeno(_sekceEdit.kod);
+  const boxy=SEKCE.map(function(x){
+    const k=x[0], on=_sekceEdit.mapa[k]!==false;
+    return '<label style="display:flex;align-items:center;gap:10px;border:1px solid #dbe6f1;border-radius:12px;padding:10px 12px;margin-bottom:8px;background:'+(on?"#fbfdff":"#f6f7f9")+';cursor:pointer">'
+      +'<input type="checkbox" '+(on?"checked":"")+' onchange="sekceToggle(\''+k+'\',this.checked)" style="width:20px;height:20px">'
+      +'<span style="font-weight:700;color:'+(on?"#0b3a66":"#9aa7b8")+'">'+esc(x[1])+'</span></label>';
+  }).join("");
+  body.innerHTML='<div style="border:1px dashed #cfe6f7;border-radius:14px;padding:12px;margin-bottom:12px;background:#f6fbff;font-size:13.5px;color:#4a5b6e;line-height:1.5">'
+    +'Zaškrtnuté sekce dotyčný <b>vidí</b>, odškrtnuté se mu v menu neobjeví.<br>'
+    +'Cisterny potřebují Aktuální události (rezervace jsou uložené v událostech) — když odškrtneš události, odškrtnou se i cisterny.'
+    +'</div>'
+    +boxy
+    +'<div style="display:flex;gap:8px;margin-top:12px">'
+    +'<button onclick="sekceUloz()" style="flex:2;border:0;border-radius:10px;padding:11px;background:#0b5cae;color:#fff;font-weight:800;cursor:pointer">Uložit</button>'
+    +'<button onclick="openSekcePrava()" style="flex:1;border:1px solid #9aa7b8;border-radius:10px;padding:11px;background:#fff;color:#6b7a8d;font-weight:800;cursor:pointer">Zpět</button>'
+    +'</div>';
+}
+function sekceToggle(k,on){
+  _sekceEdit.mapa[k]=!!on;
+  if(k==="udalosti"&&!on) _sekceEdit.mapa.cisterny=false;   // rezervace cisteren jsou v událostech
+  if(k==="cisterny"&&on)  _sekceEdit.mapa.udalosti=true;
+  _sekceRenderEdit();
+}
+function sekceUloz(){
+  const e=_sekceEdit; if(!e)return;
+  const vse=SEKCE.every(function(x){ return e.mapa[x[0]]!==false; });
+  const ref=firebase.database().ref("aquactrl_pristup_sekce/"+e.kod);
+  // Nic neomezeno = záznam se nepíše (a starý se smaže) → dotyčný prostě vidí všechno.
+  (vse?ref.remove():ref.set(e.mapa)).then(function(){ _sekceSchranka={kod:e.kod, mapa:Object.assign({},e.mapa)}; openSekcePrava(); })
+    .catch(function(err){ alert("Chyba: "+(err&&err.message?err.message:err)); });
+}
+function sekceZrus(kod){
+  if(!confirm("Zrušit omezení pro "+_sekJmeno(kod)+"? (bude zase vidět všechno)"))return;
+  firebase.database().ref("aquactrl_pristup_sekce/"+kod).remove().then(openSekcePrava).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
+}
+function sekceKopiruj(kod){
+  firebase.database().ref("aquactrl_pristup_sekce/"+kod).get().then(function(s){
+    _sekceSchranka={kod:kod, mapa:s.val()||{}};
+    openSekcePrava();
+  }).catch(function(e){ alert("Chyba: "+(e&&e.message?e.message:e)); });
+}
+function sekceVlozOtevri(){
+  if(!_sekceSchranka){ alert("Nejdřív nějaké nastavení zkopíruj (📋)."); return; }
+  const body=document.getElementById("seznamBody");
+  document.getElementById("seznamHead").textContent="Vložit nastavení dalším";
+  const skryte=SEKCE.filter(function(x){ return _sekceSchranka.mapa[x[0]]===false; }).map(function(x){ return x[1]; });
+  const lidi=LIDE_R.filter(function(p){ return p[0]!==_sekceSchranka.kod; }).map(function(p){
+    return '<label style="display:flex;align-items:center;gap:10px;border:1px solid #dbe6f1;border-radius:12px;padding:9px 12px;margin-bottom:6px;background:#fbfdff;cursor:pointer">'
+      +'<input type="checkbox" class="sekVlozKdo" value="'+p[0]+'" style="width:19px;height:19px">'
+      +'<span style="font-weight:700;color:#0b3a66">'+esc(p[1])+'</span></label>';
+  }).join("");
+  body.innerHTML='<div style="border:1px dashed #cfe6f7;border-radius:14px;padding:12px;margin-bottom:12px;background:#f6fbff;font-size:13.5px;color:#4a5b6e;line-height:1.5">'
+    +'Nastavení od <b>'+esc(_sekJmeno(_sekceSchranka.kod))+'</b>: '+(skryte.length?'nevidí <b>'+esc(skryte.join(", "))+'</b>':'vidí všechno')+'.<br>'
+    +'Vyber, komu se má nastavit to samé. Stávající omezení vybraných lidí se přepíše.'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:10px">'
+    +'<button onclick="sekceVlozVse(true)" style="flex:1;border:1px solid #0b5cae;border-radius:10px;padding:8px;background:#fff;color:#0b5cae;font-weight:800;cursor:pointer">Označit všechny</button>'
+    +'<button onclick="sekceVlozVse(false)" style="flex:1;border:1px solid #9aa7b8;border-radius:10px;padding:8px;background:#fff;color:#6b7a8d;font-weight:800;cursor:pointer">Odznačit</button>'
+    +'</div>'
+    +lidi
+    +'<div style="display:flex;gap:8px;margin-top:12px">'
+    +'<button onclick="sekceVlozUloz()" style="flex:2;border:0;border-radius:10px;padding:11px;background:#0b5cae;color:#fff;font-weight:800;cursor:pointer">Použít u vybraných</button>'
+    +'<button onclick="openSekcePrava()" style="flex:1;border:1px solid #9aa7b8;border-radius:10px;padding:11px;background:#fff;color:#6b7a8d;font-weight:800;cursor:pointer">Zpět</button>'
+    +'</div>';
+}
+function sekceVlozVse(on){ Array.prototype.forEach.call(document.querySelectorAll(".sekVlozKdo"),function(el){ el.checked=!!on; }); }
+function sekceVlozUloz(){
+  const kdo=Array.prototype.filter.call(document.querySelectorAll(".sekVlozKdo"),function(el){ return el.checked; }).map(function(el){ return el.value; });
+  if(!kdo.length){ alert("Nikdo není vybraný."); return; }
+  if(!confirm("Nastavit stejné sekce "+kdo.length+" lidem?"))return;
+  const mapa=_sekceSchranka.mapa||{};
+  const vse=SEKCE.every(function(x){ return mapa[x[0]]!==false; });
+  const upd={}; kdo.forEach(function(k){ upd[k]=vse?null:mapa; });
+  firebase.database().ref("aquactrl_pristup_sekce").update(upd).then(function(){ alert("Hotovo: nastaveno "+kdo.length+" lidem."); openSekcePrava(); })
+    .catch(function(e){ alert("Chyba: "+(e&&e.message?e.message:e)); });
+}
+
 // ===== Cisterny – obsazenost =====
 // Odznak v menu = počet cisteren právě v akci (aktivní rezervace teď)
 function acCistBadge(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aquactrl_udalosti").get().then(function(s){ const now=Date.now(); const active=new Set(), upcoming=new Set(); s.forEach(function(c){ const e=c.val()||{}; if(e.uzavreno)return; _cistArr(e).forEach(function(x){ if(x.idx==null||x.do==null||now>x.do)return; if(x.od!=null&&x.od<=now) active.add(x.idx); else upcoming.add(x.idx); }); }); upcoming.forEach(function(i){ if(active.has(i)) upcoming.delete(i); }); const b=document.getElementById("bdgCist"); if(b){ b.textContent=active.size; b.title=active.size+" v akci"; b.style.display=active.size?"":"none"; } const r=document.getElementById("bdgCistRez"); if(r){ r.textContent=upcoming.size; r.title=upcoming.size+" rezervace"; r.style.display=upcoming.size?"":"none"; } }).catch(function(){}); }catch(_){} }
@@ -1960,6 +2127,7 @@ function acUkolyBadge(){ try{ if(!(window.firebase&&firebase.database))return; c
 let _ukRef=null, _ukWatched="";
 function acUkolyWatch(){ try{ if(!(window.firebase&&firebase.database))return; const me=localStorage.getItem("ac_person")||""; if(me===_ukWatched && _ukRef) return; if(_ukRef){ try{_ukRef.off();}catch(_){} _ukRef=null; } _ukWatched=me; const b=document.getElementById("bdgUk"); if(!me){ if(b){b.style.display="none";} return; } _ukRef=firebase.database().ref("aquactrl_ukoly").orderByChild("resitel").equalTo(me); _ukRef.on("value",_setUkBadge,function(){}); }catch(_){} }
 function openCisterny(){
+  if(sekceStop("cisterny"))return;
   zavriPlan();
   document.getElementById("seznamHead").textContent="Cisterny";
   const body=document.getElementById("seznamBody");
@@ -2232,6 +2400,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
         if(person){
           acLoginClose();
           localStorage.setItem('ac_person', person);
+          try{ acNactiSekce(person); }catch(_){}
           try{ acInitGate(); }catch(_){}
           try{ acPresenceStart(person); }catch(_){}
           try{ _acTokenRefresh(); }catch(_){} // obnov push token tohoto zařízení (aby nezvětral → push chodí i po čase, na každém zařízení)
