@@ -24,6 +24,35 @@ Appka vyžaduje přihlášení e-mailovým odkazem (funguje s jakoukoli schránk
 - Spravuje se přes appku v menu **„Přístup (e-maily)"** (jen pro admina, kód `TŘ`), nebo jednorázově skriptem `seed_login_email.py` (viz jeho hlavička pro použití) přes workflow **„Naplnit povolené e-maily"**.
 - Firebase pravidla u `aquactrl_*` uzlů se **zpřísňují až s odstupem** (ne hned s tímhle nasazením) — nejdřív se musí všichni aspoň jednou přihlásit, teprve pak se v konzoli ručně nastaví, že čtení/zápis vyžaduje ověřený e-mail z `aquactrl_login_email`. Do té doby zůstávají `aquactrl_*` uzly přístupné jako dosud.
 
+### Přidání nového člověka (postup)
+
+1. **Přístup:** v appce menu **„Přístup (e-maily)"** → e-mail + osoba ze seznamu → *Přidat*.
+2. **Pošli mu odkaz** na appku (menu „📤 Sdílet appku"), ať si ji přidá na plochu.
+3. **On se přihlásí:** zadá svůj e-mail → přijde mu přihlašovací odkaz → otevře ho
+   **na tomtéž zařízení**. (iPhone s appkou na ploše: odkaz v e-mailu zkopírovat a vložit
+   v appce do „📱 iPhone".) Přihlášení pak drží trvale.
+4. **Identita:** po jeho prvním přihlášení spusť Actions → **„Nastavit identity uživatelů"**,
+   ať dostane ověřený claim `person` (appka si token obnoví sama).
+
+### Kdo nemá e-mail — přihlašovací QR
+
+Actions → **„Přihlašovací QR (AquaCtrl)"** → *Run workflow*: zadáš e-mail (kdo žádný nemá,
+dostane zástupný, třeba `jan.novak@aquactrl.local` — nemusí existovat), kód osoby z `LIDE`
+a případně platnost. Workflow vygeneruje **jednorázový přihlašovací odkaz** přes Admin SDK
+(nic se nikam neposílá) a QR se objeví v appce v menu **„Přihlašovací QR"** — vidí ho jen
+admin. Dotyčný QR naskenuje z tvého displeje a je přihlášený; e-mail si appka z odkazu vezme
+sama, nic neopisuje. Pak už se přihlašovat nemusí. Přes 📤 jde místo skenování poslat i
+samotný odkaz (SMS/WhatsApp) — pro iPhone s appkou na ploše je to jistější cesta.
+
+- Odkaz **platí jen jednou** a krátce (výchozí 60 min); po naskenování ho v appce smaž (🗑️).
+- **Do GitHub Actions se odkaz nikdy nevypisuje** — repo je veřejné, logy a artefakty vidí
+  kdokoli. Proto jde jen do DB (`aquactrl_qr_login`, čte pouze admin), viz
+  [SECURITY.md](SECURITY.md#přihlašovací-qr-aquactrl_qr_login). **Bez pravidla pro tenhle uzel
+  ve Firebase appka QR nenačte** — pravidlo se přidává v `database.rules.json` v repu `mojebudky`.
+- Lokálně (se `service-account-key.json`) totéž udělá
+  `python login_qr_aquactrl.py jan.novak@aquactrl.local JN --png qr.png` — QR rovnou do souboru
+  k vytištění.
+
 ## Odeslání push notifikace
 
 GitHub → Actions → **Odeslat push (AquaCtrl)** → *Run workflow* (titulek + text, případně Device ID jednoho příjemce). Tokeny se čtou z uzlu `aquactrl_push_tokens` ve sdílené Firebase DB.
@@ -42,6 +71,8 @@ GitHub → Actions → **Odeslat push (AquaCtrl)** → *Run workflow* (titulek +
 | `seed_login_email.py` | naplnění/doplnění seznamu povolených přihlašovacích e-mailů |
 | `.github/workflows/seed-login-email.yml` | ruční spuštění naplnění e-mailů |
 | `set_admin_claim.py` | udělení/odebrání admin práv přes Firebase Custom Claim |
+| `login_qr_aquactrl.py` | jednorázové přihlašovací QR (pro toho, kdo nemá e-mail) |
+| `.github/workflows/login-qr.yml` | ruční vygenerování přihlašovacího QR |
 | `.github/workflows/set-admin-claim.yml` | ruční spuštění nastavení admina |
 | `check_terminy_aquactrl.py` | ruční/záložní kontrola zmeškaných termínů (viz níže – automaticky to dělá Cloud Function) |
 | `SECURITY.md` | náprava po bezpečnostním auditu (Firebase pravidla + admin claim) |

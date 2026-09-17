@@ -143,6 +143,7 @@ padding:24px;z-index:50;overflow:auto}
     <a onclick="openSkladCerpadel()">Čerpadla na skladě</a>
     <a id="navZariz" onclick="openZarizeni()" style="display:none">Zařízení<span class="bdg" id="bdgZar" style="display:none;background:#e8881b">0</span></a>
     <a id="navLoginEmaily" onclick="openLoginEmaily()" style="display:none">Přístup (e-maily)</a>
+    <a id="navLoginQr" onclick="openLoginQr()" style="display:none">Přihlašovací QR</a>
     <a id="navSdilet" onclick="acSdilej()" style="display:none">📤 Sdílet appku</a>
     <a onclick="openDokumenty()">Dokumenty</a>
     <a id="btnPush" onclick="acEnablePush()">🔔 Povolit notifikace</a>
@@ -239,7 +240,7 @@ function autoUpoz(zadal,resitel){ const out=[]; [zadal,resitel,ADMIN_KOD].forEac
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v115";  // drž v souladu s CACHE v sw.js
+const VERZE="v116";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -1797,7 +1798,7 @@ function upravUdalost(id){
 // ===== Schvalování zařízení (jen správce) =====
 function acCheckPending(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aquactrl_push_tokens/"+devId()).get().then(function(s){ const v=s.val()||{}; const bar=document.getElementById("acPendBar"); if(bar) bar.style.display=(s.exists()&&v.schvaleno===false)?"":"none"; }).catch(function(){}); }catch(_){} }
 function acRenderWho(){ try{ var el=document.getElementById("acWho"); if(!el)return; var k=localStorage.getItem("ac_person")||""; if(k){ el.innerHTML="👤 "+esc(uzivatelJmeno()); el.style.background="#eaf4fc"; el.style.color="#0b3a66"; el.style.border="1px solid #cfe6f7"; } else { el.innerHTML="👤 Přihlas se"; el.style.background="#fff3cd"; el.style.color="#7a5b00"; el.style.border="1px solid #ffe69c"; } }catch(_){} }
-function acInitGate(){ try{ const a=document.getElementById("navZariz"); const le=document.getElementById("navLoginEmaily"); const sd=document.getElementById("navSdilet"); if(jsemAdmin()){ if(a){a.style.display="";acZarWatch();} if(le)le.style.display=""; if(sd)sd.style.display=""; } acCheckPending(); acUkolyWatch(); acRenderWho(); }catch(_){} }
+function acInitGate(){ try{ const a=document.getElementById("navZariz"); const le=document.getElementById("navLoginEmaily"); const qr=document.getElementById("navLoginQr"); const sd=document.getElementById("navSdilet"); if(jsemAdmin()){ if(a){a.style.display="";acZarWatch();} if(le)le.style.display=""; if(qr)qr.style.display=""; if(sd)sd.style.display=""; } acCheckPending(); acUkolyWatch(); acRenderWho(); }catch(_){} }
 // Snadné sdílení odkazu na appku (jen pro admina) – na mobilu nativní nabídka sdílení, na PC zkopíruje do schránky
 function acSdilej(){
   const url="https://pkobelka.github.io/aquactrl/";
@@ -1883,6 +1884,70 @@ function leAdd(){
 function leRemove(key){
   if(!confirm("Opravdu odebrat přístup pro tenhle e-mail?"))return;
   firebase.database().ref("aquactrl_login_email/"+key).remove().then(openLoginEmaily).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
+}
+
+// ===== Přihlašovací QR – jednorázové přihlášení pro toho, kdo nemá e-mail =====
+// Odkaz vyrábí workflow „Přihlašovací QR (AquaCtrl)" (login_qr_aquactrl.py) přes Admin SDK
+// a ukládá ho do uzlu aquactrl_qr_login. Do Actions se odkaz schválně nevypisuje (repo je
+// veřejné = logy i artefakty vidí kdokoli), proto se QR ukazuje až tady, adminovi.
+let _qrRows={};
+function _qrZbyva(ms){ const m=Math.round(((ms||0)-Date.now())/60000); if(m<=0)return"prošlo"; return m<60?(m+" min"):(Math.floor(m/60)+" h "+(m%60)+" min"); }
+function _qrCas(ms){ const d=new Date(ms||0); return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2); }
+function openLoginQr(){
+  if(!jsemAdmin()){ alert("Přihlašovací QR je jen pro správce."); return; }
+  zavriPlan();
+  document.getElementById("seznamHead").textContent="Přihlašovací QR";
+  const body=document.getElementById("seznamBody");
+  document.getElementById("seznamOv").classList.add("show");
+  body.innerHTML='<p class="hint">Načítám…</p>';
+  firebase.database().ref("aquactrl_qr_login").get().then(function(s){
+    const rows=[]; s.forEach(function(c){ const r=c.val()||{}; r.id=c.key; rows.push(r); });
+    rows.sort(function(a,b){ return (b.vytvoreno||0)-(a.vytvoreno||0); });
+    _qrRows={}; rows.forEach(function(r){ _qrRows[r.id]=r; });
+    const hint='<div style="border:1px dashed #cfe6f7;border-radius:14px;padding:12px;margin-bottom:12px;background:#f6fbff;font-size:13.5px;color:#4a5b6e;line-height:1.5">'
+      +'<div style="font-weight:800;color:#0b3a66;margin-bottom:6px">📷 Pro toho, kdo nemá e-mail</div>'
+      +'Nové QR vyrobíš na GitHubu → <b>Actions</b> → „Přihlašovací QR (AquaCtrl)" (zadáš e-mail a kód osoby). '
+      +'Objeví se tady a dotyčný ho naskenuje z tvého displeje — je přihlášený natrvalo, opakovat se to nemusí. '
+      +'Odkaz platí <b>jen jednou a krátce</b>, po naskenování ho tady smaž.<br>'
+      +'<b>iPhone s appkou na ploše:</b> pošli mu radši odkaz (📤) a ať si ho v appce vloží do „📱 iPhone" v přihlašovacím okně.'
+      +'</div>';
+    const list=rows.length?rows.map(function(r){
+      const proslo=(r.platiDo||0)<=Date.now();
+      return '<div style="border:1px solid #dbe6f1;border-radius:14px;padding:12px;margin-bottom:10px;background:'+(proslo?"#f6f7f9":"#fbfdff")+(proslo?";opacity:.6":"")+'">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
+        +'<div><b style="color:#0b3a66">'+esc(lidLbl(r.kod))+'</b><br><span style="font-size:13px;color:#9aa7b8">'+esc(r.email||"")+'</span></div>'
+        +'<button onclick="qrSmaz(\''+r.id+'\')" title="Smazat" style="border:1px solid #c0392b;border-radius:10px;padding:6px 12px;background:#fff;color:#c0392b;font-weight:800;cursor:pointer">🗑️</button>'
+        +'</div>'
+        +(proslo?'<div style="margin-top:8px;font-size:13px;color:#9aa7b8">Prošlo '+_qrCas(r.platiDo)+' — vyrob nové přes Actions.</div>'
+          :'<div style="text-align:center;margin-top:10px"><img src="'+esc(r.png||"")+'" alt="QR" style="width:100%;max-width:240px;image-rendering:pixelated;border:1px solid #e6edf4;border-radius:10px;background:#fff"></div>'
+           +'<div style="text-align:center;font-size:13px;color:#6b7a8d;margin-top:6px">Platí do '+_qrCas(r.platiDo)+' (zbývá '+_qrZbyva(r.platiDo)+')</div>'
+           +'<div style="display:flex;gap:8px;margin-top:10px">'
+           +'<button onclick="qrPosli(\''+r.id+'\')" style="flex:1;border:0;border-radius:10px;padding:9px;background:#0b5cae;color:#fff;font-weight:800;cursor:pointer">📤 Poslat odkaz</button>'
+           +'<button onclick="qrKopiruj(\''+r.id+'\')" style="flex:1;border:1px solid #0b5cae;border-radius:10px;padding:9px;background:#fff;color:#0b5cae;font-weight:800;cursor:pointer">📋 Kopírovat</button>'
+           +'</div>')
+        +'</div>';
+    }).join(""):'<p class="hint">Zatím žádné čekající QR. Vyrob ho přes Actions → „Přihlašovací QR (AquaCtrl)".</p>';
+    body.innerHTML=hint+list;
+  }).catch(function(e){
+    const m=(e&&e.message?e.message:String(e));
+    const perm=/permission|denied/i.test(m)?'<br><span style="font-size:13px">Databáze zatím uzel <code>aquactrl_qr_login</code> nepovoluje — chybí pravidlo pro admina (postup je v SECURITY.md).</span>':'';
+    body.innerHTML='<p class="hint">Chyba: '+esc(m)+perm+'</p>';
+  });
+}
+function _qrText(id){ const r=_qrRows[id]; if(!r)return""; return "AquaCtrl – tímhle odkazem se přihlásíš (platí jen jednou, do "+_qrCas(r.platiDo)+"): "+r.odkaz; }
+function qrPosli(id){
+  const t=_qrText(id); if(!t)return;
+  if(navigator.share){ navigator.share({title:"AquaCtrl – přihlášení", text:t}).catch(function(){}); }
+  else qrKopiruj(id);
+}
+function qrKopiruj(id){
+  const t=_qrText(id); if(!t)return;
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(function(){ alert("Odkaz zkopírován do schránky."); }).catch(function(){ window.prompt("Zkopíruj si odkaz:",t); }); }
+  else window.prompt("Zkopíruj si odkaz:",t);
+}
+function qrSmaz(id){
+  if(!confirm("Opravdu smazat tohle přihlašovací QR? (odkaz přestane platit)"))return;
+  firebase.database().ref("aquactrl_qr_login/"+id).remove().then(openLoginQr).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
 }
 
 // ===== Cisterny – obsazenost =====
@@ -2125,6 +2190,9 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
   function acAuthGate(){
     if(!(window.firebase&&firebase.auth)) return;
     var auth=firebase.auth();
+    // Přihlašovací QR (login_qr_aquactrl.py) veze e-mail v odkazu (?e=…), ať ho dotyčný
+    // po naskenování nemusí opisovat (jinak by se na to appka dole ptala promptem).
+    try{ var _eQr=new URLSearchParams(window.location.search).get('e'); if(_eQr) localStorage.setItem('ac_emailForSignIn',_eQr); }catch(_){}
     if(auth.isSignInWithEmailLink(window.location.href)){
       var email=localStorage.getItem('ac_emailForSignIn');
       if(!email){ email=window.prompt('Potvrď svůj e-mail pro přihlášení:'); }
