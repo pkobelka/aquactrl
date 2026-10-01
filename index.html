@@ -241,7 +241,7 @@ function autoUpoz(zadal,resitel){ const out=[]; [zadal,resitel,ADMIN_KOD].forEac
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v119";  // drž v souladu s CACHE v sw.js
+const VERZE="v120";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -2373,6 +2373,21 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
   // ===== Přihlášení e-mailovým odkazem (passwordless) – kdo se smí přihlásit, řídí uzel aquactrl_login_email =====
   var LOGIN_URL='https://pkobelka.github.io/aquactrl/';
   function _leKeyLogin(email){ return String(email||"").trim().toLowerCase().replace(/\./g,","); }
+  // Z vloženého textu vytáhne přihlašovací odkaz – i když ho pošta (Gmail, Outlook, Seznam…)
+  // obalila svým přesměrováním (…?url=https%3A… / …?q=https%3A…).
+  function _acNormLink(t){
+    t=String(t||'').trim(); var m=t.match(/https?:\/\/\S+/); if(m) t=m[0].replace(/[)>\].,;'"]+$/,'');
+    for(var k=0;k<4;k++){
+      if(/[?&](oobCode|apiKey)=/.test(t)&&/mode=signIn/.test(t)) return t;
+      try{ var u=new URL(t), inner=null;
+        u.searchParams.forEach(function(v){ if(!inner&&/^https?:\/\//i.test(v)) inner=v; });
+        if(!inner) return t; t=inner;
+      }catch(_){ return t; }
+    }
+    return t;
+  }
+  function _acIsIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1); }
+  function _acStandalone(){ return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true; }
   function acLoginClose(){ var ov=document.getElementById('acLoginOv'); if(ov&&ov.parentNode) ov.parentNode.removeChild(ov); }
   function acLoginOverlay(msg){
     acLoginClose();
@@ -2388,12 +2403,15 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
       +'<div style="margin-top:14px;border-top:1px solid #eef2f6;padding-top:12px">'
       +'<a id="acIosTog" style="font-size:13px;color:#0b5cae;font-weight:700;cursor:pointer;text-decoration:underline">📱 iPhone – appka na ploše? Odkaz se nepřihlásí sám →</a>'
       +'<div id="acIosBox" style="display:none;margin-top:8px">'
-      +'<div style="font-size:13px;color:#6b7a8d;margin-bottom:6px">Na iPhonu se odkaz otevře v Safari, ne v appce. Proto v e-mailu <b>podrž prst na odkazu → Kopírovat</b> (neotvírej ho) a vlož sem. Nahoře musí být vyplněný stejný e-mail.</div>'
-      +'<input id="acLoginLink" type="text" placeholder="Vlož zkopírovaný odkaz z e-mailu" style="width:100%;padding:9px;font-size:14px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box">'
+      +'<div style="font-size:13px;color:#6b7a8d;margin-bottom:6px">Na iPhonu se odkaz otevře v Safari (nebo v prohlížeči pošty), ne v appce. Buď v e-mailu <b>podrž prst na odkazu → Kopírovat</b>, nebo odkaz normálně otevři a tam dej <b>„Zkopírovat odkaz pro appku“</b>. Pak se vrať sem a klepni na tlačítko níže. Nahoře musí být vyplněný stejný e-mail.</div>'
+      +'<button id="acLoginClip" style="width:100%;padding:11px;border:0;background:#2a5fc4;color:#fff;border-radius:8px;font-weight:700;cursor:pointer;margin-bottom:8px">📋 Vložit odkaz ze schránky a přihlásit</button>'
+      +'<input id="acLoginLink" type="text" placeholder="…nebo ho vlož ručně sem" style="width:100%;padding:9px;font-size:14px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box">'
       +'<button id="acLoginPaste" style="margin-top:8px;width:100%;padding:10px;border:1px solid #0b5cae;background:#fff;color:#0b5cae;border-radius:8px;font-weight:700;cursor:pointer">Přihlásit vloženým odkazem</button>'
       +'</div></div>'
       +'</div>';
     document.body.appendChild(ov);
+    try{ var _se=localStorage.getItem('ac_emailForSignIn'); if(_se) ov.querySelector('#acLoginEmail').value=_se; }catch(_){}
+    if(_acIsIOS()&&_acStandalone()) ov.querySelector('#acIosBox').style.display='block';
     ov.querySelector('#acLoginSend').onclick=function(){
       var email=(ov.querySelector('#acLoginEmail').value||'').trim();
       var out=ov.querySelector('#acLoginMsg');
@@ -2405,8 +2423,15 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
       }).catch(function(err){ out.textContent='⚠️ Chyba: '+(err&&err.message?err.message:err); });
     };
     ov.querySelector('#acIosTog').onclick=function(){ var b=ov.querySelector('#acIosBox'); b.style.display=(b.style.display==='none')?'block':'none'; };
+    ov.querySelector('#acLoginClip').onclick=function(){
+      var out=ov.querySelector('#acLoginMsg');
+      if(!(navigator.clipboard&&navigator.clipboard.readText)){ out.textContent='Schránku nejde přečíst – vlož odkaz ručně do políčka.'; return; }
+      navigator.clipboard.readText().then(function(t){
+        ov.querySelector('#acLoginLink').value=t||''; ov.querySelector('#acLoginPaste').click();
+      }).catch(function(){ out.textContent='Schránku nejde přečíst – vlož odkaz ručně do políčka (podrž prst → Vložit).'; });
+    };
     ov.querySelector('#acLoginPaste').onclick=function(){
-      var link=(ov.querySelector('#acLoginLink').value||'').trim();
+      var link=_acNormLink(ov.querySelector('#acLoginLink').value);
       var email=(ov.querySelector('#acLoginEmail').value||'').trim()||localStorage.getItem('ac_emailForSignIn')||'';
       var out=ov.querySelector('#acLoginMsg');
       if(!link){ out.textContent='Vlož odkaz z e-mailu.'; return; }
@@ -2414,6 +2439,49 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
       if(!email){ out.textContent='Vyplň nahoře svůj e-mail (ten, na který odkaz přišel).'; return; }
       out.textContent='Přihlašuji…';
       firebase.auth().signInWithEmailLink(email,link).then(function(){ localStorage.removeItem('ac_emailForSignIn'); }).catch(function(err){ out.textContent='⚠️ '+(err&&err.message?err.message:err)+' (Zkus poslat nový odkaz a použít ho hned – platí jen jednou.)'; });
+    };
+  }
+  function _acLinkSignIn(email,link,onErr){
+    firebase.auth().signInWithEmailLink(email,link).then(function(){
+      localStorage.removeItem('ac_emailForSignIn');
+      history.replaceState(null,'',window.location.pathname);
+    }).catch(function(err){
+      var m='Přihlášení se nepovedlo: '+(err&&err.message?err.message:err)+'\n\nOdkaz platí jen jednou a krátce – nech si poslat nový.';
+      if(onErr) onErr(m); else alert(m);
+    });
+  }
+  // Odkaz z e-mailu se otevřel jinde, než kde se o něj žádalo (typicky iPhone: appka na ploše
+  // vs. Safari / prohlížeč v aplikaci pošty – každý má své úložiště). Přihlášením tady by se
+  // appka na ploše nepřihlásila, proto nabídni odkaz zkopírovat a vložit v appce.
+  function acLinkElsewhere(link){
+    var ov=document.createElement("div"); ov.id='acLinkOv';
+    ov.style.cssText="position:fixed;inset:0;background:rgba(11,40,70,.55);z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px";
+    var ios=_acIsIOS();
+    ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:400px;width:100%;padding:22px;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
+      +'<h3 style="margin:0 0 8px;color:#0b3a66">🔑 Přihlašovací odkaz</h3>'
+      +(ios?'<p style="margin:0 0 10px;font-size:15px;color:#33485e"><b>Používáš AquaCtrl jako appku na ploše?</b> Klepni na tlačítko, pak otevři AquaCtrl z plochy a dej <b>„📋 Vložit odkaz ze schránky a přihlásit“</b>.</p>'
+           :'<p style="margin:0 0 10px;font-size:15px;color:#33485e">Odkaz se otevřel v jiném prohlížeči, než ve kterém sis o něj řekl. Můžeš se přihlásit tady, nebo odkaz zkopírovat a vložit tam, kde AquaCtrl používáš.</p>')
+      +'<button id="acLeCopy" style="width:100%;padding:12px;border:0;background:#2a5fc4;color:#fff;border-radius:8px;font-weight:700;font-size:15px;cursor:pointer">📋 Zkopírovat odkaz pro appku</button>'
+      +'<div id="acLeMsg" style="margin-top:8px;font-size:14px;color:#2a7a3a;min-height:1em"></div>'
+      +'<div style="margin-top:12px;border-top:1px solid #eef2f6;padding-top:12px">'
+      +'<div style="font-size:13.5px;color:#6b7a8d;margin-bottom:6px">…nebo se přihlas tady v tomhle prohlížeči:</div>'
+      +'<input id="acLeEmail" type="email" placeholder="tvuj@email.cz" style="width:100%;padding:10px;font-size:16px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box">'
+      +'<button id="acLeHere" style="margin-top:8px;width:100%;padding:10px;border:1px solid #0b5cae;background:#fff;color:#0b5cae;border-radius:8px;font-weight:700;cursor:pointer">Přihlásit tady</button>'
+      +'</div></div>';
+    document.body.appendChild(ov);
+    var msg=ov.querySelector('#acLeMsg');
+    ov.querySelector('#acLeCopy').onclick=function(){
+      function ok(){ msg.textContent='✅ Zkopírováno. Teď otevři AquaCtrl z plochy a klepni na „📋 Vložit odkaz ze schránky a přihlásit“.'; }
+      if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(link).then(ok).catch(function(){ window.prompt('Zkopíruj si odkaz:',link); }); }
+      else window.prompt('Zkopíruj si odkaz:',link);
+    };
+    ov.querySelector('#acLeHere').onclick=function(){
+      var e=(ov.querySelector('#acLeEmail').value||'').trim();
+      if(!e){ msg.style.color='#c0392b'; msg.textContent='Vyplň e-mail, na který odkaz přišel.'; return; }
+      msg.style.color='#6b7a8d'; msg.textContent='Přihlašuji…';
+      _acLinkSignIn(e,link,function(m){ msg.style.color='#c0392b'; msg.textContent=m; });
+      // po úspěchu okno zavře onAuthStateChanged → acLoginClose nestačí, zavři i tohle
+      firebase.auth().onAuthStateChanged(function(u){ if(u&&ov.parentNode) ov.parentNode.removeChild(ov); });
     };
   }
   function acAuthGate(){
@@ -2424,13 +2492,8 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
     try{ var _eQr=new URLSearchParams(window.location.search).get('e'); if(_eQr) localStorage.setItem('ac_emailForSignIn',_eQr); }catch(_){}
     if(auth.isSignInWithEmailLink(window.location.href)){
       var email=localStorage.getItem('ac_emailForSignIn');
-      if(!email){ email=window.prompt('Potvrď svůj e-mail pro přihlášení:'); }
-      if(email){
-        auth.signInWithEmailLink(email,window.location.href).then(function(){
-          localStorage.removeItem('ac_emailForSignIn');
-          history.replaceState(null,'',window.location.pathname);
-        }).catch(function(err){ alert('Přihlášení se nepovedlo: '+(err&&err.message?err.message:err)); });
-      }
+      if(email){ _acLinkSignIn(email,window.location.href); }
+      else { acLinkElsewhere(window.location.href); }
     }
     // Doplnění identity, když `person` claim dorazí se zpožděním u nového účtu.
     function _acDoplnClaim(user){
