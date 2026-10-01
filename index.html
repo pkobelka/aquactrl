@@ -241,7 +241,7 @@ function autoUpoz(zadal,resitel){ const out=[]; [zadal,resitel,ADMIN_KOD].forEac
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v120";  // drž v souladu s CACHE v sw.js
+const VERZE="v121";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -2417,7 +2417,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
       var out=ov.querySelector('#acLoginMsg');
       if(!email){ out.textContent='Vyplň e-mail.'; return; }
       out.textContent='Odesílám…';
-      firebase.auth().sendSignInLinkToEmail(email,{url:LOGIN_URL,handleCodeInApp:true}).then(function(){
+      firebase.auth().sendSignInLinkToEmail(email,{url:LOGIN_URL+'?e='+encodeURIComponent(email),handleCodeInApp:true}).then(function(){
         localStorage.setItem('ac_emailForSignIn',email);
         out.textContent='✅ Odkaz poslán na '+email+'. Zkontroluj schránku (i spam) a otevři odkaz na tomhle zařízení. (iPhone s appkou na ploše: viz „📱 iPhone" níže.)';
       }).catch(function(err){ out.textContent='⚠️ Chyba: '+(err&&err.message?err.message:err); });
@@ -2431,11 +2431,15 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
       }).catch(function(){ out.textContent='Schránku nejde přečíst – vlož odkaz ručně do políčka (podrž prst → Vložit).'; });
     };
     ov.querySelector('#acLoginPaste').onclick=function(){
-      var link=_acNormLink(ov.querySelector('#acLoginLink').value);
-      var email=(ov.querySelector('#acLoginEmail').value||'').trim()||localStorage.getItem('ac_emailForSignIn')||'';
+      var raw=ov.querySelector('#acLoginLink').value||'';
+      var link=_acNormLink(raw);
+      var email=(ov.querySelector('#acLoginEmail').value||'').trim();
+      if(/^https?:/i.test(email)){ if(!raw) link=_acNormLink(email); email=''; ov.querySelector('#acLoginEmail').value=''; }
+      email=email||localStorage.getItem('ac_emailForSignIn')||'';
+      try{ var _le=new URL(link).searchParams.get('e'); if(!email&&_le) email=_le; }catch(_){}
       var out=ov.querySelector('#acLoginMsg');
       if(!link){ out.textContent='Vlož odkaz z e-mailu.'; return; }
-      if(!firebase.auth().isSignInWithEmailLink(link)){ out.textContent='Tohle nevypadá jako přihlašovací odkaz – zkopíruj z e-mailu celý (dlouhý) odkaz.'; return; }
+      if(!firebase.auth().isSignInWithEmailLink(link)){ out.innerHTML='Tohle nevypadá jako přihlašovací odkaz (chybí v něm kód). Vloženo bylo: <code style="word-break:break-all;font-size:12px">'+esc(String(raw).slice(0,120)||'(nic)')+'</code><br>V e-mailu na odkaz <b>klepni</b> a v okně, které se otevře, dej <b>„Zkopírovat odkaz pro appku“</b>. Kopírování adresy z řádku Safari nefunguje.'; return; }
       if(!email){ out.textContent='Vyplň nahoře svůj e-mail (ten, na který odkaz přišel).'; return; }
       out.textContent='Přihlašuji…';
       firebase.auth().signInWithEmailLink(email,link).then(function(){ localStorage.removeItem('ac_emailForSignIn'); }).catch(function(err){ out.textContent='⚠️ '+(err&&err.message?err.message:err)+' (Zkus poslat nový odkaz a použít ho hned – platí jen jednou.)'; });
@@ -2453,7 +2457,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
   // Odkaz z e-mailu se otevřel jinde, než kde se o něj žádalo (typicky iPhone: appka na ploše
   // vs. Safari / prohlížeč v aplikaci pošty – každý má své úložiště). Přihlášením tady by se
   // appka na ploše nepřihlásila, proto nabídni odkaz zkopírovat a vložit v appce.
-  function acLinkElsewhere(link){
+  function acLinkElsewhere(link,email0){
     var ov=document.createElement("div"); ov.id='acLinkOv';
     ov.style.cssText="position:fixed;inset:0;background:rgba(11,40,70,.55);z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px";
     var ios=_acIsIOS();
@@ -2470,6 +2474,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
       +'</div></div>';
     document.body.appendChild(ov);
     var msg=ov.querySelector('#acLeMsg');
+    if(email0) ov.querySelector('#acLeEmail').value=email0;
     ov.querySelector('#acLeCopy').onclick=function(){
       function ok(){ msg.textContent='✅ Zkopírováno. Teď otevři AquaCtrl z plochy a klepni na „📋 Vložit odkaz ze schránky a přihlásit“.'; }
       if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(link).then(ok).catch(function(){ window.prompt('Zkopíruj si odkaz:',link); }); }
@@ -2492,8 +2497,10 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
     try{ var _eQr=new URLSearchParams(window.location.search).get('e'); if(_eQr) localStorage.setItem('ac_emailForSignIn',_eQr); }catch(_){}
     if(auth.isSignInWithEmailLink(window.location.href)){
       var email=localStorage.getItem('ac_emailForSignIn');
-      if(email){ _acLinkSignIn(email,window.location.href); }
-      else { acLinkElsewhere(window.location.href); }
+      // iPhone mimo appku na ploše: nepřihlašovat rovnou – odkaz by se spotřeboval v Safari
+      // a appka na ploše by zůstala nepřihlášená. Nabídni volbu.
+      if(email && !(_acIsIOS()&&!_acStandalone())){ _acLinkSignIn(email,window.location.href); }
+      else { acLinkElsewhere(window.location.href, email); }
     }
     // Doplnění identity, když `person` claim dorazí se zpožděním u nového účtu.
     function _acDoplnClaim(user){
