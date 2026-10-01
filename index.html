@@ -575,12 +575,73 @@ function _objInfo(o){
   if(tech.length) parts.push('<span style="color:#0b3a66">'+tech.join(" · ")+'</span>');
   return parts.join("<br>");
 }
+// ---- Navigace k objektu (jako u hydrantů ve Florianovi) ----
+function _navDist(a1,o1,a2,o2){var R=6371000,r=Math.PI/180,dA=(a2-a1)*r,dO=(o2-o1)*r;var h=Math.sin(dA/2)*Math.sin(dA/2)+Math.cos(a1*r)*Math.cos(a2*r)*Math.sin(dO/2)*Math.sin(dO/2);return 2*R*Math.asin(Math.sqrt(h));}
+function _navFmt(m){return m<1000?Math.round(m)+" m":(m/1000).toFixed(m<10000?1:0).replace(".",",")+" km";}
+function openNavObj(i){
+  if(!_slCtx||!_slCtx.objs[i])return;
+  var o=_slCtx.objs[i], lat=+o.lat, lon=+o.lon; if(!lat||!lon)return;
+  var typ=({"Vodovody":"Vodovod","Vodojemy":"Vodojem","Prameniště":"Prameniště","Studny":"Studna","Vrty":"Vrt","Chlorace":"Chlorace"})[_slCtx.kl]||_slCtx.kl, nm=o.n, ll=lat+","+lon;
+  var ua=navigator.userAgent, isIOS=/iphone|ipad|ipod/i.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1), isAnd=/android/i.test(ua);
+  // „Vést sem“ = výchozí navigace zařízení (Android: výběr aplikace, iPhone: Apple Mapy)
+  var vest=isAnd?"geo:"+ll+"?q="+ll+"("+encodeURIComponent(nm)+")"
+          :isIOS?"maps://?daddr="+ll+"&dirflg=d"
+          :"https://www.google.com/maps/dir/?api=1&destination="+ll+"&travelmode=driving";
+  var google="https://www.google.com/maps/dir/?api=1&destination="+ll+"&travelmode=driving";
+  function mapyUrl(pos){return "https://mapy.com/fnc/v1/route?mapset=traffic&routeType=car_fast_traffic&navigate=true&end="+lon+","+lat+(pos?"&start="+pos.lon+","+pos.lat:"");}
+  var osm="https://www.openstreetmap.org/?mlat="+lat+"&mlon="+lon+"#map=17/"+lat+"/"+lon;
+  var dd=0.004, emb="https://www.openstreetmap.org/export/embed.html?bbox="+(lon-dd)+","+(lat-dd*0.6)+","+(lon+dd)+","+(lat+dd*0.6)+"&layer=mapnik&marker="+lat+","+lon;
+  var bs="display:flex;align-items:center;justify-content:center;gap:6px;border-radius:10px;padding:11px 8px;font-size:15px;font-weight:700;text-decoration:none;cursor:pointer;";
+  var b2=bs+"background:#fff;color:#0b5cae;border:1px solid #dbe6f1;";
+  var ov=document.createElement("div"); ov.className="ac-nav-modal";
+  ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px";
+  ov.innerHTML='<div style="background:#fff;border-radius:16px;max-width:380px;width:100%;padding:16px;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
+    +'<div style="text-align:center"><span style="background:#0b3a66;color:#fff;border-radius:8px;padding:2px 9px;font-size:12px;font-weight:800">'+esc(typ)+'</span></div>'
+    +'<h3 style="margin:8px 0 2px;color:#0b3a66;text-align:center">📍 '+esc(nm)+'</h3>'
+    +'<div id="navSub" style="text-align:center;color:#6b7a8d;font-size:13.5px">'+esc(_slCtx.s)+' · <span id="navDist">zjišťuji vzdálenost…</span></div>'
+    +(o.p?'<div style="text-align:center;color:#6b7a8d;font-size:13.5px;margin-top:2px">'+esc(o.p)+'</div>':'')
+    +'<div style="text-align:center;color:#9aa7b8;font-size:12.5px;margin-top:4px">GPS: '+lat.toFixed(6)+', '+lon.toFixed(6)+'</div>'
+    +'<div style="position:relative;margin-top:10px;border-radius:12px;overflow:hidden;border:1px solid #dbe6f1;height:200px;background:#eef3f8">'
+    +'<iframe src="'+esc(emb)+'" style="border:0;width:100%;height:100%" loading="lazy" title="Mapa"></iframe>'
+    +'<a href="'+esc(osm)+'" target="_blank" rel="noopener" style="position:absolute;right:6px;bottom:6px;background:#fff;color:#0b5cae;border-radius:8px;padding:3px 8px;font-size:12.5px;font-weight:700;text-decoration:none;box-shadow:0 1px 4px rgba(0,0,0,.2)">Větší mapa ▸</a></div>'
+    +'<div id="navVolby" style="display:none;margin-top:10px">'
+    +'<a href="'+esc(vest)+'" style="'+bs+'background:#2a5fc4;color:#fff;border:0;font-size:16px;padding:13px">🧭 Vést sem</a>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">'
+    +'<a id="navMapy" href="'+esc(mapyUrl(null))+'" target="_blank" rel="noopener" style="'+b2+'">🚗 Mapy.com</a>'
+    +'<a href="'+esc(google)+'" target="_blank" rel="noopener" style="'+b2+'">🚗 Google</a>'
+    +'</div>'
+    +'<button type="button" id="navCopy" style="'+b2+'width:100%;margin-top:8px">📋 Kopírovat GPS</button>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">'
+    +'<button type="button" id="navGo" style="'+bs+'background:#2a5fc4;color:#fff;border:0">🧭 Navigovat</button>'
+    +'<button type="button" id="navX" style="'+b2+'color:#33485e">✕ Zrušit</button>'
+    +'</div>'
+    +'</div>';
+  document.body.appendChild(ov);
+  function close(){ov.remove();}
+  ov.addEventListener("click",function(e){if(e.target===ov)close();});
+  ov.querySelector("#navX").onclick=close;
+  ov.querySelector("#navGo").onclick=function(){ov.querySelector("#navVolby").style.display="block";this.style.display="none";ov.querySelector("#navX").parentNode.style.gridTemplateColumns="1fr";};
+  ov.querySelector("#navCopy").onclick=function(){
+    var t=lat.toFixed(6)+", "+lon.toFixed(6);
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){alert("GPS zkopírováno: "+t);}).catch(function(){window.prompt("GPS:",t);});}
+    else window.prompt("GPS:",t);
+  };
+  var dEl=ov.querySelector("#navDist");
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(function(p){
+      var me={lat:p.coords.latitude,lon:p.coords.longitude};
+      dEl.textContent=_navFmt(_navDist(me.lat,me.lon,lat,lon))+" vzdušně";
+      ov.querySelector("#navMapy").href=mapyUrl(me);
+    },function(){dEl.textContent="vzdálenost neznámá";},{enableHighAccuracy:true,timeout:8000,maximumAge:60000});
+  } else dEl.textContent="vzdálenost neznámá";
+}
 function openSeznam(s,kl){
  const typ=KAT_TYP[kl];const objs=(OBJEKTY[s]&&OBJEKTY[s][typ])?OBJEKTY[s][typ]:[];
  _slCtx={s:s,kl:kl,objs:objs,loaded:null};
  document.getElementById("seznamHead").textContent=kl+" – "+s+" ("+objs.length+")";
  const evCount=_evCounts[s+"|"+kl]||0;
- const objHtml=objs.length?objs.map((o,i)=>{const cnt=_evObjCounts[s+"|"+kl+"|"+o.n]||0;return `<div><div class="sl-row"><div><b onclick="slToggleObj(${i})" style="cursor:pointer">${esc(o.n)}</b><span id="objBdg-${i}" onclick="slToggleObj(${i})" title="Zobrazit událost" style="cursor:pointer;background:#e23b3b;color:#fff;border-radius:9px;padding:1px 8px;font-size:12.5px;font-weight:800;margin-left:6px;${cnt>0?'':'display:none'}"><span id="objCnt-${i}">${cnt}</span> <span id="objArr-${i}">▸</span></span>${kl==="Vrty"?` <span class="sl-tech" title="Vytvořit / upravit kartu vrtu" onclick="event.stopPropagation();openKartaVrtu(${i})">📋 Karta</span>`:""}${o.p?` <span style="color:#6b7a8d">· ${esc(o.p)}</span>`:""}${_objHasInfo(o)?` <span class="sl-tech" title="Zobrazit info o čerpadle / zdroji" onclick="document.getElementById('ci${i}').classList.toggle('show')">🔧</span>`:""}</div>`+(o.lat?`<a class="sl-map" target="_blank" href="https://www.openstreetmap.org/?mlat=${o.lat}&mlon=${o.lon}#map=16/${o.lat}/${o.lon}">📍 Mapa</a>`:`<span class="sl-nogps">bez GPS</span>`)+`</div>${_objHasInfo(o)?`<div class="sl-cinfo" id="ci${i}">${_objInfo(o)}</div>`:""}<div id="objEv-${i}" style="display:none;padding:2px 6px 6px;background:#f6fafe;border-bottom:1px solid #eef2f7"></div></div>`;}).join(""):`<p class="hint">Žádné objekty.</p>`;
+ const objHtml=objs.length?objs.map((o,i)=>{const cnt=_evObjCounts[s+"|"+kl+"|"+o.n]||0;return `<div><div class="sl-row"><div><b onclick="slToggleObj(${i})" style="cursor:pointer">${esc(o.n)}</b><span id="objBdg-${i}" onclick="slToggleObj(${i})" title="Zobrazit událost" style="cursor:pointer;background:#e23b3b;color:#fff;border-radius:9px;padding:1px 8px;font-size:12.5px;font-weight:800;margin-left:6px;${cnt>0?'':'display:none'}"><span id="objCnt-${i}">${cnt}</span> <span id="objArr-${i}">▸</span></span>${kl==="Vrty"?` <span class="sl-tech" title="Vytvořit / upravit kartu vrtu" onclick="event.stopPropagation();openKartaVrtu(${i})">📋 Karta</span>`:""}${o.p?` <span style="color:#6b7a8d">· ${esc(o.p)}</span>`:""}${_objHasInfo(o)?` <span class="sl-tech" title="Zobrazit info o čerpadle / zdroji" onclick="document.getElementById('ci${i}').classList.toggle('show')">🔧</span>`:""}</div>`+(o.lat?`<a class="sl-map" href="#" title="Zobrazit objekt na mapě / navigovat" onclick="event.preventDefault();openNavObj(${i})">📍 Zobrazit</a>`:`<span class="sl-nogps">bez GPS</span>`)+`</div>${_objHasInfo(o)?`<div class="sl-cinfo" id="ci${i}">${_objInfo(o)}</div>`:""}<div id="objEv-${i}" style="display:none;padding:2px 6px 6px;background:#f6fafe;border-bottom:1px solid #eef2f7"></div></div>`;}).join(""):`<p class="hint">Žádné objekty.</p>`;
  let html="";
  html+=`<div id="slEventy" style="margin-bottom:12px;display:none"></div>`;
  if(objs.length) html+=`<div style="font-size:14px;font-weight:800;color:#6b7a8d;margin:10px 0 4px">Objekty (${objs.length})</div>`;
