@@ -61,6 +61,7 @@ Firebase Console → projekt **moje-budky** → **Realtime Database** → zálo�
     "aquactrl_push_tokens": { ".read": "auth != null", ".write": "auth != null" },
     "aquactrl_outbox":      { ".read": "auth != null", ".write": "auth != null" },
     "aquactrl_login_email": { ".read": "auth != null", ".write": "auth.token.admin === true" },
+    "aquactrl_osoby":       { ".read": "auth != null", ".write": "auth.token.admin === true" },
     "aquactrl_qr_login":    { ".read": "auth.token.admin === true", ".write": "auth.token.admin === true" },
     "aquactrl_karty_vrtu":  { ".read": "auth != null && (…viz aquactrl_pristup_sekce…)", ".write": "auth != null" },
     "aquactrl_pristup_sekce": { ".read": "auth.token.admin === true", ".write": "auth.token.admin === true",
@@ -86,6 +87,8 @@ Firebase Console → projekt **moje-budky** → **Realtime Database** → zálo�
 
 Co to dělá:
 - **`aquactrl_login_email`** (řídí, kdo se smí přihlásit) smí **měnit jen admin** → zavírá nález 2 na serveru.
+- **`aquactrl_osoby`** (lidé přidaní v appce v menu „Osoby“) čtou všichni přihlášení, mění jen admin.
+  **Bez tohohle pravidla appka nové osoby neuloží ani nenačte** (zůstane jen pevný seznam v `index.html`).
 - **`aquactrl_qr_login`** (čekající přihlašovací QR, viz níže) smí **číst i měnit jen admin** —
   leží v něm jednorázový přihlašovací odkaz, takže ho nesmí vidět ani ostatní přihlášení.
 - **`aquactrl_pristup_sekce`** (kdo které sekce vidí, viz níže) mění jen admin; každý si smí
