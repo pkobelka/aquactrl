@@ -36,7 +36,13 @@ LIDE = {
 
 
 def jmeno(person):
-    return LIDE.get(person, person or '(bez jména)')
+    if person in LIDE:
+        return LIDE[person]
+    # osoby přidané v appce (menu „Osoby“) – uzel aquactrl_osoby
+    o = db.reference(f'aquactrl_osoby/{person}').get() if person else None
+    if isinstance(o, dict) and o.get('jmeno'):
+        return o['jmeno']
+    return person or '(bez jména)'
 
 
 def main():

@@ -27,6 +27,9 @@ Appka vyžaduje přihlášení e-mailovým odkazem (funguje s jakoukoli schránk
 ### Přidání nového člověka (postup)
 
 1. **Přístup:** v appce menu **„Přístup (e-maily)"** → e-mail + osoba ze seznamu → *Přidat*.
+   Kdo v seznamu není, vyber **„➕ Nová osoba"**, doplň jméno (a telefon) a *Přidat* ho rovnou
+   založí i povolí. Osoby přidané v appce jde upravit/smazat v menu **„Osoby"** (jen admin,
+   uzel `aquactrl_osoby`). Stálí lidé zůstávají v `LIDE`/`KONTAKTY` v `index.html`.
 2. **Pošli mu odkaz** na appku (menu „📤 Sdílet appku"), ať si ji přidá na plochu.
 3. **On se přihlásí:** zadá svůj e-mail → přijde mu přihlašovací odkaz → otevře ho
    **na tomtéž zařízení**. (iPhone s appkou na ploše: odkaz v e-mailu zkopírovat a vložit

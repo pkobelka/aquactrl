@@ -143,6 +143,7 @@ padding:24px;z-index:50;overflow:auto}
     <a id="navCerpadla" onclick="openSkladCerpadel()">Čerpadla na skladě</a>
     <a id="navZariz" onclick="openZarizeni()" style="display:none">Zařízení<span class="bdg" id="bdgZar" style="display:none;background:#e8881b">0</span></a>
     <a id="navLoginEmaily" onclick="openLoginEmaily()" style="display:none">Přístup (e-maily)</a>
+    <a id="navOsoby" onclick="openOsoby()" style="display:none">Osoby</a>
     <a id="navLoginQr" onclick="openLoginQr()" style="display:none">Přihlašovací QR</a>
     <a id="navSekce" onclick="openSekcePrava()" style="display:none">Sekce (kdo co vidí)</a>
     <a id="navSdilet" onclick="acSdilej()" style="display:none">📤 Sdílet appku</a>
@@ -229,7 +230,8 @@ const LIDE=[["AB", "Aleš Bubák"], ["BK", "Bláža Kolaříková"], ["JR", "Jan
 // pořadí v nabídkách lidí: nejdřív vedení GŘ, PŘ, TŘ, pak ostatní podle jména
 const VEDENI=["GŘ","PŘ","TŘ"];
 const _prijmeni=jm=>{const p=String(jm).trim().split(/\s+/);return p[p.length-1];};
-const LIDE_R=[...LIDE].sort((a,b)=>{const ia=VEDENI.indexOf(a[0]),ib=VEDENI.indexOf(b[0]);if(ia>=0||ib>=0){if(ia<0)return 1;if(ib<0)return -1;return ia-ib;}return _prijmeni(a[1]).localeCompare(_prijmeni(b[1]),"cs")||a[1].localeCompare(b[1],"cs");});
+function _lidCmp(a,b){const ia=VEDENI.indexOf(a[0]),ib=VEDENI.indexOf(b[0]);if(ia>=0||ib>=0){if(ia<0)return 1;if(ib<0)return -1;return ia-ib;}return _prijmeni(a[1]).localeCompare(_prijmeni(b[1]),"cs")||a[1].localeCompare(b[1],"cs");}
+const LIDE_R=[...LIDE].sort(_lidCmp);
 // Kdo smí uzavírat události (Zvejška, Rada, Vykydal, Kolaříková, Kobelka)
 const MOHOU_UZAVIRAT=["PŘ","JR","LV","BK","TŘ"];
 function jsemUzaviratel(){return MOHOU_UZAVIRAT.includes(localStorage.getItem("ac_person")||"");}
@@ -241,7 +243,7 @@ function autoUpoz(zadal,resitel){ const out=[]; [zadal,resitel,ADMIN_KOD].forEac
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v122";  // drž v souladu s CACHE v sw.js
+const VERZE="v123";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -280,6 +282,50 @@ const KONTAKTY={
  "JZ":{mail:"jan.zahradnik@tns.cz", tel:"731446834"},
  "MJ":{mail:"martina.junkova@vhos.cz", tel:"724 510 786"}
 };
+// ===== Osoby přidané v appce (admin, menu „Osoby“) =====
+// Uzel aquactrl_osoby: kód -> {jmeno, mail, tel}. Doplňují se k pevnému seznamu LIDE/KONTAKTY
+// (pevné kódy přepsat nejdou). Kopie v localStorage, ať jsou jména vidět hned po startu.
+const LIDE_PEVNI=LIDE.map(p=>p[0]);
+let OSOBY_APP={};
+function _aplikujOsoby(map){
+  map=(map&&typeof map==="object")?map:{};
+  for(let i=LIDE.length-1;i>=0;i--){ if(LIDE_PEVNI.indexOf(LIDE[i][0])<0) LIDE.splice(i,1); }
+  Object.keys(OSOBY_APP).forEach(k=>{ if(LIDE_PEVNI.indexOf(k)<0) delete KONTAKTY[k]; });
+  OSOBY_APP={};
+  Object.keys(map).forEach(k=>{
+    const o=map[k]; if(!o||!o.jmeno||LIDE_PEVNI.indexOf(k)>=0) return;
+    OSOBY_APP[k]={jmeno:String(o.jmeno), mail:o.mail?String(o.mail):"", tel:o.tel?String(o.tel):""};
+    LIDE.push([k, OSOBY_APP[k].jmeno]);
+    const kt={}; if(OSOBY_APP[k].mail)kt.mail=OSOBY_APP[k].mail; if(OSOBY_APP[k].tel)kt.tel=OSOBY_APP[k].tel; KONTAKTY[k]=kt;
+  });
+  LIDE_R.length=0; LIDE_R.push(...[...LIDE].sort(_lidCmp));
+}
+try{ _aplikujOsoby(JSON.parse(localStorage.getItem("ac_osoby")||"{}")); }catch(_){}
+let _osobyWatch=false;
+function acNactiOsoby(){
+  if(_osobyWatch||!(window.firebase&&firebase.database)) return;
+  _osobyWatch=true;
+  firebase.database().ref("aquactrl_osoby").on("value",function(s){
+    const v=s.val()||{};
+    try{ localStorage.setItem("ac_osoby",JSON.stringify(v)); }catch(_){}
+    _aplikujOsoby(v);
+    try{ acRenderWho(); }catch(_){}
+  },function(){ _osobyWatch=false; }); // bez pravidla ve Firebase zůstane jen pevný seznam
+}
+// Kód pro novou osobu: iniciály (Martina Junková -> MJ); obsazené -> MJu, MJn…, pak MJ2…
+function _osobaNovyKod(jmeno){
+  const c=String(jmeno||"").trim().split(/\s+/).filter(Boolean);
+  const f=c[0]||"", l=c.length>1?c[c.length-1]:"";
+  const base=((f.charAt(0)+(l.charAt(0)||f.charAt(1))).toUpperCase())||"X";
+  const used=k=>LIDE.some(p=>p[0]===k);
+  if(!used(base)) return base;
+  for(let i=1;i<l.length;i++){ const k=base+l.charAt(i).toLowerCase(); if(/^[^.$#\[\]\/\s]$/.test(l.charAt(i))&&!used(k)) return k; }
+  for(let n=2;;n++){ if(!used(base+n)) return base+n; }
+}
+function _osobaUloz(kod,jmeno,mail,tel){
+  const o={jmeno:jmeno}; if(mail)o.mail=mail; if(tel)o.tel=tel;
+  return firebase.database().ref("aquactrl_osoby/"+kod).set(o);
+}
 // Sklad TČ (Moravská Třebová) – záložní čerpadla uskladněná mimo vrty (list "seznam čerpadel - sklad TČ")
 const SKLAD_CERPADLA=[{"poz":1,"misto":"SEBRANICE VRT V5","popis":"nový motor- původní hydraulika- bez kabelu"},{"poz":2,"misto":"SEBRANICE VRT V3","popis":"LOWARA Z6YZ/9- s kabelem"},{"poz":3,"misto":"PROVOZ SY","popis":"UVN 10"},{"poz":4,"misto":"OPATOVEC","popis":"UBG 5- s kabelem- odvoz vrt V2 Hradec nad Svitavou"},{"poz":5,"misto":"OPATOVEC","popis":"CUBU 0708- s kabelem"},{"poz":6,"misto":"PUSTÁ KAMENICE","popis":"UBA 6- s kabelem"},{"poz":7,"misto":"KOSTELNÍ LUKA","popis":"UDN 6- s kabelem"},{"poz":8,"misto":"BUDISLAV","popis":"A-UBA 6- s kabelem"},{"poz":9,"misto":"DĚTŘICHOV","popis":"CALPEDA-již použité čerpadlo bez kabelu"},{"poz":10,"misto":"OPATOV","popis":"čerpadlo již vydáno"},{"poz":11,"misto":"VRT JANOV","popis":"LOWARA- s kabelem- čerpadlo již vydáno"},{"poz":12,"misto":"DLOUHÁ LOUČKA","popis":"WILO- s kabelem"},{"poz":13,"misto":"HARTINKOV","popis":"EVGU- s kabelem"},{"poz":14,"misto":"VRT MLADĚJOV","popis":"KSB- s kabelem"},{"poz":15,"misto":"ČS OLDŘÍŠ","popis":"KSB , v tlakovém plášti- s kabelem"},{"poz":16,"misto":"MAŘÍN","popis":"CALPEDA- s kabelem"},{"poz":17,"misto":"POHLEDY","popis":"CALPEDA- s kabelem"},{"poz":18,"misto":"PACOV","popis":"čerpadlo již vydáno"},{"poz":19,"misto":"BĚLÁ NAD SVIT.","popis":"UBA 6- s kabelem"},{"poz":20,"misto":"PUSTÁ KAMENICE","popis":"UVN 4- s kabelem"},{"poz":21,"misto":"TRSTĚNICE","popis":"A- UBA 8- s kabelem"},{"poz":22,"misto":"POLIČKA VRT V6","popis":"CVBU 0709- s kabelem (pouze hydraulika)"},{"poz":23,"misto":"POLIČKA VRT V8","popis":"CALPEDA- s kabelem"},{"poz":24,"misto":"DĚTŘICHOV- SY","popis":"GRUNDFOS- s kabelem"},{"poz":25,"misto":"SUCHÁ LHOTA","popis":"LOWARA- s kabelem"},{"poz":26,"misto":"KRASÍKOV","popis":"LOWARA- s kabelem"},{"poz":27,"misto":"JEDLOVÁ VRT- HV5","popis":"UG 14A-23 s kabelem"},{"poz":28,"misto":"TRPÍN","popis":"UG 14A-23,chladící plášť+ kabel 50m"},{"poz":29,"misto":"RAIFOVA PILA","popis":"Z612 08F, chladicí plášť, 10 m kabelu"},{"poz":30,"misto":"JEDLOVÁ VRT- HV3","popis":"UG 8A-12 + Franklin 3kW s kabelem 30m"}];
 const SKLAD_CERPADLA_BEZ=["KSB- motor 16kW, Q 2,79- 19, 8 l/s, H 92- 35m, střed 70m 10,5 l/s","KSB- motor 7kW, Q 0,8-10 l/s, H 86- 39m, střed 60m 6,5 l/s"];
@@ -1867,7 +1913,7 @@ function upravUdalost(id){
 // ===== Schvalování zařízení (jen správce) =====
 function acCheckPending(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aquactrl_push_tokens/"+devId()).get().then(function(s){ const v=s.val()||{}; const bar=document.getElementById("acPendBar"); if(bar) bar.style.display=(s.exists()&&v.schvaleno===false)?"":"none"; }).catch(function(){}); }catch(_){} }
 function acRenderWho(){ try{ var el=document.getElementById("acWho"); if(!el)return; var k=localStorage.getItem("ac_person")||""; if(k){ el.innerHTML="👤 "+esc(uzivatelJmeno()); el.style.background="#eaf4fc"; el.style.color="#0b3a66"; el.style.border="1px solid #cfe6f7"; } else { el.innerHTML="👤 Přihlas se"; el.style.background="#fff3cd"; el.style.color="#7a5b00"; el.style.border="1px solid #ffe69c"; } }catch(_){} }
-function acInitGate(){ try{ const a=document.getElementById("navZariz"); const le=document.getElementById("navLoginEmaily"); const qr=document.getElementById("navLoginQr"); const sd=document.getElementById("navSdilet"); if(jsemAdmin()){ if(a){a.style.display="";acZarWatch();} if(le)le.style.display=""; if(qr)qr.style.display=""; if(sd)sd.style.display=""; const sk=document.getElementById("navSekce"); if(sk)sk.style.display=""; } acAplikujSekce(); acCheckPending(); acUkolyWatch(); acRenderWho(); }catch(_){} }
+function acInitGate(){ try{ const a=document.getElementById("navZariz"); const le=document.getElementById("navLoginEmaily"); const qr=document.getElementById("navLoginQr"); const sd=document.getElementById("navSdilet"); if(jsemAdmin()){ if(a){a.style.display="";acZarWatch();} if(le)le.style.display=""; const os=document.getElementById("navOsoby"); if(os)os.style.display=""; if(qr)qr.style.display=""; if(sd)sd.style.display=""; const sk=document.getElementById("navSekce"); if(sk)sk.style.display=""; } acAplikujSekce(); acCheckPending(); acUkolyWatch(); acRenderWho(); }catch(_){} }
 // Snadné sdílení odkazu na appku (jen pro admina) – na mobilu nativní nabídka sdílení, na PC zkopíruje do schránky
 function acSdilej(){
   const url="https://pkobelka.github.io/aquactrl/";
@@ -1929,11 +1975,15 @@ function openLoginEmaily(){
   firebase.database().ref("aquactrl_login_email").get().then(function(s){
     const rows=[]; s.forEach(function(c){ rows.push({key:c.key, kod:c.val()}); });
     rows.sort(function(a,b){ return lidLbl(a.kod).localeCompare(lidLbl(b.kod),"cs"); });
-    const opts='<option value="">— vyber osobu —</option>'+LIDE_R.map(p=>'<option value="'+p[0]+'">'+esc(p[1])+'</option>').join("");
+    const opts='<option value="">— vyber osobu —</option><option value="__nova">➕ Nová osoba (není v seznamu)…</option>'+LIDE_R.map(p=>'<option value="'+p[0]+'">'+esc(p[1])+'</option>').join("");
     const addForm='<div style="border:1px dashed #cfe6f7;border-radius:14px;padding:12px;margin-bottom:12px;background:#f6fbff">'
       +'<div style="font-weight:800;color:#0b3a66;margin-bottom:8px">➕ Přidat přístup</div>'
       +'<input id="leNewEmail" type="email" placeholder="email@example.cz" style="width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;box-sizing:border-box">'
-      +'<select id="leNewKod" style="width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px">'+opts+'</select>'
+      +'<select id="leNewKod" onchange="document.getElementById(\'leNova\').style.display=this.value===\'__nova\'?\'\':\'none\'" style="width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px">'+opts+'</select>'
+      +'<div id="leNova" style="display:none">'
+      +'<input id="leNovaJmeno" placeholder="Jméno a příjmení (např. Martina Junková)" style="width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;box-sizing:border-box">'
+      +'<input id="leNovaTel" type="tel" placeholder="Telefon (nepovinné)" style="width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;box-sizing:border-box">'
+      +'</div>'
       +'<button onclick="leAdd()" style="width:100%;border:0;border-radius:10px;padding:9px;background:#0b5cae;color:#fff;font-weight:800;cursor:pointer">Přidat</button></div>';
     const list=rows.length?rows.map(function(r){
       return '<div style="border:1px solid #dbe6f1;border-radius:14px;padding:10px 12px;margin-bottom:8px;background:#fbfdff;display:flex;justify-content:space-between;align-items:center;gap:8px">'
@@ -1946,13 +1996,80 @@ function openLoginEmaily(){
 }
 function leAdd(){
   const emailEl=document.getElementById("leNewEmail"), kodEl=document.getElementById("leNewKod");
-  const email=(emailEl.value||"").trim(), kod=kodEl.value;
+  const email=(emailEl.value||"").trim(); let kod=kodEl.value;
   if(!email||!kod){ alert("Vyplň e-mail i osobu."); return; }
-  firebase.database().ref("aquactrl_login_email/"+_leKey(email)).set(kod).then(openLoginEmaily).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
+  let krok=Promise.resolve();
+  if(kod==="__nova"){
+    const jmeno=(document.getElementById("leNovaJmeno").value||"").trim().replace(/\s+/g," ");
+    const tel=(document.getElementById("leNovaTel").value||"").trim();
+    if(jmeno.split(" ").length<2){ alert("Vyplň jméno i příjmení nové osoby."); return; }
+    if(LIDE.some(p=>p[1].toLowerCase()===jmeno.toLowerCase())&&!confirm(jmeno+" už v seznamu je. Přesto přidat jako další osobu?")) return;
+    kod=_osobaNovyKod(jmeno);
+    krok=_osobaUloz(kod,jmeno,email.toLowerCase(),tel);
+  }
+  krok.then(function(){ return firebase.database().ref("aquactrl_login_email/"+_leKey(email)).set(kod); }).then(openLoginEmaily).catch(function(e){ const m=(e&&e.message?e.message:String(e)); alert("Chyba: "+m+(/permission/i.test(m)?"\n\nVe Firebase chybí pravidlo pro uzel aquactrl_osoby (viz SECURITY.md).":"")); });
 }
 function leRemove(key){
   if(!confirm("Opravdu odebrat přístup pro tenhle e-mail?"))return;
   firebase.database().ref("aquactrl_login_email/"+key).remove().then(openLoginEmaily).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
+}
+
+// ===== Osoby – správa lidí přidaných v appce (aquactrl_osoby) =====
+function openOsoby(){
+  if(!jsemAdmin()){ alert("Správa osob je jen pro správce."); return; }
+  zavriPlan();
+  acNactiOsoby();
+  document.getElementById("seznamHead").textContent="Osoby";
+  const body=document.getElementById("seznamBody");
+  document.getElementById("seznamOv").classList.add("show");
+  body.innerHTML='<p class="hint">Načítám…</p>';
+  firebase.database().ref("aquactrl_osoby").get().then(function(s){
+    _aplikujOsoby(s.val()||{});
+    const inp='width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;margin-bottom:8px;box-sizing:border-box';
+    const form='<div style="border:1px dashed #cfe6f7;border-radius:14px;padding:12px;margin-bottom:12px;background:#f6fbff">'
+      +'<div id="osFormHead" style="font-weight:800;color:#0b3a66;margin-bottom:8px">➕ Nová osoba</div>'
+      +'<input id="osKod" type="hidden">'
+      +'<input id="osJmeno" placeholder="Jméno a příjmení" style="'+inp+'">'
+      +'<input id="osMail" type="email" placeholder="E-mail (nepovinné)" style="'+inp+'">'
+      +'<input id="osTel" type="tel" placeholder="Telefon (nepovinné)" style="'+inp+'">'
+      +'<button onclick="osUloz()" style="width:100%;border:0;border-radius:10px;padding:9px;background:#0b5cae;color:#fff;font-weight:800;cursor:pointer">Uložit</button>'
+      +'<div style="font-size:12.5px;color:#6b7a8d;margin-top:8px">Osoba se pak objeví ve všech nabídkách lidí i v Kontaktech. Přihlásit se může, až jí v „Přístup (e-maily)“ přidáš e-mail.</div></div>';
+    const kody=Object.keys(OSOBY_APP).sort(function(a,b){ return _lidCmp([a,OSOBY_APP[a].jmeno],[b,OSOBY_APP[b].jmeno]); });
+    const list=kody.length?kody.map(function(k){ const o=OSOBY_APP[k];
+      return '<div style="border:1px solid #dbe6f1;border-radius:14px;padding:10px 12px;margin-bottom:8px;background:#fbfdff;display:flex;justify-content:space-between;align-items:center;gap:8px">'
+        +'<div><b style="color:#0b3a66">'+esc(o.jmeno)+'</b> <span style="font-size:12.5px;color:#9aa7b8">('+esc(k)+')</span><br><span style="font-size:13px;color:#9aa7b8">'+esc([o.mail,o.tel].filter(Boolean).join(" · ")||"—")+'</span></div>'
+        +'<div style="display:flex;gap:6px"><button onclick="osUprav(\''+esc(k)+'\')" title="Upravit" style="border:1px solid #0b5cae;border-radius:10px;padding:6px 10px;background:#fff;color:#0b5cae;font-weight:800;cursor:pointer">✏️</button>'
+        +'<button onclick="osSmaz(\''+esc(k)+'\')" title="Smazat" style="border:1px solid #c0392b;border-radius:10px;padding:6px 10px;background:#fff;color:#c0392b;font-weight:800;cursor:pointer">🗑️</button></div>'
+        +'</div>';
+    }).join(""):'<p class="hint">Zatím žádné osoby přidané v appce. (Stálí lidé jsou v kódu appky a tady se neukazují.)</p>';
+    body.innerHTML=form+list;
+  }).catch(function(e){ const m=(e&&e.message?e.message:String(e)); body.innerHTML='<p class="hint">Chyba: '+esc(m)+(/permission/i.test(m)?'<br><br>Ve Firebase je potřeba přidat pravidlo pro uzel <b>aquactrl_osoby</b> (viz SECURITY.md).':'')+'</p>'; });
+}
+function osUprav(k){
+  const o=OSOBY_APP[k]; if(!o) return;
+  document.getElementById("osKod").value=k;
+  document.getElementById("osJmeno").value=o.jmeno;
+  document.getElementById("osMail").value=o.mail||"";
+  document.getElementById("osTel").value=o.tel||"";
+  document.getElementById("osFormHead").textContent="✏️ Upravit: "+o.jmeno+" ("+k+")";
+  document.getElementById("osJmeno").focus();
+}
+function osUloz(){
+  const jmeno=(document.getElementById("osJmeno").value||"").trim().replace(/\s+/g," ");
+  const mail=(document.getElementById("osMail").value||"").trim().toLowerCase();
+  const tel=(document.getElementById("osTel").value||"").trim();
+  let kod=document.getElementById("osKod").value;
+  if(jmeno.split(" ").length<2){ alert("Vyplň jméno i příjmení."); return; }
+  if(!kod){
+    if(LIDE.some(p=>p[1].toLowerCase()===jmeno.toLowerCase())&&!confirm(jmeno+" už v seznamu je. Přesto přidat jako další osobu?")) return;
+    kod=_osobaNovyKod(jmeno);
+  }
+  _osobaUloz(kod,jmeno,mail,tel).then(openOsoby).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
+}
+function osSmaz(k){
+  const o=OSOBY_APP[k]; if(!o) return;
+  if(!confirm("Opravdu smazat osobu "+o.jmeno+"?\n\nZ „Přístup (e-maily)“ se tím neodebere – to udělej zvlášť, jinak se může dál přihlásit (jen bez jména).")) return;
+  firebase.database().ref("aquactrl_osoby/"+k).remove().then(openOsoby).catch(function(e){alert("Chyba: "+(e&&e.message?e.message:e));});
 }
 
 // ===== Přihlašovací QR – jednorázové přihlášení pro toho, kdo nemá e-mail =====
@@ -2532,6 +2649,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
         if(person){
           acLoginClose();
           localStorage.setItem('ac_person', person);
+          try{ acNactiOsoby(); }catch(_){}
           try{ acNactiSekce(person); }catch(_){}
           try{ acInitGate(); }catch(_){}
           try{ acPresenceStart(person); }catch(_){}
