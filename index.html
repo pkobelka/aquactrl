@@ -123,9 +123,17 @@ padding:24px;z-index:50;overflow:auto}
 .sl-cinfo.show{display:block}
 @keyframes slflash{0%{box-shadow:0 0 0 3px rgba(11,92,174,.55)}100%{box-shadow:0 0 0 3px rgba(11,92,174,0)}}
 .slFlash{animation:slflash 1.6s ease}
+/* Pozastavení appky: všechno pod vrstvou zešedne a nejde na nic kliknout (správce ji nevidí) */
+#acPauza{position:fixed;inset:0;z-index:9995;display:flex;align-items:center;justify-content:center;
+  background:rgba(225,229,234,.45);-webkit-backdrop-filter:grayscale(1) blur(1.5px);backdrop-filter:grayscale(1) blur(1.5px)}
+#acPauza.skryt{display:none}
+#acPauza .pruh{width:100%;background:#0b5cae;color:#fff;text-align:center;padding:22px 20px;box-shadow:0 6px 24px rgba(11,40,70,.35)}
+#acPauza .pruh b{display:block;font-size:22px;letter-spacing:.2px}
+#acPauza .pruh span{display:block;margin-top:6px;font-size:15px;opacity:.9}
 </style>
 </head>
 <body>
+<div id="acPauza"><div class="pruh"><b>⏸️ Vývoj aplikace byl pozastaven</b><span>AquaCtrl momentálně není v provozu. Děkuji všem za testování.</span></div></div>
 <div class="testbar">🔔 TESTOVACÍ PROVOZ — události a úkoly se ukládají; po „Uložit" se odešle push a přidělené úkoly najdeš v „Moje úkoly" (potvrzení + plnění, hlídání termínů). Nejdřív se přihlas e-mailem a klikni „🔔 Povolit notifikace".</div>
 <div id="acPendBar" style="display:none;background:#fff3cd;border-bottom:1px solid #ffe69c;color:#7a5b00;padding:8px 14px;font-size:15px;text-align:center">⏳ Toto zařízení čeká na schválení správcem — notifikace zatím nechodí.</div>
 
@@ -243,7 +251,11 @@ function autoUpoz(zadal,resitel){ const out=[]; [zadal,resitel,ADMIN_KOD].forEac
 // TESTOVACÍ REŽIM: nová (i dosud čekající) zařízení se schválí sama – tester dostává push hned bez čekání.
 // Po skončení testování přepni na false (pak se zase schvaluje ručně v sekci Zařízení).
 const TEST_AUTO_SCHVALENI=true;
-const VERZE="v125";  // drž v souladu s CACHE v sw.js
+// POZASTAVENO: appka je pro všechny kromě správce zešedlá a nepoužitelná (vrstva #acPauza).
+// Vrstva je vidět od načtení stránky a schová se jen po ověření admin claimu. Obnovení provozu = false.
+const AC_POZASTAVENO=true;
+function acPauza(){ const el=document.getElementById("acPauza"); if(el) el.classList.toggle("skryt", !AC_POZASTAVENO||jsemAdmin()); }
+const VERZE="v126";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -1913,7 +1925,7 @@ function upravUdalost(id){
 // ===== Schvalování zařízení (jen správce) =====
 function acCheckPending(){ try{ if(!(window.firebase&&firebase.database))return; firebase.database().ref("aquactrl_push_tokens/"+devId()).get().then(function(s){ const v=s.val()||{}; const bar=document.getElementById("acPendBar"); if(bar) bar.style.display=(s.exists()&&v.schvaleno===false)?"":"none"; }).catch(function(){}); }catch(_){} }
 function acRenderWho(){ try{ var el=document.getElementById("acWho"); if(!el)return; var k=localStorage.getItem("ac_person")||""; if(k){ el.innerHTML="👤 "+esc(uzivatelJmeno()); el.style.background="#eaf4fc"; el.style.color="#0b3a66"; el.style.border="1px solid #cfe6f7"; } else { el.innerHTML="👤 Přihlas se"; el.style.background="#fff3cd"; el.style.color="#7a5b00"; el.style.border="1px solid #ffe69c"; } }catch(_){} }
-function acInitGate(){ try{ const a=document.getElementById("navZariz"); const le=document.getElementById("navLoginEmaily"); const qr=document.getElementById("navLoginQr"); const sd=document.getElementById("navSdilet"); if(jsemAdmin()){ if(a){a.style.display="";acZarWatch();} if(le)le.style.display=""; const os=document.getElementById("navOsoby"); if(os)os.style.display=""; if(qr)qr.style.display=""; if(sd)sd.style.display=""; const sk=document.getElementById("navSekce"); if(sk)sk.style.display=""; } acAplikujSekce(); acCheckPending(); acUkolyWatch(); acRenderWho(); }catch(_){} }
+function acInitGate(){ try{ acPauza(); const a=document.getElementById("navZariz"); const le=document.getElementById("navLoginEmaily"); const qr=document.getElementById("navLoginQr"); const sd=document.getElementById("navSdilet"); if(jsemAdmin()){ if(a){a.style.display="";acZarWatch();} if(le)le.style.display=""; const os=document.getElementById("navOsoby"); if(os)os.style.display=""; if(qr)qr.style.display=""; if(sd)sd.style.display=""; const sk=document.getElementById("navSekce"); if(sk)sk.style.display=""; } acAplikujSekce(); acCheckPending(); acUkolyWatch(); acRenderWho(); }catch(_){} }
 // Snadné sdílení odkazu na appku (jen pro admina) – na mobilu nativní nabídka sdílení, na PC zkopíruje do schránky
 function acSdilej(){
   const url="https://pkobelka.github.io/aquactrl/";
@@ -2632,7 +2644,7 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
       }catch(_){}
     }
     auth.onAuthStateChanged(function(user){
-      if(!user){ _acIsAdmin=false; acLoginOverlay(); return; }
+      if(!user){ _acIsAdmin=false; try{ acPauza(); }catch(_){} acLoginOverlay(); return; }
       // Identitu (admin i osobu) čti z ověřeného Custom Claimu, ne z localStorage –
       // token podepisuje Google, nejde v prohlížeči podvrhnout. force refresh = true,
       // aby se čerstvě nastavený claim projevil bez ručního mazání tokenu.
