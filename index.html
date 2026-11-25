@@ -127,14 +127,17 @@ padding:24px;z-index:50;overflow:auto}
 #acPauza{position:fixed;inset:0;z-index:9995;display:flex;align-items:center;justify-content:center;
   background:rgba(225,229,234,.45);-webkit-backdrop-filter:grayscale(1) blur(1.5px);backdrop-filter:grayscale(1) blur(1.5px)}
 #acPauza.skryt{display:none}
-#acPauza .pruh{width:100%;background:#0b5cae;color:#fff;text-align:center;padding:22px 20px;box-shadow:0 6px 24px rgba(11,40,70,.35)}
+#acPauza .pruh{width:100%;background:#0b5cae;color:#fff;text-align:center;padding:22px 20px;box-shadow:0 6px 24px rgba(11,40,70,.35);
+  display:flex;align-items:center;justify-content:center;gap:22px;box-sizing:border-box}
+#acPauza .pruh img{width:104px;height:104px;flex:none;border-radius:50%;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+@media (max-width:600px){ #acPauza .pruh{flex-direction:column;gap:14px} #acPauza .pruh img{width:96px;height:96px} }
 #acPauza .pruh b{display:block;font-size:22px;letter-spacing:.2px;line-height:1.35}
 #acPauza .pruh b+b{margin-top:4px}
 #acPauza .pruh span{display:block;margin-top:10px;font-size:15px;opacity:.9}
 </style>
 </head>
 <body>
-<div id="acPauza"><div class="pruh"><b>⏸️ Vývoj aplikace byl pozastaven</b><b>Děkuji všem za testování.</b><span>AquaCtrl momentálně není v provozu.</span></div></div>
+<div id="acPauza"><div class="pruh"><img src="logo-ac-512.png" alt="AquaControl – VHOS a.s."><div><b>⏸️ Vývoj aplikace byl pozastaven</b><b>Děkuji všem za testování.</b><span>AquaCtrl momentálně není v provozu.</span></div></div></div>
 <div class="testbar">🔔 TESTOVACÍ PROVOZ — události a úkoly se ukládají; po „Uložit" se odešle push a přidělené úkoly najdeš v „Moje úkoly" (potvrzení + plnění, hlídání termínů). Nejdřív se přihlas e-mailem a klikni „🔔 Povolit notifikace".</div>
 <div id="acPendBar" style="display:none;background:#fff3cd;border-bottom:1px solid #ffe69c;color:#7a5b00;padding:8px 14px;font-size:15px;text-align:center">⏳ Toto zařízení čeká na schválení správcem — notifikace zatím nechodí.</div>
 
@@ -256,7 +259,7 @@ const TEST_AUTO_SCHVALENI=true;
 // Vrstva je vidět od načtení stránky a schová se jen po ověření admin claimu. Obnovení provozu = false.
 const AC_POZASTAVENO=true;
 function acPauza(){ const el=document.getElementById("acPauza"); if(el) el.classList.toggle("skryt", !AC_POZASTAVENO||jsemAdmin()); }
-const VERZE="v127";  // drž v souladu s CACHE v sw.js
+const VERZE="v128";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
