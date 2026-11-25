@@ -128,12 +128,13 @@ padding:24px;z-index:50;overflow:auto}
   background:rgba(225,229,234,.45);-webkit-backdrop-filter:grayscale(1) blur(1.5px);backdrop-filter:grayscale(1) blur(1.5px)}
 #acPauza.skryt{display:none}
 #acPauza .pruh{width:100%;background:#0b5cae;color:#fff;text-align:center;padding:22px 20px;box-shadow:0 6px 24px rgba(11,40,70,.35)}
-#acPauza .pruh b{display:block;font-size:22px;letter-spacing:.2px}
-#acPauza .pruh span{display:block;margin-top:6px;font-size:15px;opacity:.9}
+#acPauza .pruh b{display:block;font-size:22px;letter-spacing:.2px;line-height:1.35}
+#acPauza .pruh b+b{margin-top:4px}
+#acPauza .pruh span{display:block;margin-top:10px;font-size:15px;opacity:.9}
 </style>
 </head>
 <body>
-<div id="acPauza"><div class="pruh"><b>⏸️ Vývoj aplikace byl pozastaven</b><span>AquaCtrl momentálně není v provozu. Děkuji všem za testování.</span></div></div>
+<div id="acPauza"><div class="pruh"><b>⏸️ Vývoj aplikace byl pozastaven</b><b>Děkuji všem za testování.</b><span>AquaCtrl momentálně není v provozu.</span></div></div>
 <div class="testbar">🔔 TESTOVACÍ PROVOZ — události a úkoly se ukládají; po „Uložit" se odešle push a přidělené úkoly najdeš v „Moje úkoly" (potvrzení + plnění, hlídání termínů). Nejdřív se přihlas e-mailem a klikni „🔔 Povolit notifikace".</div>
 <div id="acPendBar" style="display:none;background:#fff3cd;border-bottom:1px solid #ffe69c;color:#7a5b00;padding:8px 14px;font-size:15px;text-align:center">⏳ Toto zařízení čeká na schválení správcem — notifikace zatím nechodí.</div>
 
@@ -255,7 +256,7 @@ const TEST_AUTO_SCHVALENI=true;
 // Vrstva je vidět od načtení stránky a schová se jen po ověření admin claimu. Obnovení provozu = false.
 const AC_POZASTAVENO=true;
 function acPauza(){ const el=document.getElementById("acPauza"); if(el) el.classList.toggle("skryt", !AC_POZASTAVENO||jsemAdmin()); }
-const VERZE="v126";  // drž v souladu s CACHE v sw.js
+const VERZE="v127";  // drž v souladu s CACHE v sw.js
 // Admin práva se NEurčují z localStorage (to jde v prohlížeči podvrhnout), ale
 // z ověřeného Firebase Custom Claimu `admin` na přihlášeném účtu.
 // Claim nastavuje set_admin_claim.py (workflow „Nastavit admina"). Serverovou
@@ -2519,8 +2520,13 @@ document.addEventListener("visibilitychange",function(){ if(!document.hidden){ a
   function _acIsIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1); }
   function _acStandalone(){ return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true; }
   function acLoginClose(){ var ov=document.getElementById('acLoginOv'); if(ov&&ov.parentNode) ov.parentNode.removeChild(ov); }
+  // Pozastaveno: přihlašovací okno se běžně neukazuje (vidět je jen šedá appka s pruhem).
+  // Správce se přihlásí přes odkaz s #spravce (…/aquactrl/#spravce).
+  function _acLoginSkryt(){ return AC_POZASTAVENO && (location.hash||"").indexOf("spravce")<0; }
+  window.addEventListener("hashchange",function(){ try{ if(!_acLoginSkryt() && !firebase.auth().currentUser) acLoginOverlay(); }catch(_){} });
   function acLoginOverlay(msg){
     acLoginClose();
+    if(_acLoginSkryt()) return;
     var ov=document.createElement("div");
     ov.id='acLoginOv';
     ov.style.cssText="position:fixed;inset:0;background:rgba(11,40,70,.55);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px";
